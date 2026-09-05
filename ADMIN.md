@@ -18,9 +18,14 @@ access to the site's content.
 
 ## Running it
 
-The panel itself needs nothing local — it talks to Supabase directly from the
-browser. But it currently ships as part of this Vite project rather than its
-own deployment, so for now you still run:
+The panel talks to Supabase directly from the browser, so it works wherever
+the site is deployed:
+
+**On the live site:** open `/admin.html` on the deployed domain — e.g.
+`https://mmonninfo.vercel.app/admin.html`. No install, no local machine
+needed.
+
+**Locally, for development:**
 
 ```bash
 npm run dev
@@ -28,6 +33,11 @@ npm run dev
 
 and open **http://127.0.0.1:4173/admin.html**. The site itself is at
 http://127.0.0.1:4173/.
+
+The only things that stay local-only are **Build site** and the *bundled*
+half of the image picker (see *Images* below) — both need this machine's own
+Vite toolchain, so they quietly do nothing useful from a deployed copy. Every
+other part of the panel — sign in, edit, save, upload — is identical on both.
 
 ## What it edits
 
