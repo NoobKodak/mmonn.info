@@ -1,0 +1,387 @@
+.highlights {
+  position: relative;
+  min-height: 100dvh;
+  overflow: clip;
+  background: #000;
+  color: #fff;
+  font-family: "Arial Narrow", Arial, sans-serif;
+  scroll-margin-top: 0;
+}
+
+.highlights-index,
+.highlights-panel {
+  min-height: 100dvh;
+}
+
+.highlights-index {
+  padding: clamp(4.5rem, 16vw, 8rem) clamp(1.25rem, 6vw, 2rem);
+}
+
+.highlights-menu {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.75rem, 3vw, 1.35rem);
+  width: 100%;
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
+.highlights-menu-item {
+  min-width: 0;
+}
+
+.highlights-menu-button {
+  display: flex;
+  align-items: baseline;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.2rem 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    letter-spacing 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.highlights-menu-number {
+  flex: none;
+  margin-right: 0.3em;
+  font-size: clamp(1rem, 3.4vw, 1.75rem);
+  line-height: 1;
+}
+
+.highlights-menu-label {
+  font-size: clamp(2.35rem, 11vw, 5.25rem);
+  font-weight: 400;
+  letter-spacing: -0.06em;
+  line-height: 0.88;
+}
+
+.highlights-menu-button:hover,
+.highlights-menu-button:focus-visible {
+  letter-spacing: 0.012em;
+  transform: translateX(0.4rem);
+}
+
+.highlights-menu-button:focus-visible,
+.highlights-back:focus-visible,
+.performance-pagination-button:focus-visible,
+.performance-gallery:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 5px;
+}
+
+.highlights-panel {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: clamp(1.5rem, 5vw, 4rem);
+  isolation: isolate;
+  animation: highlights-panel-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes highlights-panel-enter {
+  from {
+    opacity: 0;
+    translate: 0 1rem;
+  }
+}
+
+.highlights-back {
+  position: absolute;
+  z-index: 2;
+  top: clamp(1.25rem, 3vw, 2.5rem);
+  left: clamp(1.25rem, 3vw, 2.5rem);
+  min-height: 44px;
+  padding: 0.35rem 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  line-height: 1;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    letter-spacing 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.highlights-back::before {
+  content: "← ";
+}
+
+.highlights-back:hover,
+.highlights-back:focus-visible {
+  letter-spacing: 0.04em;
+  transform: translateX(-0.18rem);
+}
+
+.highlights-panel-title {
+  z-index: 1;
+  max-width: min(100%, 70rem);
+  margin: 0;
+  font-size: clamp(3.1rem, 11vw, 11.5rem);
+  font-weight: 400;
+  letter-spacing: -0.075em;
+  line-height: 0.84;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.highlights-panel-title span {
+  font-size: 0.26em;
+  letter-spacing: 0;
+  vertical-align: top;
+}
+
+.highlights-panel--performances {
+  display: block;
+  position: relative;
+  height: 100dvh;
+  min-height: 100dvh;
+  padding: 0;
+  background: #000;
+}
+
+.highlights-panel--streaming,
+.highlights-panel--media {
+  display: block;
+  padding: 0;
+  background: #000;
+}
+
+/* This panel is white, and the back control has to invert with it. */
+.highlights-panel--collaborations {
+  display: block;
+  padding: 0;
+  background: #fff;
+}
+
+.highlights-panel--collaborations .highlights-back {
+  color: #000;
+}
+
+/* The existing Streaming Milestones composition becomes this panel's page. */
+.highlights-panel--streaming .sm {
+  width: 100%;
+  min-height: 100dvh;
+}
+
+.highlights-panel--performances .highlights-panel-title {
+  position: absolute;
+  z-index: 2;
+  right: clamp(1.25rem, 3vw, 2.5rem);
+  bottom: clamp(1.5rem, 4vw, 3rem);
+  left: clamp(1.25rem, 3vw, 2.5rem);
+  max-width: none;
+  color: #fff;
+  font-size: clamp(2.125rem, 5vw, 5.5rem);
+  text-align: right;
+}
+
+.performance-gallery-shell {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.performance-gallery {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.performance-gallery::-webkit-scrollbar {
+  display: none;
+}
+
+.performance-slide {
+  position: relative;
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: #000;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* Every present and future GIF receives the same black edge treatment. */
+.performance-slide::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.88) 0%,
+    rgba(0, 0, 0, 0.48) 13%,
+    transparent 30%,
+    transparent 62%,
+    rgba(0, 0, 0, 0.5) 84%,
+    #000 100%
+  );
+}
+
+.performance-slide-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.performance-pagination {
+  position: absolute;
+  z-index: 2;
+  bottom: clamp(1.5rem, 4vw, 3rem);
+  left: clamp(1.25rem, 3vw, 2.5rem);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-height: 44px;
+  color: #fff;
+}
+
+.performance-pagination-count {
+  margin: 0;
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  letter-spacing: 0.08em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.performance-pagination-button {
+  min-height: 44px;
+  padding: 0.2rem 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.performance-pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@media (min-width: 48rem) {
+  .highlights-index {
+    display: grid;
+    place-items: center;
+    padding: clamp(4rem, 10vw, 8rem);
+  }
+
+  .highlights-menu {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 1.5rem;
+    max-width: 90rem;
+  }
+
+  .highlights-menu-item--major-collaborations {
+    grid-column: 2 / span 8;
+  }
+
+  .highlights-menu-item--streaming-milestones {
+    grid-column: 5 / -1;
+  }
+
+  .highlights-menu-item--performances {
+    grid-column: 6 / -1;
+  }
+
+  .highlights-menu-item--media-coverage {
+    grid-column: 1 / span 10;
+  }
+
+  .highlights-menu-label {
+    font-size: clamp(3rem, 7.3vw, 7.2rem);
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 64rem) {
+  .highlights-index {
+    padding: 0;
+  }
+
+  .highlights-menu {
+    position: relative;
+    display: block;
+    width: min(100%, 120rem);
+    max-width: none;
+    min-height: 100dvh;
+    margin: 0 auto;
+  }
+
+  .highlights-menu-item {
+    position: absolute;
+  }
+
+  .highlights-menu-item--major-collaborations {
+    top: 6%;
+    left: 23%;
+  }
+
+  .highlights-menu-item--streaming-milestones {
+    top: 27%;
+    right: 4%;
+  }
+
+  .highlights-menu-item--performances {
+    top: 48%;
+    left: 5%;
+  }
+
+  .highlights-menu-item--media-coverage {
+    top: 69%;
+    right: 8%;
+  }
+
+  .highlights-menu-button {
+    width: max-content;
+  }
+
+  .highlights-menu-label {
+    font-size: clamp(3.5rem, 6.8vw, 7.8rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .highlights-menu-button,
+  .highlights-back,
+  .highlights-panel,
+  .performance-gallery {
+    animation: none !important;
+    scroll-behavior: auto;
+    transition: none !important;
+  }
+
+  .highlights-menu-button:hover,
+  .highlights-menu-button:focus-visible,
+  .highlights-back:hover,
+  .highlights-back:focus-visible {
+    transform: none;
+  }
+}

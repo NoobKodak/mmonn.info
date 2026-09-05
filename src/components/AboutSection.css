@@ -1,0 +1,126 @@
+/* =========================================================================
+   About — full-bleed portrait on the left, set text on the right.
+   Column split matches the artwork: the portrait is 802 of a 1728 frame.
+   ========================================================================= */
+
+.ab {
+  --paper: #fff;
+  --ink: #000;
+  --face: "Helvetica Neue", Helvetica, Arial, "Liberation Sans", sans-serif;
+
+  /* How far the white fade reaches in from the top and bottom of the
+     portrait. The right-hand edge is left clean against the text column. */
+  --fade-block: 12%;
+
+  display: grid;
+  grid-template-columns: 802fr 926fr;
+  min-height: 100svh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--face);
+  scroll-margin-top: 0;
+}
+
+.ab-figure {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* A white linear wash on the top and bottom edges, so the portrait blends
+   into the sections above and below instead of cutting hard against them. */
+.ab-figure::after {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, var(--paper) 0%, transparent var(--fade-block)),
+    linear-gradient(to top, var(--paper) 0%, transparent var(--fade-block));
+  content: "";
+  pointer-events: none;
+}
+
+.ab-portrait {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* --- Right-hand column --------------------------------------------------- */
+
+.ab-body {
+  container-type: inline-size;
+  display: grid;
+  align-content: center;
+  /* 118px left / 133px right of a 926px column in the reference. */
+  padding: clamp(2.5rem, 6vw, 6rem) 14.4% clamp(2.5rem, 6vw, 6rem) 12.7%;
+}
+
+.ab-heading {
+  margin: 0 0 clamp(1.75rem, 9cqw, 4.5rem);
+}
+
+.ab-heading-art {
+  display: block;
+  /* Slightly inset from the text column, as in the reference. */
+  width: 92%;
+  height: auto;
+  margin-inline: auto;
+}
+
+/* --- Body copy ----------------------------------------------------------- */
+
+.ab-text {
+  display: grid;
+  gap: max(0.9rem, 2.4cqw);
+}
+
+.ab-paragraph {
+  margin: 0;
+  font-size: max(0.875rem, 3.92cqw);
+  line-height: 1.32;
+  letter-spacing: 0.005em;
+  text-align: justify;
+  text-transform: uppercase;
+  /* Justified uppercase with no hyphenation, as set in the reference. */
+  hyphens: none;
+}
+
+/* =========================================================================
+   Stacked
+   ========================================================================= */
+
+@media (max-width: 60rem) {
+  .ab {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .ab {
+    --fade-block: 9%;
+  }
+
+  .ab-portrait {
+    min-height: 0;
+    max-height: 68svh;
+    aspect-ratio: 802 / 1117;
+  }
+
+  .ab-body {
+    padding: clamp(2.5rem, 9vw, 4rem) 7% clamp(3rem, 10vw, 5rem);
+  }
+
+  .ab-heading {
+    margin-bottom: clamp(1.5rem, 7cqw, 3rem);
+  }
+
+  .ab-heading-art {
+    width: min(100%, 26rem);
+  }
+
+  .ab-paragraph {
+    font-size: max(0.8125rem, 2.9cqw);
+    text-align: left;
+  }
+}

@@ -1,0 +1,495 @@
+/* =========================================================================
+   Music catalog — an editorial Spotify discography arranged as a CD shelf.
+   Spotify artwork stays square and uncropped; the disc treatment sits behind it.
+   ========================================================================= */
+
+.music-catalog {
+  --catalog-paper: #f5f3ee;
+  --catalog-ink: #0a0a0a;
+  --catalog-muted: #686762;
+  --catalog-disc: #151515;
+  --catalog-edge: clamp(1.25rem, 3.6vw, 4rem);
+
+  position: relative;
+  overflow: clip;
+  padding: clamp(3.5rem, 7vw, 7rem) var(--catalog-edge) clamp(3rem, 6vw, 6rem);
+  background: var(--catalog-paper);
+  color: var(--catalog-ink);
+  font-family: var(--typeface, "Arial Narrow", Arial, sans-serif);
+  scroll-margin-top: 0;
+}
+
+.music-catalog-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: clamp(2.5rem, 5.5vw, 6rem);
+}
+
+.music-catalog-index,
+.music-catalog-kicker,
+.music-catalog-header-meta p,
+.music-catalog-header-meta a,
+.music-catalog-track-number,
+.music-catalog-track-meta,
+.music-catalog-track-credit,
+.music-catalog-footer,
+.music-catalog-status {
+  margin: 0;
+  font-size: clamp(0.72rem, 1.15vw, 0.95rem);
+  letter-spacing: 0.045em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.music-catalog-index {
+  margin-bottom: 0.35rem;
+}
+
+.music-catalog-title {
+  margin: 0;
+  font-size: clamp(4rem, 14vw, 13rem);
+  font-weight: 400;
+  letter-spacing: -0.085em;
+  line-height: 0.76;
+}
+
+.music-catalog-header-meta {
+  display: grid;
+  justify-items: end;
+  gap: 0.75rem;
+  text-align: right;
+}
+
+/* Compact audience figures live in the music section, not the landing hero. */
+.music-catalog-metrics {
+  position: absolute;
+  z-index: 1;
+  top: clamp(3.5rem, 7vw, 7rem);
+  right: var(--catalog-edge);
+  margin: 0;
+  color: var(--catalog-ink);
+  text-align: right;
+  animation: music-catalog-metrics-enter 360ms var(--ease) 100ms backwards;
+}
+
+.music-catalog-metrics-list {
+  display: grid;
+  gap: clamp(0.8rem, 1.7vw, 1.25rem);
+  margin: 0;
+}
+
+.music-catalog-metrics-item {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.music-catalog-metrics-item dt,
+.music-catalog-metrics-item dd {
+  margin: 0;
+}
+
+.music-catalog-metrics-item dt {
+  font-size: clamp(0.5rem, 0.85vw, 0.65rem);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.music-catalog-metrics-item dd {
+  font-size: clamp(1.1rem, 2vw, 1.75rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.08em;
+  line-height: 0.86;
+}
+
+@keyframes music-catalog-metrics-enter {
+  from {
+    opacity: 0;
+    translate: 0 -0.5rem;
+  }
+}
+
+.music-catalog-header-meta a,
+.music-catalog-status a,
+.music-catalog-footer a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.music-catalog-header-meta a::after,
+.music-catalog-status a::after,
+.music-catalog-footer a::after {
+  position: absolute;
+  right: 0;
+  bottom: 0.15em;
+  left: 0;
+  height: 1px;
+  background: currentColor;
+  content: "";
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 260ms var(--ease);
+}
+
+.music-catalog-header-meta a:hover::after,
+.music-catalog-header-meta a:focus-visible::after,
+.music-catalog-status a:hover::after,
+.music-catalog-status a:focus-visible::after,
+.music-catalog-footer a:hover::after,
+.music-catalog-footer a:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.music-catalog-header-meta a:focus-visible,
+.music-catalog-status a:focus-visible,
+.music-catalog-footer a:focus-visible,
+.music-catalog-card:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 6px;
+}
+
+.music-video-showcase {
+  margin: 0 0 clamp(3.5rem, 7vw, 7rem);
+}
+
+.music-video-showcase-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  margin-bottom: clamp(1rem, 2vw, 1.5rem);
+}
+
+.music-video-showcase-heading p,
+.music-video-showcase-label {
+  margin: 0;
+  font-size: clamp(0.72rem, 1.15vw, 0.95rem);
+  letter-spacing: 0.045em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.music-video-showcase-heading h3 {
+  margin: 0;
+  font-size: clamp(1.45rem, 2.6vw, 2.5rem);
+  font-weight: 400;
+  letter-spacing: -0.055em;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.music-video-showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2.2vw, 2.5rem);
+}
+
+.music-video-showcase-item {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.music-video-showcase-frame {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.music-video-showcase-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.music-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(2.25rem, 4.5vw, 5rem) clamp(1rem, 2.2vw, 2.5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.music-catalog-item {
+  min-width: 0;
+  opacity: 0;
+  transform: translate3d(0, 1.25rem, 0);
+}
+
+.music-catalog[data-entered] .music-catalog-item {
+  animation: music-catalog-card-enter 560ms var(--ease) var(--card-delay, 0ms) both;
+}
+
+@keyframes music-catalog-card-enter {
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.music-catalog-card {
+  display: grid;
+  gap: 0.9rem;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.music-catalog-disc-stage {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  isolation: isolate;
+}
+
+.music-catalog-disc {
+  position: absolute;
+  z-index: 0;
+  top: 5%;
+  right: 0;
+  width: 87%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, #2b2b2b 0 3%, #070707 3.5% 8%, transparent 8.5%),
+    repeating-radial-gradient(circle at center, #181818 0 1px, #0c0c0c 1px 4px);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 14%);
+  transition: transform 320ms var(--ease);
+}
+
+.music-catalog-disc-hole {
+  position: absolute;
+  z-index: 0;
+  top: 46.5%;
+  right: 39.5%;
+  width: 8%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--catalog-paper);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 12%);
+  transition: transform 320ms var(--ease);
+}
+
+.music-catalog-artwork,
+.music-catalog-artwork-fallback {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  display: grid;
+  width: 82%;
+  aspect-ratio: 1;
+  place-items: center;
+  background: #101010;
+  object-fit: contain;
+  transition: transform 320ms var(--ease);
+}
+
+.music-catalog-artwork-fallback {
+  padding: 0.75rem;
+  color: #fff;
+  font-size: clamp(1rem, 2.4vw, 2rem);
+  letter-spacing: -0.06em;
+}
+
+.music-catalog-card:hover .music-catalog-disc,
+.music-catalog-card:focus-visible .music-catalog-disc {
+  transform: translate3d(0.55rem, 0, 0) rotate(12deg);
+}
+
+.music-catalog-card:hover .music-catalog-disc-hole,
+.music-catalog-card:focus-visible .music-catalog-disc-hole {
+  transform: translate3d(0.55rem, 0, 0);
+}
+
+.music-catalog-card:hover .music-catalog-artwork,
+.music-catalog-card:hover .music-catalog-artwork-fallback,
+.music-catalog-card:focus-visible .music-catalog-artwork,
+.music-catalog-card:focus-visible .music-catalog-artwork-fallback {
+  transform: translate3d(-0.3rem, -0.3rem, 0);
+}
+
+.music-catalog-card-copy {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 0.55rem;
+  min-width: 0;
+}
+
+.music-catalog-track-number {
+  grid-row: 1 / span 3;
+  padding-top: 0.15em;
+  color: var(--catalog-muted);
+}
+
+.music-catalog-track-name {
+  min-width: 0;
+  font-size: clamp(1.25rem, 2.35vw, 2.5rem);
+  letter-spacing: -0.055em;
+  line-height: 0.95;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.music-catalog-track-meta,
+.music-catalog-track-credit {
+  margin-top: 0.45rem;
+  color: var(--catalog-muted);
+  overflow-wrap: anywhere;
+}
+
+.music-catalog-track-credit {
+  margin-top: 0.2rem;
+}
+
+.music-catalog-status {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 3rem);
+  margin-bottom: clamp(3rem, 7vw, 7rem);
+  color: var(--catalog-muted);
+}
+
+.music-catalog-cache-note {
+  margin: calc(-1 * clamp(1.25rem, 2.5vw, 2.5rem)) 0 clamp(2rem, 4vw, 4rem);
+  color: var(--catalog-muted);
+  font-size: clamp(0.72rem, 1.15vw, 0.95rem);
+  letter-spacing: 0.045em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.music-catalog-status--error {
+  max-width: 38rem;
+  color: var(--catalog-ink);
+}
+
+.music-catalog-grid--loading {
+  pointer-events: none;
+}
+
+.music-catalog-loading-card {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.music-catalog-loading-disc {
+  width: 82%;
+  aspect-ratio: 1;
+  justify-self: center;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle at center, #e2e0da 0 1px, #d5d3cd 1px 4px);
+}
+
+.music-catalog-loading-line {
+  width: 78%;
+  height: 0.85rem;
+  background: #dedcd6;
+}
+
+.music-catalog-loading-line--short {
+  width: 46%;
+  height: 0.65rem;
+}
+
+.music-catalog-empty {
+  margin: clamp(2rem, 4vw, 4rem) 0 0;
+  color: var(--catalog-muted);
+}
+
+.music-catalog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin-top: clamp(4rem, 9vw, 9rem);
+  padding-top: 1rem;
+  color: var(--catalog-muted);
+}
+
+.music-catalog-footer a {
+  color: var(--catalog-ink);
+}
+
+@media (max-width: 64rem) {
+  .music-catalog-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 44rem) {
+  .music-catalog {
+    padding-top: clamp(3rem, 11vw, 4.5rem);
+  }
+
+  .music-catalog-metrics {
+    top: clamp(3rem, 11vw, 4.5rem);
+  }
+
+  .music-catalog-header {
+    display: grid;
+    align-items: start;
+  }
+
+  .music-catalog-header-meta {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .music-catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.75rem 1.1rem;
+  }
+
+  .music-video-showcase-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .music-catalog-track-name {
+    font-size: clamp(1.15rem, 6vw, 1.85rem);
+  }
+
+  .music-catalog-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 24rem) {
+  .music-catalog-grid {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 19rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-catalog-metrics {
+    animation: none;
+    translate: none;
+  }
+
+  .music-catalog-item,
+  .music-catalog[data-entered] .music-catalog-item {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .music-catalog-disc,
+  .music-catalog-disc-hole,
+  .music-catalog-artwork,
+  .music-catalog-artwork-fallback,
+  .music-catalog-header-meta a::after,
+  .music-catalog-status a::after,
+  .music-catalog-footer a::after {
+    transition: none;
+  }
+}

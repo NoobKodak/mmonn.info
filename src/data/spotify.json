@@ -1,0 +1,168 @@
+{
+  "artist": {
+    "name": "MMONN",
+    "id": "57wPsYZkEErG0C2ntgqNTe",
+    "spotifyUrl": "https://open.spotify.com/artist/57wPsYZkEErG0C2ntgqNTe"
+  },
+  "source": "embed",
+  "fetchedAt": "2026-09-02T05:14:30.396Z",
+  "tracks": [
+    {
+      "id": "3nRlbohAuTQDgKdB7RQWBk",
+      "name": "PLY4",
+      "artists": [
+        "DEMI",
+        "MMONN"
+      ],
+      "releaseDate": "2025-06-27T00:00:00Z",
+      "durationMs": 236129,
+      "explicit": true,
+      "spotifyUrl": "https://open.spotify.com/track/3nRlbohAuTQDgKdB7RQWBk",
+      "album": {
+        "name": null,
+        "image": "covers/3nRlbohAuTQDgKdB7RQWBk.jpg"
+      }
+    },
+    {
+      "id": "1IZkg1yKs8wQOwXZveRkRN",
+      "name": "Lason",
+      "artists": [
+        "Alisson Shore",
+        "Because",
+        "MMONN"
+      ],
+      "releaseDate": "2025-10-19T00:00:00Z",
+      "durationMs": 183215,
+      "explicit": true,
+      "spotifyUrl": "https://open.spotify.com/track/1IZkg1yKs8wQOwXZveRkRN",
+      "album": {
+        "name": null,
+        "image": "covers/1IZkg1yKs8wQOwXZveRkRN.jpg"
+      }
+    },
+    {
+      "id": "16qiO1gfdcLyBEzAkCSjGV",
+      "name": "Ply4",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2023-07-01T00:00:00Z",
+      "durationMs": 180019,
+      "explicit": true,
+      "spotifyUrl": "https://open.spotify.com/track/16qiO1gfdcLyBEzAkCSjGV",
+      "album": {
+        "name": null,
+        "image": "covers/16qiO1gfdcLyBEzAkCSjGV.jpg"
+      }
+    },
+    {
+      "id": "6hFTpybHEefCqqOoP0RvOr",
+      "name": "Panganib",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2026-04-03T00:00:00Z",
+      "durationMs": 280785,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/6hFTpybHEefCqqOoP0RvOr",
+      "album": {
+        "name": null,
+        "image": "covers/6hFTpybHEefCqqOoP0RvOr.jpg"
+      }
+    },
+    {
+      "id": "54wX2ULUVGODWNPcjXiliN",
+      "name": "Naga City Baby",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2025-11-13T00:00:00Z",
+      "durationMs": 125993,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/54wX2ULUVGODWNPcjXiliN",
+      "album": {
+        "name": null,
+        "image": "covers/54wX2ULUVGODWNPcjXiliN.jpg"
+      }
+    },
+    {
+      "id": "5P0OmLtPsQlNpQBHYt8S6o",
+      "name": "Kung Kakapit Ka",
+      "artists": [
+        "MMONN",
+        "Ne7in"
+      ],
+      "releaseDate": "2024-12-27T00:00:00Z",
+      "durationMs": 231784,
+      "explicit": true,
+      "spotifyUrl": "https://open.spotify.com/track/5P0OmLtPsQlNpQBHYt8S6o",
+      "album": {
+        "name": null,
+        "image": "covers/5P0OmLtPsQlNpQBHYt8S6o.jpg"
+      }
+    },
+    {
+      "id": "5zwoGZDiCSCa0d0GcHMEC0",
+      "name": "Chillerong Busy",
+      "artists": [
+        "MMONN",
+        "Lanzeta"
+      ],
+      "releaseDate": "2023-09-01T00:00:00Z",
+      "durationMs": 178316,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/5zwoGZDiCSCa0d0GcHMEC0",
+      "album": {
+        "name": null,
+        "image": "covers/5zwoGZDiCSCa0d0GcHMEC0.jpg"
+      }
+    },
+    {
+      "id": "4lRspLX3zBJcjdR4lMlFwc",
+      "name": "Pagod na",
+      "artists": [
+        "MMONN",
+        "RB Slatt"
+      ],
+      "releaseDate": "2022-11-26T00:00:00Z",
+      "durationMs": 169613,
+      "explicit": true,
+      "spotifyUrl": "https://open.spotify.com/track/4lRspLX3zBJcjdR4lMlFwc",
+      "album": {
+        "name": null,
+        "image": "covers/4lRspLX3zBJcjdR4lMlFwc.jpg"
+      }
+    },
+    {
+      "id": "7pB8BnZyVdgiomsOnOzmp1",
+      "name": "Langit, Mundo",
+      "artists": [
+        "MMONN",
+        "Calvin De Leon"
+      ],
+      "releaseDate": "2023-05-06T00:00:00Z",
+      "durationMs": 204694,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/7pB8BnZyVdgiomsOnOzmp1",
+      "album": {
+        "name": null,
+        "image": "covers/7pB8BnZyVdgiomsOnOzmp1.jpg"
+      }
+    },
+    {
+      "id": "5IS2Eexq0gSttZj86HcVR7",
+      "name": "Alice",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2022-07-08T00:00:00Z",
+      "durationMs": 176015,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/5IS2Eexq0gSttZj86HcVR7",
+      "album": {
+        "name": null,
+        "image": "covers/5IS2Eexq0gSttZj86HcVR7.jpg"
+      }
+    }
+  ]
+}

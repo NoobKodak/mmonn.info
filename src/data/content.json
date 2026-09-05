@@ -1,0 +1,353 @@
+{
+  "version": 1,
+  "hero": {
+    "roles": [
+      "Music Artist",
+      "Producer",
+      "Songwriter"
+    ]
+  },
+  "musicMetrics": {
+    "label": "Audience figures",
+    "items": [
+      {
+        "id": "monthly",
+        "label": "Monthly",
+        "value": "128K"
+      },
+      {
+        "id": "streams",
+        "label": "Streams",
+        "value": "2.4M"
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "about",
+      "label": "about"
+    },
+    {
+      "id": "highlights",
+      "label": "career highlights"
+    },
+    {
+      "id": "music",
+      "label": "music"
+    },
+    {
+      "id": "contact",
+      "label": "contact"
+    }
+  ],
+  "about": {
+    "headingAlt": "About the artist",
+    "portraitAlt": "Close black-and-white portrait of MMONN in a dark suit and tie.",
+    "paragraphs": [
+      "MMONN is an independent multi-genre artist and producer from Naga City. Since 2019, he has been creating music inspired by real emotions and personal experiences, blending influences from R&B, hip-hop, melodic trap, and other contemporary genres.",
+      "His notable release, “PLY4,” helped establish his presence in the local music scene. Throughout his career, MMONN has collaborated with several respected artists, including Alison Shore and Because on “Lason,” DEMI on “PLY4 Remix,” LANZETA on “Chillerong Busy,” RB Slatt on “Pagod Na,” and SXBER and Ne7in on “Kung Kakapit Ka.”",
+      "MMONN further expanded his catalog with “AMARAD,” featuring Kyleaux—a collaboration that highlights his evolving sound, emotional storytelling, and ability to create music across different styles. Driven by authenticity and artistic growth, MMONN continues to push creative boundaries, crafting music that connects with listeners through honest storytelling and versatile soundscapes."
+    ]
+  },
+  "polaroid": {
+    "src": "Major collaborations/polaroid.svg",
+    "width": 539,
+    "height": 590,
+    "window": {
+      "top": 6,
+      "side": 6,
+      "bottom": 18
+    }
+  },
+  "collaborations": [
+    {
+      "id": "lason",
+      "track": "Lason",
+      "artists": [
+        "Alison Shore",
+        "Because",
+        "MMONN"
+      ],
+      "description": "A late-night collaboration that brings three distinct voices into one shared melodic frame. Replace this sample note with the official release story, production credits, or an artist note.",
+      "photo": "",
+      "frame": {
+        "src": "uploads/image-2026-09-03-192541971.png",
+        "width": 736,
+        "height": 981,
+        "window": {
+          "top": 6,
+          "side": 6,
+          "bottom": 18
+        }
+      }
+    },
+    {
+      "id": "ply4-remix",
+      "track": "PLY4 Remix",
+      "artists": [
+        "DEMI",
+        "MMONN"
+      ],
+      "description": "A reworked PLY4 moment, pairing DEMI and MMONN in a new version of the record. Replace this sample note with the official release story, production credits, or an artist note.",
+      "photo": "",
+      "frame": {
+        "src": "",
+        "width": 0,
+        "height": 0,
+        "window": {
+          "top": 6,
+          "side": 6,
+          "bottom": 18
+        }
+      }
+    },
+    {
+      "id": "chillerong-busy",
+      "track": "Chillerong Busy",
+      "artists": [
+        "LANZETA",
+        "MMONN"
+      ],
+      "description": "A shared release that gives LANZETA and MMONN space to meet in the same restless, after-hours world. Replace this sample note with the official release story, production credits, or an artist note.",
+      "photo": "",
+      "frame": {
+        "src": "",
+        "width": 0,
+        "height": 0,
+        "window": {
+          "top": 6,
+          "side": 6,
+          "bottom": 18
+        }
+      }
+    },
+    {
+      "id": "pagod-na",
+      "track": "Pagod Na",
+      "artists": [
+        "RB Slatt",
+        "MMONN"
+      ],
+      "description": "A direct two-artist collaboration, connecting RB Slatt and MMONN around a single release. Replace this sample note with the official release story, production credits, or an artist note.",
+      "photo": "",
+      "frame": {
+        "src": "",
+        "width": 0,
+        "height": 0,
+        "window": {
+          "top": 6,
+          "side": 6,
+          "bottom": 18
+        }
+      }
+    },
+    {
+      "id": "kung-kakapit-ka",
+      "track": "Kung Kakapit Ka",
+      "artists": [
+        "SXBER",
+        "Ne7in",
+        "MMONN"
+      ],
+      "description": "A three-way collaboration that puts SXBER, Ne7in, and MMONN in one shared track listing. Replace this sample note with the official release story, production credits, or an artist note.",
+      "photo": "",
+      "frame": {
+        "src": "",
+        "width": 0,
+        "height": 0,
+        "window": {
+          "top": 6,
+          "side": 6,
+          "bottom": 18
+        }
+      }
+    },
+    {
+      "id": "amarad",
+      "track": "AMARAD",
+      "artists": [
+        "Kyleaux",
+        "MMONN"
+      ],
+      "description": "A compact collaboration entry for Kyleaux and MMONN, held as a single piece in the archive. Replace this sample note with the official release story, production credits, or an artist note.",
+      "photo": "",
+      "frame": {
+        "src": "",
+        "width": 0,
+        "height": 0,
+        "window": {
+          "top": 6,
+          "side": 6,
+          "bottom": 18
+        }
+      }
+    }
+  ],
+  "milestones": {
+    "label": "Streaming milestones",
+    "slides": [
+      {
+        "id": "ply4",
+        "kind": "figures",
+        "tone": "dark",
+        "title": "PLY4 milestones",
+        "backdrop": {
+          "src": "bg .jpeg",
+          "alt": "MMONN standing against shuttered market stalls at night in Naga City.",
+          "width": 1920,
+          "height": 1080
+        },
+        "art": {
+          "src": "ply4 titlecard-.svg",
+          "alt": "PLY4",
+          "width": 835,
+          "height": 470
+        },
+        "copy": "",
+        "figures": [
+          {
+            "id": "views",
+            "value": 900,
+            "suffix": "K+",
+            "track": "PLY4",
+            "metric": "Music video views"
+          },
+          {
+            "id": "streams",
+            "value": 348,
+            "suffix": "K+",
+            "track": "PLY4",
+            "metric": "Spotify streams"
+          }
+        ]
+      },
+      {
+        "id": "platform",
+        "kind": "mark",
+        "tone": "dark",
+        "title": "Combined streaming figure",
+        "backdrop": {
+          "src": "",
+          "alt": "",
+          "width": 0,
+          "height": 0
+        },
+        "art": {
+          "src": "stream milestone/spotify.svg",
+          "alt": "Spotify",
+          "width": 286,
+          "height": 286
+        },
+        "copy": "1M+ combined streams across key releases",
+        "figures": []
+      },
+      {
+        "id": "lason",
+        "kind": "blend",
+        "tone": "dark",
+        "title": "Lason milestones",
+        "backdrop": {
+          "src": "stream milestone/lason_bg.gif",
+          "alt": "MMONN performing in low light, from the Lason visual.",
+          "width": 0,
+          "height": 0
+        },
+        "art": {
+          "src": "stream milestone/lason_titlecard.png",
+          "alt": "Lason",
+          "width": 381,
+          "height": 453
+        },
+        "copy": "527K+ Lason Spotify streams",
+        "figures": []
+      },
+      {
+        "id": "alice",
+        "kind": "artwork",
+        "tone": "light",
+        "title": "Alice milestones",
+        "backdrop": {
+          "src": "",
+          "alt": "",
+          "width": 0,
+          "height": 0
+        },
+        "art": {
+          "src": "stream milestone/alice.png",
+          "alt": "Alice single artwork, a blue disc in a CD jewel case.",
+          "width": 1024,
+          "height": 1024
+        },
+        "copy": "81K+ Alice Spotify streams",
+        "figures": []
+      }
+    ]
+  },
+  "media": [
+    {
+      "id": "dbtv-soundtrip",
+      "outlet": "DBTV’s Soundtrip",
+      "copy": "MMONN performed his song “PLY4” live on DBTV’s Soundtrip Episode 217, showcasing his distinct sound and stage presence to a wider Filipino audience. The performance premiered on March 21, 2024.",
+      "background": {
+        "src": "medie coverage/dogbrak.gif",
+        "alt": "MMONN performing live on DBTV’s Soundtrip, framed by hanging plants."
+      }
+    },
+    {
+      "id": "wish-1075",
+      "outlet": "Wish 107.5",
+      "copy": "MMONN was featured on Wish 107.5 with “PLY4” featuring DEMI on September 4, 2025, highlighting their collaboration and introducing the track to a wider audience.",
+      "background": {
+        "src": "medie coverage/wish.jpg",
+        "alt": "MMONN featured on Wish 107.5."
+      }
+    },
+    {
+      "id": "baggaz",
+      "outlet": "BAGGAZ",
+      "copy": "MMONN delivered a live performance of his song “PLY4” on BAGGAZ, showcasing his distinctive sound and performance style. The video premiered on July 26, 2024.",
+      "background": {
+        "src": "medie coverage/bagas.gif",
+        "alt": "MMONN performing live for BAGGAZ."
+      }
+    }
+  ],
+  "projects": {
+    "headline": {
+      "before": "notable projects that shaped the",
+      "circled": "sound, the visuals",
+      "after": "and the room it started in"
+    },
+    "items": [
+      {
+        "id": "ply4-rollout",
+        "caption": "self-released “ply4” and ran the rollout end to end",
+        "plate": "PLY4",
+        "accent": "tape"
+      },
+      {
+        "id": "artwork",
+        "caption": "art-directed the covers across every single",
+        "plate": "cover\nart",
+        "accent": "star"
+      },
+      {
+        "id": "collabs",
+        "caption": "built a run of collaborations across the bicol scene",
+        "plate": "collabs",
+        "accent": "pin"
+      },
+      {
+        "id": "live",
+        "caption": "took the set to live rooms, radio and video",
+        "plate": "live",
+        "accent": "tape"
+      }
+    ]
+  },
+  "contact": {
+    "instagram": "mmonn.msc",
+    "email": "mmonn.music.business@gmail.com",
+    "location": "Naga City, Philippines"
+  }
+}

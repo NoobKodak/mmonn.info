@@ -1,0 +1,1425 @@
+/* =========================================================================
+   Admin panel design system.
+
+   A local authoring tool, not part of the public site — styled as a clear,
+   modern working interface rather than in the site's own editorial voice.
+   This stylesheet is only ever loaded by admin.html, never by the public
+   site, so its tokens live on `:root` rather than a scoping class: the
+   signed-out boot and sign-in screens render *outside* the `.ad` app shell
+   (there is nothing to lay out a sidebar around yet), and a class-scoped
+   token is invisible to anything outside that class — every color on those
+   screens would silently resolve to nothing.
+   ========================================================================= */
+
+:root {
+  color-scheme: light dark;
+
+  /* --- Palette -------------------------------------------------------- */
+  --ink: #14141a;
+  --muted: #62626d;
+  --faint: #8b8b95;
+  --line: #e3e3e8;
+  --line-strong: #cfcfd8;
+  --surface: #ffffff;
+  --surface-2: #fafafb;
+  --sidebar: #17171d;
+  --sidebar-ink: #e7e7ec;
+  --sidebar-muted: #8f8f9c;
+  --sidebar-active: #26262f;
+  --bg: #f4f4f6;
+  --accent: #3d3dff;
+  --accent-ink: #ffffff;
+  --accent-tint: color-mix(in srgb, var(--accent) 12%, transparent);
+  --accent-tint-strong: color-mix(in srgb, var(--accent) 20%, transparent);
+  --danger: #c22e28;
+  --danger-tint: color-mix(in srgb, var(--danger) 10%, transparent);
+  --ok: #157a45;
+  --ok-tint: color-mix(in srgb, var(--ok) 12%, transparent);
+  --warn: #9a6400;
+  --warn-tint: color-mix(in srgb, var(--warn) 12%, transparent);
+
+  /* --- Scale ------------------------------------------------------------ */
+  --radius-sm: 7px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 2px rgb(20 20 26 / 6%);
+  --shadow-md: 0 4px 16px rgb(20 20 26 / 10%);
+  --shadow-lg: 0 12px 36px rgb(20 20 26 / 16%);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.ad {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100dvh;
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.5 -apple-system, "Segoe UI", system-ui, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #edeef2;
+    --muted: #a3a3ad;
+    --faint: #7b7b85;
+    --line: #2c2c34;
+    --line-strong: #3c3c46;
+    --surface: #1b1b21;
+    --surface-2: #202027;
+    --sidebar: #101014;
+    --sidebar-ink: #edeef2;
+    --sidebar-muted: #85858f;
+    --sidebar-active: #1e1e25;
+    --bg: #131316;
+    --accent: #8f8fff;
+    --accent-ink: #101014;
+    --danger: #ff8a85;
+    --danger-tint: color-mix(in srgb, var(--danger) 16%, transparent);
+    --ok: #6fd39b;
+    --ok-tint: color-mix(in srgb, var(--ok) 16%, transparent);
+    --warn: #e0b64c;
+    --warn-tint: color-mix(in srgb, var(--warn) 16%, transparent);
+  }
+}
+
+.ad * {
+  box-sizing: border-box;
+}
+
+.ad h1,
+.ad h2,
+.ad h3,
+.ad h4,
+.ad p {
+  font-family: inherit;
+}
+
+/* --- Shared focus ring ---------------------------------------------------- */
+
+.ad-button:focus-visible,
+.ad-nav-button:focus-visible,
+.ad-input:focus-visible,
+.ad-icon-button:focus-visible,
+.ad-add:focus-visible,
+.ad-asset-tile:focus-visible,
+.ad-card-toggle:focus-visible,
+.ad-dashboard-card:focus-visible,
+.ad-toast-dismiss:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* =========================================================================
+   Top bar
+   ========================================================================= */
+
+.ad-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.ad-brand {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.ad-brand-mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.ad-brand-text {
+  display: grid;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.ad-brand h1 {
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ad-brand-sub {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- Save-state pill ------------------------------------------------------ */
+
+.ad-state {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ad-state-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.ad-state--dirty {
+  background: var(--warn-tint);
+  color: var(--warn);
+}
+
+.ad-state--saving {
+  background: var(--accent-tint);
+  color: var(--accent);
+}
+
+.ad-state--saving .ad-state-dot {
+  animation: ad-pulse 1s ease-in-out infinite;
+}
+
+.ad-state--saved {
+  background: var(--ok-tint);
+  color: var(--ok);
+}
+
+@keyframes ad-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.ad-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.ad-account {
+  overflow: hidden;
+  max-width: 12rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================================================================
+   Buttons
+   ========================================================================= */
+
+.ad-button {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, transform 80ms ease;
+}
+
+.ad-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 88%, black 6%);
+}
+
+.ad-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.ad-button--quiet {
+  border-color: var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 550;
+}
+
+.ad-button--quiet:hover:not(:disabled) {
+  border-color: var(--faint);
+  background: var(--surface-2);
+}
+
+.ad-button--danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.ad-button--danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 88%, black 6%);
+}
+
+.ad-button--sm {
+  min-height: 30px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.78rem;
+}
+
+.ad-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.ad-button-label {
+  white-space: nowrap;
+}
+
+/* Secondary top-bar actions collapse to icon-only before they collapse into
+   the overflow menu — see the responsive section. */
+.ad-top .ad-button--icon-collapse .ad-button-label {
+  display: inline;
+}
+
+.ad-icon-button {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 120ms ease, color 120ms ease, background-color 120ms ease;
+}
+
+.ad-icon-button:hover:not(:disabled) {
+  border-color: var(--faint);
+  color: var(--ink);
+  background: var(--surface-2);
+}
+
+.ad-icon-button--danger:not(:disabled):hover {
+  border-color: var(--danger);
+  background: var(--danger-tint);
+  color: var(--danger);
+}
+
+.ad-icon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.ad-add {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  justify-self: start;
+  padding: 0.5rem 0.85rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.ad-add:hover {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+}
+
+/* --- Overflow menu (secondary actions once the top bar gets tight) -------- */
+
+.ad-overflow {
+  position: relative;
+}
+
+.ad-overflow-menu {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 20;
+  display: grid;
+  gap: 0.15rem;
+  width: max-content;
+  min-width: 12rem;
+  padding: 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.ad-overflow-item {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+  padding: 0.5rem 0.6rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ad-overflow-item:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.ad-overflow-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.ad-overflow-item svg {
+  flex: none;
+  color: var(--muted);
+}
+
+/* =========================================================================
+   Layout — sidebar + content
+   ========================================================================= */
+
+.ad-body {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  min-height: 0;
+}
+
+.ad-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 0.9rem 0.75rem;
+  overflow-y: auto;
+  background: var(--sidebar);
+}
+
+.ad-nav-group {
+  margin: 0 0 1.1rem;
+}
+
+.ad-nav-group:last-child {
+  margin-bottom: 0;
+}
+
+.ad-nav-group-label {
+  margin: 0 0.6rem 0.4rem;
+  color: var(--sidebar-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.ad-nav ul {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ad-nav-button {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  width: 100%;
+  min-height: 40px;
+  padding: 0.45rem 0.65rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--sidebar-ink);
+  font: inherit;
+  font-size: 0.86rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.ad-nav-button svg {
+  flex: none;
+  color: var(--sidebar-muted);
+}
+
+.ad-nav-button:hover {
+  background: var(--sidebar-active);
+}
+
+.ad-nav-button.is-active {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 650;
+}
+
+.ad-nav-button.is-active svg {
+  color: var(--accent-ink);
+}
+
+.ad-main {
+  min-width: 0;
+  padding: 1.75rem clamp(1.1rem, 3vw, 2.75rem) 5rem;
+  overflow-y: auto;
+}
+
+.ad-panel {
+  display: grid;
+  gap: 1.5rem;
+  width: min(100%, 62rem);
+}
+
+.ad-panel-head h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  letter-spacing: -0.015em;
+}
+
+.ad-panel-head p {
+  margin: 0.35rem 0 0;
+  max-width: 60ch;
+  color: var(--muted);
+}
+
+.ad-note {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+/* =========================================================================
+   Dashboard
+   ========================================================================= */
+
+.ad-dashboard-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18rem;
+  align-items: start;
+  gap: 1.25rem;
+}
+
+.ad-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.9rem;
+}
+
+.ad-dashboard-card {
+  display: grid;
+  gap: 0.55rem;
+  align-content: start;
+  padding: 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 80ms ease;
+}
+
+.ad-dashboard-card:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.ad-dashboard-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ad-dashboard-card-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-tint);
+  color: var(--accent);
+}
+
+.ad-dashboard-card-count {
+  color: var(--faint);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ad-dashboard-card h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.ad-dashboard-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.ad-dashboard-side {
+  display: grid;
+  gap: 0.9rem;
+  align-content: start;
+}
+
+.ad-summary-card {
+  padding: 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.ad-summary-card h3 {
+  margin: 0 0 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.ad-summary-card-title {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.ad-summary-list {
+  margin: 0;
+}
+
+.ad-summary-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.85rem;
+}
+
+.ad-summary-row:first-of-type {
+  border-top: 0;
+}
+
+.ad-summary-row dt {
+  color: var(--muted);
+}
+
+.ad-summary-row dd {
+  margin: 0;
+  overflow: hidden;
+  font-weight: 600;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ad-summary-empty {
+  margin: 0;
+  color: var(--faint);
+  font-size: 0.82rem;
+}
+
+/* =========================================================================
+   Fields
+   ========================================================================= */
+
+.ad-field {
+  display: grid;
+  gap: 0.32rem;
+  margin-bottom: 0.9rem;
+}
+
+.ad-field-label {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: baseline;
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.ad-field-hint {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.ad-input {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.ad-input:hover {
+  border-color: var(--faint);
+}
+
+.ad-input:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-tint);
+}
+
+.ad-textarea {
+  min-height: 4.5rem;
+  overflow-y: hidden;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+/* =========================================================================
+   Lists
+   ========================================================================= */
+
+.ad-list {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.ad-list-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.ad-list-title {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.ad-list-count {
+  color: var(--faint);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ad-list-hint {
+  flex-basis: 100%;
+  margin: 0;
+  max-width: 60ch;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.ad-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: start;
+}
+
+.ad-row-controls {
+  display: flex;
+  flex: none;
+  gap: 0.25rem;
+}
+
+.ad-empty {
+  display: grid;
+  gap: 0.3rem;
+  justify-items: center;
+  padding: 1.75rem 1rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-md);
+  color: var(--muted);
+  text-align: center;
+}
+
+.ad-empty svg {
+  color: var(--faint);
+}
+
+.ad-empty strong {
+  color: var(--ink);
+  font-size: 0.88rem;
+}
+
+.ad-empty span {
+  max-width: 32ch;
+  font-size: 0.8rem;
+}
+
+/* --- Collapsible cards ----------------------------------------------------- */
+
+.ad-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  overflow: hidden;
+  transition: border-color 120ms ease;
+}
+
+.ad-card-toggle-row {
+  display: flex;
+  align-items: center;
+}
+
+.ad-card-toggle {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+  padding: 0.55rem 0.6rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ad-card-thumb {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.ad-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ad-card-thumb svg {
+  color: var(--faint);
+}
+
+.ad-card-title {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ad-card-index {
+  flex: none;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.ad-card-chevron {
+  flex: none;
+  margin-left: auto;
+  color: var(--faint);
+  transition: transform 150ms ease;
+}
+
+.ad-card.is-open .ad-card-chevron {
+  transform: rotate(90deg);
+}
+
+.ad-card-controls {
+  display: flex;
+  flex: none;
+  gap: 0.25rem;
+  align-items: center;
+  margin-left: 0.5rem;
+}
+
+.ad-card-body {
+  padding: 0.2rem 0.9rem 0.9rem;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.ad-card-body .ad-list {
+  margin-bottom: 0.9rem;
+  background: var(--surface-2);
+}
+
+.ad-card-body > .ad-field:first-child,
+.ad-card-body > .ad-grid:first-child {
+  margin-top: 0.9rem;
+}
+
+.ad-group {
+  padding: 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.ad-group-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+}
+
+/* Side-by-side numeric fields (frame size, window insets). */
+.ad-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0 0.75rem;
+}
+
+/* =========================================================================
+   Asset picker
+   ========================================================================= */
+
+.ad-asset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.ad-asset-row .ad-input {
+  flex: 1 1 12rem;
+}
+
+.ad-asset-preview {
+  margin: -0.4rem 0 0.9rem;
+}
+
+.ad-asset-preview img {
+  max-width: 160px;
+  max-height: 110px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  object-fit: contain;
+}
+
+.ad-dialog {
+  width: min(92vw, 60rem);
+  max-height: 82dvh;
+  padding: 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-lg);
+}
+
+.ad-dialog::backdrop {
+  background: rgb(10 10 14 / 55%);
+  backdrop-filter: blur(1px);
+}
+
+.ad-dialog-head {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.ad-dialog-head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.ad-asset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.6rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  max-height: 58dvh;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.ad-asset-tile {
+  display: grid;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 120ms ease;
+}
+
+.ad-asset-tile:hover {
+  border-color: var(--line-strong);
+}
+
+.ad-asset-tile.is-current {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.ad-asset-tile img {
+  width: 100%;
+  height: 90px;
+  border-radius: 4px;
+  background: #fff;
+  object-fit: contain;
+}
+
+.ad-asset-name {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ad-asset-empty {
+  grid-column: 1 / -1;
+  padding: 1.5rem 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+.ad-asset-error {
+  margin: -0.5rem 0 0.9rem;
+  color: var(--danger);
+  font-size: 0.8125rem;
+}
+
+/* =========================================================================
+   Confirm dialog
+   ========================================================================= */
+
+.ad-confirm {
+  width: min(92vw, 24rem);
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-lg);
+}
+
+.ad-confirm::backdrop {
+  background: rgb(10 10 14 / 55%);
+  backdrop-filter: blur(1px);
+}
+
+.ad-confirm-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 0.85rem;
+  border-radius: 50%;
+  background: var(--danger-tint);
+  color: var(--danger);
+}
+
+.ad-confirm h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1.02rem;
+}
+
+.ad-confirm p {
+  margin: 0 0 1.1rem;
+  color: var(--muted);
+  font-size: 0.87rem;
+}
+
+.ad-confirm-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+}
+
+/* =========================================================================
+   Toasts
+   ========================================================================= */
+
+.ad-toast-stack {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 60;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.55rem;
+  width: min(92vw, 22rem);
+  pointer-events: none;
+}
+
+.ad-toast {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  padding: 0.75rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  pointer-events: auto;
+  animation: ad-toast-in 180ms ease both;
+}
+
+@keyframes ad-toast-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+
+.ad-toast-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-top: 0.1rem;
+  border-radius: 50%;
+}
+
+.ad-toast--success .ad-toast-icon {
+  background: var(--ok-tint);
+  color: var(--ok);
+}
+
+.ad-toast--error .ad-toast-icon {
+  background: var(--danger-tint);
+  color: var(--danger);
+}
+
+.ad-toast--info .ad-toast-icon {
+  background: var(--accent-tint);
+  color: var(--accent);
+}
+
+.ad-toast-body {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.ad-toast-message {
+  font-size: 0.83rem;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.ad-toast-action {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 650;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ad-toast-dismiss {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin: -0.1rem -0.1rem 0 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--faint);
+  cursor: pointer;
+}
+
+.ad-toast-dismiss:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+/* =========================================================================
+   Boot / sign-in
+   ========================================================================= */
+
+.ad-boot {
+  display: grid;
+  place-content: center;
+  gap: 1rem;
+  height: 100dvh;
+  padding: 2rem;
+  background: var(--bg, #f4f4f6);
+  color: var(--ink, #14141a);
+  font: 14px/1.5 -apple-system, "Segoe UI", system-ui, Roboto, sans-serif;
+  text-align: center;
+}
+
+.ad-boot-brand {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+}
+
+.ad-boot-mark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md, 10px);
+  background: var(--ink, #14141a);
+  color: var(--surface, #fff);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.ad-spinner {
+  width: 22px;
+  height: 22px;
+  margin: 0 auto;
+  border: 2.5px solid var(--line, #e3e3e8);
+  border-top-color: var(--accent, #3d3dff);
+  border-radius: 50%;
+  animation: ad-spin 700ms linear infinite;
+}
+
+@keyframes ad-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ad-boot-hint {
+  max-width: 26rem;
+  margin: 0;
+  color: var(--muted, #62626d);
+}
+
+.ad-signin {
+  display: grid;
+  gap: 1rem;
+  width: min(92vw, 23rem);
+  padding: 1.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  text-align: left;
+}
+
+.ad-signin-head {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.2rem;
+  text-align: center;
+}
+
+.ad-signin h1 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.ad-signin-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.83rem;
+}
+
+.ad-password-row {
+  position: relative;
+}
+
+.ad-password-row .ad-input {
+  padding-right: 2.6rem;
+}
+
+.ad-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.4rem;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  translate: 0 -50%;
+}
+
+.ad-password-toggle:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.ad-signin-message {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0.6rem 0.7rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.ad-signin-message--success {
+  background: var(--ok-tint);
+  color: var(--ok);
+}
+
+.ad-signin-message--error {
+  background: var(--danger-tint);
+  color: var(--danger);
+}
+
+.ad-signin-divider {
+  height: 1px;
+  margin: 0.1rem 0;
+  background: var(--line);
+}
+
+/* Off-screen but still focusable and announced — used for the file input the
+   Upload button stands in for. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* =========================================================================
+   Responsive
+   ========================================================================= */
+
+@media (max-width: 68rem) {
+  .ad-top .ad-button--icon-collapse .ad-button-label {
+    display: none;
+  }
+
+  .ad-top .ad-button--icon-collapse {
+    padding-inline: 0.6rem;
+  }
+}
+
+@media (max-width: 52rem) {
+  .ad-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ad-nav {
+    flex-direction: row;
+    padding: 0.5rem;
+    overflow-x: auto;
+  }
+
+  .ad-nav-group {
+    display: flex;
+    gap: 0.15rem;
+    margin: 0;
+  }
+
+  .ad-nav-group-label {
+    display: none;
+  }
+
+  .ad-nav ul {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .ad-nav-button {
+    width: max-content;
+    white-space: nowrap;
+  }
+
+  .ad-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ad-dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 40rem) {
+  .ad-top {
+    padding: 0.65rem 0.85rem;
+  }
+
+  .ad-brand-sub,
+  .ad-account {
+    display: none;
+  }
+
+  .ad-main {
+    padding: 1.25rem 0.9rem 4rem;
+  }
+
+  .ad-toast-stack {
+    right: 0.6rem;
+    bottom: 0.6rem;
+    left: 0.6rem;
+    width: auto;
+  }
+}

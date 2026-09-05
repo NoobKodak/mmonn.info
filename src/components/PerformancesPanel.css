@@ -1,0 +1,152 @@
+/* =========================================================================
+   Performances — a horizontally paginated rail of clips.
+   ========================================================================= */
+
+.pf {
+  --type: #fff;
+  --dim: #9a9a9a;
+
+  display: grid;
+  gap: clamp(1rem, 2.4vw, 1.75rem);
+  background: #000;
+  color: var(--type);
+}
+
+.pf-track {
+  display: flex;
+  overflow-x: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.pf-track::-webkit-scrollbar {
+  display: none;
+}
+
+.pf-track:focus-visible {
+  outline: 2px solid var(--type);
+  outline-offset: -2px;
+}
+
+.pf-slide {
+  position: relative;
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.pf-media {
+  display: block;
+  width: 100%;
+  height: min(72svh, 40rem);
+  background: #111;
+  object-fit: cover;
+  object-position: center;
+}
+
+.pf-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  margin: 0;
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+  font-size: max(0.6875rem, 0.85vw);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* --- Pagination ---------------------------------------------------------- */
+
+.pf-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pf-counter,
+.pf-arrows {
+  margin: 0;
+}
+
+.pf-counter {
+  color: var(--dim);
+  font-size: max(0.6875rem, 0.85vw);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
+
+.pf-dots {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pf-dot {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* The visible mark is a bar; the button around it stays a 44px target. */
+.pf-dot::before {
+  display: block;
+  width: 1.75rem;
+  height: 2px;
+  margin: 0 auto;
+  background: var(--dim);
+  content: "";
+  transition: background var(--hover-speed) var(--ease);
+}
+
+.pf-dot[aria-current]::before,
+.pf-dot:hover::before {
+  background: var(--type);
+}
+
+.pf-dot:focus-visible {
+  outline: 2px solid var(--type);
+  outline-offset: -6px;
+}
+
+.pf-arrows {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.pf-arrow {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--type);
+  font: inherit;
+  font-size: max(1rem, 1.1vw);
+  cursor: pointer;
+}
+
+.pf-arrow[disabled] {
+  color: var(--dim);
+  cursor: default;
+  opacity: 0.4;
+}
+
+.pf-arrow:focus-visible {
+  outline: 2px solid var(--type);
+  outline-offset: -4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-track {
+    scroll-behavior: auto;
+  }
+}

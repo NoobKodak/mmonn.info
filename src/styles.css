@@ -1,0 +1,795 @@
+/* =========================================================================
+   MMONN — artist profile
+   Monochrome, editorial, spacious. Pure white paper, solid black ink.
+   ========================================================================= */
+
+:root {
+  --ink: #000;
+  --paper: #fff;
+  --typeface: "Arial Narrow", Arial, sans-serif;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --hover-speed: 300ms;
+  --fade-out: 420ms;
+  --fade-in: 560ms;
+  --stagger: 90ms;
+  --enter: 700ms;
+  --page-fade-in: 380ms;
+  --page-fade-out: 220ms;
+  --section-fade: 380ms;
+
+  /* Reference composition is drawn on a 1728 x 1117 frame.
+     `--px` maps one reference pixel onto the rendered stage and is
+     redefined inside the desktop stage so the layout scales as a whole. */
+  --px: 1px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--typeface);
+  font-stretch: condensed;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* `hidden` must win over the display values set below. */
+[hidden] {
+  display: none !important;
+}
+
+/* =========================================================================
+   Page transition — fades in on every load, and out again on the way to the
+   next one.
+   -------------------------------------------------------------------------
+   The outgoing half cannot be done with `beforeunload`: browsers stop
+   painting once teardown begins. A cross-document view transition is the
+   mechanism that actually holds a snapshot of the old page long enough to
+   fade it. Where it is unsupported the page simply fades in, which is the
+   half that matters most.
+   ========================================================================= */
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes page-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.app {
+  /* `backwards`, not `forwards` — the same reasoning as the hero entrance:
+     the property is handed back to the cascade once the fade finishes. */
+  animation: page-fade-in var(--page-fade-in) ease backwards;
+}
+
+/* -------------------------------------------------------------------------
+   Per-section fade on load.
+
+   `backwards`, like every other entrance here, so each section is hidden
+   through its delay and then hands opacity back to the cascade — a section
+   can never be left stuck part-faded. A short stagger sequences the ones
+   visible on arrival; the rest have finished long before you scroll to them.
+   ------------------------------------------------------------------------- */
+
+@keyframes section-fade-in {
+  from {
+    opacity: 0;
+    translate: 0 1.25rem;
+  }
+}
+
+.app main > section {
+  animation: section-fade-in var(--section-fade) var(--ease) backwards;
+}
+
+.app main > section:nth-child(1) { animation-delay: 60ms; }
+.app main > section:nth-child(2) { animation-delay: 150ms; }
+.app main > section:nth-child(3) { animation-delay: 240ms; }
+.app main > section:nth-child(4) { animation-delay: 330ms; }
+.app main > section:nth-child(5) { animation-delay: 420ms; }
+.app main > section:nth-child(6) { animation-delay: 510ms; }
+
+/* -------------------------------------------------------------------------
+   Scroll-linked fade.
+
+   Where scroll-driven animations exist this replaces the load fade above,
+   so each section fades in as it arrives and out as it leaves — and on
+   reload the section you land on is already mid-timeline, so it fades in
+   too. The load fade stays as the fallback everywhere else.
+
+   One animation, not two. Two animations on `opacity` would not layer: the
+   later one wins outright, and a fade-out with a `both` fill would resolve
+   its implicit start against the base style rather than against the fade-in,
+   cancelling it entirely.
+
+   The plateau is what keeps a section readable. Percentages here are of the
+   whole `cover` range, which scales with the section, so 18–82% stays opaque
+   for the entire stretch during which the section is the one on screen —
+   whether it is viewport-height or three times that.
+   ------------------------------------------------------------------------- */
+
+@keyframes section-scroll-fade {
+  0% {
+    opacity: 0;
+    translate: 0 2rem;
+  }
+
+  18%,
+  82% {
+    opacity: 1;
+    translate: none;
+  }
+
+  100% {
+    opacity: 0;
+    translate: 0 -2rem;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media not (prefers-reduced-motion: reduce) {
+    .app main > section {
+      animation: section-scroll-fade linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: page-fade-out var(--page-fade-out) ease both;
+}
+
+/* The arriving document runs its own `.app` fade-in, so suppress the
+   default crossfade rather than playing two fades back to back. */
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* Available to assistive tech, absent from the layout. */
+.visually-hidden {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 10;
+  top: 0.75rem;
+  left: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 1rem;
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform var(--hover-speed) var(--ease);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* =========================================================================
+   Page entrance — the hero settles in on every load
+   -------------------------------------------------------------------------
+   `backwards` (not `forwards`) is deliberate: each element holds its start
+   state through its delay, then hands the property back to the cascade once
+   it finishes — so the Explore fade-out transition still works afterwards.
+   `translate` is used instead of `transform` so it composes with the title's
+   own translateX(-50%) centring.
+   ========================================================================= */
+
+@keyframes hero-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    translate: 0 calc(14 * var(--px));
+  }
+}
+
+.hero-title,
+.hero-roles,
+.hero-tagline,
+.explore {
+  animation: hero-rise var(--enter) var(--ease) backwards;
+}
+
+.hero-portrait {
+  animation: hero-fade calc(var(--enter) + 200ms) ease backwards;
+}
+
+.hero-title { animation-delay: 0ms; }
+.hero-portrait { animation-delay: 120ms; }
+.hero-roles { animation-delay: 300ms; }
+.hero-tagline { animation-delay: 380ms; }
+.explore { animation-delay: 500ms; }
+
+/* =========================================================================
+   Hero — base (mobile first): a single stacked column
+   ========================================================================= */
+
+.hero {
+  display: grid;
+  /* minmax(0, 1fr) keeps the track from growing to the tagline's intrinsic
+     761px width on narrow screens. */
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  overflow-x: clip;
+  padding: clamp(2.25rem, 8vw, 3.5rem) clamp(1.25rem, 6vw, 2rem) clamp(3.5rem, 12vw, 5rem);
+}
+
+.hero-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: 34rem;
+}
+
+.hero-title {
+  order: 1;
+  margin: 0;
+  font-size: clamp(1.5rem, 6.5vw, 2.125rem);
+  font-weight: 400;
+  line-height: 1;
+  text-align: center;
+}
+
+/* --- Portrait + role line --------------------------------------------- */
+
+.hero-figure {
+  order: 2;
+  margin: clamp(2.5rem, 10vw, 4rem) 0 0;
+}
+
+.hero-portrait {
+  width: auto;
+  max-width: 100%;
+  max-height: 46svh;
+  margin-inline: auto;
+}
+
+.hero-roles {
+  margin-top: clamp(0.75rem, 2.5vw, 1rem);
+}
+
+.role-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(0.75rem, 3.4vw, 1.5rem);
+  font-size: clamp(0.95rem, 3.6vw, 1.3125rem);
+  line-height: 1;
+}
+
+.role {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 3.4vw, 1.5rem);
+  white-space: nowrap;
+}
+
+.role-star {
+  width: clamp(0.75rem, 2.9vw, 1.125rem);
+  height: auto;
+  flex: none;
+}
+
+/* --- Tagline + Explore More ------------------------------------------- */
+
+.hero-intro {
+  order: 3;
+  margin-top: clamp(2.5rem, 10vw, 4rem);
+  opacity: 1;
+  transition: opacity var(--fade-out) ease, transform var(--fade-out) var(--ease);
+}
+
+.hero-intro[data-state="leaving"] {
+  opacity: 0;
+  transform: translateY(calc(-6 * var(--px)));
+  pointer-events: none;
+}
+
+.hero-tagline {
+  width: 100%;
+  max-width: calc(761 * var(--px));
+}
+
+.explore {
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-width: 44px;
+  min-height: 44px;
+  margin: clamp(1.75rem, 7vw, 2.75rem) 0 0;
+  padding: 0.625rem 0.875rem;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: clamp(1.0625rem, 4.2vw, 1.75rem);
+  line-height: 1;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.explore-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.61em; /* 17px against the 28px label in the reference */
+  transition: transform var(--hover-speed) var(--ease),
+    letter-spacing var(--hover-speed) var(--ease);
+}
+
+.explore-icon {
+  width: 0.857em; /* 24px against a 28px label in the reference */
+  height: auto;
+  margin-bottom: 0.12em; /* mirrors the label's underline padding */
+  flex: none;
+  transition: transform var(--hover-speed) var(--ease);
+}
+
+.explore-label {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.12em;
+  white-space: nowrap;
+}
+
+.explore-label::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: currentColor;
+  content: "";
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--hover-speed) var(--ease);
+}
+
+.explore:hover .explore-content,
+.explore:focus-visible .explore-content {
+  letter-spacing: 0.02em;
+  transform: translate(0.18rem, -0.18rem);
+}
+
+.explore:hover .explore-icon,
+.explore:focus-visible .explore-icon {
+  transform: translate(0.14rem, -0.14rem);
+}
+
+.explore:hover .explore-label::after,
+.explore:focus-visible .explore-label::after {
+  transform: scaleX(1);
+}
+
+.explore:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.explore:active .explore-content {
+  transform: translate(0.08rem, -0.06rem);
+}
+
+/* --- Revealed navigation ---------------------------------------------- */
+
+.hero-nav {
+  order: 4;
+  margin-top: clamp(2rem, 8vw, 3.25rem);
+}
+
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.25rem, 1.5vw, 0.75rem);
+}
+
+@keyframes nav-enter {
+  from {
+    opacity: 0;
+    translate: 0 calc(16 * var(--px));
+  }
+}
+
+.nav-item {
+  display: flex;
+  /* Plays when the nav stops being `hidden`; `backwards` holds the start state
+     through the per-item delay, then hands the properties back. */
+  animation: nav-enter var(--fade-in) var(--ease) backwards;
+  animation-delay: calc(var(--i, 0) * var(--stagger));
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: baseline;
+  min-height: 44px;
+  gap: calc(10 * var(--px));
+  color: var(--ink);
+  line-height: 1;
+  text-decoration: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--hover-speed) var(--ease),
+    letter-spacing var(--hover-speed) var(--ease);
+}
+
+.nav-slash {
+  font-size: clamp(1.35rem, 6vw, 2.125rem);
+}
+
+.nav-number {
+  font-size: clamp(2.5rem, 12vw, 3.8125rem);
+}
+
+.nav-label {
+  position: relative;
+  margin-left: calc(5 * var(--px));
+  padding-bottom: 0.1em;
+  font-size: clamp(1.35rem, 6vw, 2.125rem);
+  white-space: nowrap;
+}
+
+.nav-label::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: currentColor;
+  content: "";
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--hover-speed) var(--ease);
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  letter-spacing: 0.012em;
+  transform: translate(0.22rem, -0.16rem);
+}
+
+.nav-link:hover .nav-label::after,
+.nav-link:focus-visible .nav-label::after {
+  transform: scaleX(1);
+}
+
+.nav-link:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 5px;
+}
+
+.nav-link:active {
+  transform: translate(0.1rem, -0.05rem);
+}
+
+/* =========================================================================
+   Tablet — keep the portrait on the right
+   ========================================================================= */
+
+@media (min-width: 40rem) {
+  .hero-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(11rem, 20rem);
+    column-gap: clamp(1.5rem, 5vw, 3.5rem);
+    align-items: start;
+    max-width: 60rem;
+  }
+
+  .hero-title {
+    grid-column: 1 / -1;
+  }
+
+  .hero-figure {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: clamp(2rem, 6vw, 3.5rem);
+  }
+
+  .hero-portrait {
+    width: 100%;
+    max-height: none;
+  }
+
+  /* The tagline and the navigation never coexist, so they share one cell and
+     each sits centred against the portrait. */
+  .hero-intro,
+  .hero-nav {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: center;
+    margin-top: 0;
+  }
+
+  /* The role line has only the portrait column to live in. */
+  .role-list {
+    gap: clamp(0.5rem, 1.4vw, 1.25rem);
+    font-size: clamp(0.8rem, 2vw, 1.125rem);
+  }
+
+  .role {
+    gap: clamp(0.5rem, 1.4vw, 1.25rem);
+  }
+
+  .role-star {
+    width: clamp(0.65rem, 1.7vw, 0.95rem);
+  }
+
+  /* Two columns only while two columns actually fit. */
+  .nav-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: clamp(1rem, 3vw, 1.75rem) clamp(1rem, 4vw, 2.5rem);
+  }
+}
+
+/* =========================================================================
+   Desktop — the reference composition, scaled as one piece
+   ========================================================================= */
+
+@media (min-width: 64rem) {
+  .hero {
+    min-height: 100svh;
+    padding: 0;
+  }
+
+  .hero-stage {
+    position: relative;
+    display: block;
+    /* Never wider than the reference frame, never taller than the viewport. */
+    width: min(100%, 1728px, calc(100svh * 1728 / 1117));
+    max-width: none;
+    aspect-ratio: 1728 / 1117;
+    container-type: inline-size;
+  }
+
+  /* One reference pixel, resolved against the stage width. Custom properties
+     inherit, so every descendant of the stage shares the same scale. */
+  .hero-stage > * {
+    --px: calc(100cqw / 1728);
+  }
+
+  /* --- Title --- */
+  .hero-title {
+    position: absolute;
+    top: calc(100 * var(--px));
+    left: 50%;
+    width: max-content;
+    margin: 0;
+    font-size: calc(34 * var(--px));
+    transform: translateX(-50%);
+  }
+
+  /* --- Portrait + role line --- */
+  .hero-figure {
+    position: absolute;
+    top: calc(293 * var(--px));
+    left: calc(1069 * var(--px));
+    width: calc(409 * var(--px));
+    margin: 0;
+  }
+
+  .hero-portrait {
+    width: 100%;
+    aspect-ratio: auto;
+  }
+
+  .hero-roles {
+    margin-top: calc(17 * var(--px));
+  }
+
+  .role-list {
+    flex-wrap: nowrap;
+    /* Wider than the 409px portrait now that there are four roles, so pin its
+       centre to the portrait's centre instead of overflowing to one side. */
+    width: max-content;
+    margin-left: 50%;
+    gap: calc(24 * var(--px));
+    font-size: max(0.8125rem, calc(21 * var(--px)));
+    translate: -50%;
+  }
+
+  .role {
+    gap: calc(24 * var(--px));
+  }
+
+  .role-star {
+    width: calc(18 * var(--px));
+  }
+
+  /* --- Tagline + Explore More --- */
+  .hero-intro {
+    position: absolute;
+    top: calc(559 * var(--px));
+    left: calc(211 * var(--px));
+    width: calc(761 * var(--px));
+    margin: 0;
+  }
+
+  .hero-tagline {
+    max-width: none;
+  }
+
+  .explore {
+    margin: calc(109 * var(--px)) 0 0 calc(263 * var(--px));
+    padding: calc(11 * var(--px)) calc(14 * var(--px));
+    font-size: calc(28 * var(--px));
+  }
+
+  /* --- Navigation: scattered editorial placement --- */
+  .hero-nav {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    /* Undo the tablet rule: box alignment applies to absolutely positioned
+       boxes, so `center` would collapse this inset:0 overlay to zero height
+       and drop every link half a stage down. */
+    align-self: stretch;
+    pointer-events: none;
+  }
+
+  .nav-list {
+    display: block;
+    gap: 0;
+  }
+
+  .nav-item {
+    position: absolute;
+    pointer-events: auto;
+    /* `--base` is the row's shared text baseline in reference pixels; 52 is the
+       distance from the link's box top down to that baseline (the 61px number's
+       ascent governs it). */
+    top: calc((var(--base) - 52) * var(--px));
+    left: calc(var(--x) * var(--px));
+  }
+
+  .nav-item--about { --x: 199; --base: 514; }
+  .nav-item--highlights { --x: 292; --base: 691; }
+  .nav-item--music { --x: 771; --base: 514; }
+  .nav-item--notable-projects { --x: 718; --base: 691; }
+  .nav-item--contact { --x: 517; --base: 622; }
+
+  .nav-slash {
+    font-size: calc(34 * var(--px));
+  }
+
+  .nav-number {
+    font-size: calc(61 * var(--px));
+  }
+
+  .nav-label {
+    font-size: calc(34 * var(--px));
+  }
+}
+
+/* =========================================================================
+   Profile sections
+   ========================================================================= */
+
+.profile-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+  align-items: baseline;
+  min-height: 42svh;
+  padding: 4.5rem 1.25rem;
+  scroll-margin-top: 1rem;
+}
+
+.section-index,
+.profile-section h2 {
+  margin: 0;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.section-index {
+  font-size: clamp(1.2rem, 1.5vw, 1.65rem);
+  white-space: nowrap;
+}
+
+.profile-section h2 {
+  font-size: clamp(3.2rem, 8vw, 8rem);
+  letter-spacing: -0.075em;
+}
+
+@media (min-width: 45rem) {
+  .profile-section {
+    grid-template-columns: min-content minmax(0, 1fr);
+    gap: 0.8rem;
+    min-height: 52svh;
+    padding: clamp(2rem, 8vw, 8rem) clamp(1.5rem, 12vw, 13rem);
+  }
+}
+
+/* =========================================================================
+   Reduced motion
+   ========================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  .hero-intro[data-state="leaving"] {
+    transform: none !important;
+  }
+
+  .hero-title,
+  .hero-roles,
+  .hero-tagline,
+  .explore,
+  .nav-item,
+  .app main > section {
+    translate: none !important;
+  }
+
+  /* The `*` rule above cannot reach view-transition pseudo-elements. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,323 @@
+/* =========================================================================
+   Notable projects — a scrapbook page: heavy black headline with one phrase
+   ringed by hand, then numbered plates pinned and taped down the sheet.
+   ========================================================================= */
+
+.np {
+  --edge: clamp(1.25rem, 3.6vw, 4rem);
+  --ink: #000;
+  --accent: #2b2bf5;
+  --face: var(--typeface, "Arial Narrow", Arial, sans-serif);
+
+  container-type: inline-size;
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: clamp(2.5rem, 7cqw, 7rem);
+  width: 100%;
+  min-height: 100dvh;
+  padding: calc(var(--edge) * 2.6) var(--edge) calc(var(--edge) * 2);
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--face);
+}
+
+.np-label {
+  position: absolute;
+  top: var(--edge);
+  right: var(--edge);
+  margin: 0;
+  font-size: clamp(1.05rem, 2.45cqw, 3rem);
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.np-label-no {
+  font-size: 0.5em;
+  letter-spacing: 0.04em;
+  vertical-align: 0.35em;
+}
+
+/* --- Headline ------------------------------------------------------------ */
+
+.np-headline {
+  max-width: 22ch;
+  margin: 0;
+  font-size: clamp(2rem, 7.2cqw, 8rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+}
+
+/* The ring is drawn over the phrase, not around a box, so it can overshoot. */
+.np-circled {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.np-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* preserveAspectRatio="none" on the element is what lets these two stretch
+     the loop onto the phrase. Without it the drawing keeps its 300:90 ratio
+     and letterboxes itself inside the box, landing far narrower than the
+     words it is meant to circle. */
+  width: 116%;
+  height: 172%;
+  overflow: visible;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+
+/* --- Plates -------------------------------------------------------------- */
+
+.np-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(2rem, 6cqw, 6rem) clamp(1.5rem, 5cqw, 5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.np-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.4em clamp(0.5rem, 1.4cqw, 1.25rem);
+  align-items: start;
+  min-width: 0;
+  color: var(--accent);
+}
+
+/* Alternating drop, so the column reads as a collage rather than a table. */
+.np-item:nth-child(even) {
+  margin-top: clamp(1.5rem, 6cqw, 6rem);
+}
+
+.np-no {
+  grid-row: 1;
+  font-size: clamp(1rem, 2.1cqw, 2.35rem);
+  line-height: 1;
+}
+
+.np-plate {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  max-width: min(100%, 25rem);
+  padding: 1rem;
+  background: #f2f2f2;
+  box-shadow: 0 0.5rem 1.4rem rgb(0 0 0 / 12%);
+  rotate: calc((var(--i, 0) - 1.5) * 1.1deg);
+  transition:
+    rotate 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    scale 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.np-item:hover .np-plate {
+  rotate: 0deg;
+  scale: 1.02;
+}
+
+.np-plate-text {
+  color: var(--ink);
+  font-size: clamp(1.35rem, 4.2cqw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+  text-align: center;
+  text-transform: lowercase;
+  white-space: pre-line;
+}
+
+/* --- Pinned, taped, starred --------------------------------------------- */
+
+.np-plate[data-accent="tape"]::before {
+  position: absolute;
+  top: -0.7rem;
+  left: 50%;
+  width: clamp(3rem, 9cqw, 6.5rem);
+  height: 1.4rem;
+  background: rgb(214 202 160 / 78%);
+  content: "";
+  rotate: -3deg;
+  translate: -50% 0;
+}
+
+.np-plate[data-accent="star"]::before {
+  position: absolute;
+  right: -0.9rem;
+  bottom: -0.9rem;
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: #ececec;
+  color: var(--ink);
+  content: "✱";
+  font-size: 1.4rem;
+  line-height: 2.4rem;
+  text-align: center;
+}
+
+.np-plate[data-accent="pin"]::before {
+  position: absolute;
+  top: -0.55rem;
+  right: 1.1rem;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0.3rem 0.5rem rgb(0 0 0 / 28%);
+  content: "";
+}
+
+.np-caption {
+  grid-column: 2;
+  grid-row: 2;
+  font-size: clamp(0.95rem, 1.75cqw, 2rem);
+  letter-spacing: -0.01em;
+  line-height: 1.16;
+}
+
+/* =========================================================================
+   Narrow
+   ========================================================================= */
+
+@media (max-width: 48rem) {
+  .np {
+    padding: calc(var(--edge) * 3.4) var(--edge) calc(var(--edge) * 2);
+  }
+
+  .np-label {
+    right: auto;
+    left: var(--edge);
+  }
+
+  .np-headline {
+    max-width: none;
+    font-size: clamp(2rem, 9.5cqw, 3.5rem);
+  }
+
+  .np-list {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.5rem;
+  }
+
+  .np-item:nth-child(even) {
+    margin-top: 0;
+  }
+
+  .np-caption {
+    font-size: clamp(0.95rem, 4.2cqw, 1.3rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .np-plate {
+    transition: none;
+  }
+
+  .np-item:hover .np-plate {
+    rotate: calc((var(--i, 0) - 1.5) * 1.1deg);
+    scale: 1;
+  }
+}
+
+/* =========================================================================
+   Scroll-linked fade
+   =========================================================================
+   The headline and each plate fade up on the way in and fade away on the way
+   out, driven by the element's own progress through the viewport.
+
+   One keyframe rather than a separate fade-in and fade-out: two animations on
+   `opacity` do not layer — the later one wins outright, and a fade-out with a
+   `both` fill resolves its implicit start against the base style instead of
+   against the fade-in, cancelling it. The staggered load fade below it stays
+   as the fallback wherever scroll timelines are unsupported. */
+
+@keyframes np-rise {
+  from {
+    opacity: 0;
+    translate: 0 1.5rem;
+  }
+}
+
+.np-headline,
+.np-item {
+  animation: np-rise 620ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.np-item {
+  animation-delay: calc(var(--i, 0) * 90ms + 140ms);
+}
+
+@keyframes np-scroll-fade {
+  0% {
+    opacity: 0;
+    translate: 0 2.5rem;
+  }
+
+  16%,
+  84% {
+    opacity: 1;
+    translate: none;
+  }
+
+  100% {
+    opacity: 0;
+    translate: 0 -2.5rem;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media not (prefers-reduced-motion: reduce) {
+    .np-headline,
+    .np-item {
+      animation: np-scroll-fade linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .np-headline,
+  .np-item {
+    animation: none;
+    opacity: 1;
+    translate: none;
+  }
+}
+
+/* =========================================================================
+   Top-level section
+   =========================================================================
+   `.np` already paints a full-height sheet, so the wrapping section only has
+   to keep out of its way. */
+
+.np-section {
+  display: block;
+  min-height: 100dvh;
+  padding: 0;
+  scroll-margin-top: 0;
+}
+
+/* The headline and every plate already fade on their own view() timeline.
+   Letting the page-level section fade run as well would multiply the two
+   opacities, so the outer one stands down here. The load-fade fallback is
+   left alone: it only applies where scroll timelines are unsupported. */
+@supports (animation-timeline: view()) {
+  @media not (prefers-reduced-motion: reduce) {
+    .app main > section.np-section {
+      animation: none;
+    }
+  }
+}

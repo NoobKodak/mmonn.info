@@ -1,0 +1,491 @@
+/* =========================================================================
+   Streaming milestones — a full-bleed frame: photograph behind,
+   label top right, title card centred, figures along the bottom.
+   ========================================================================= */
+
+.sm {
+  --edge: clamp(1.25rem, 3.6vw, 4rem);
+  --bottom-edge: clamp(3.25rem, 4.6vw, 5rem);
+  --type: #fff;
+  --face: var(--typeface, "Arial Narrow", Arial, sans-serif);
+
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  min-height: 100dvh;
+  background: #000;
+  color: var(--type);
+  font-family: var(--face);
+}
+
+/* --- The rail ------------------------------------------------------------ */
+
+.sm-gallery {
+  display: flex;
+  width: 100%;
+  min-height: 100dvh;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.sm-gallery::-webkit-scrollbar {
+  display: none;
+}
+
+.sm-gallery:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -4px;
+}
+
+.sm-slide {
+  /* The blended title card sits outside .sm-inner, so the slide itself has to
+     be the query container for it. */
+  container-type: inline-size;
+  position: relative;
+  flex: 0 0 100%;
+  width: 100%;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: #000;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.sm-backdrop {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* The photograph is bright across the middle, so a light scrim top and
+   bottom keeps the white type legible without flattening the image. */
+.sm-slide--release::after,
+.sm-slide--lason::after {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 28%) 0%,
+      transparent 25%,
+      transparent 66%,
+      rgb(0 0 0 / 38%) 100%
+    ),
+    linear-gradient(to right, rgb(0 0 0 / 15%) 0%, transparent 45%);
+  content: "";
+  pointer-events: none;
+}
+
+.sm-inner {
+  container-type: inline-size;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 100dvh;
+}
+
+/* --- Label, top right ---------------------------------------------------- */
+
+.sm-label {
+  position: absolute;
+  top: var(--edge);
+  right: var(--edge);
+  margin: 0;
+  font-size: clamp(1.05rem, 2.45cqw, 3rem);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.sm-label-no {
+  font-size: 0.5em;
+  letter-spacing: 0.04em;
+  vertical-align: 0.35em;
+}
+
+/* --- Title card, centred ------------------------------------------------- */
+
+.sm-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  z-index: 1;
+  width: min(48cqw, 52rem);
+  max-width: calc(100% - (var(--edge) * 2));
+  height: auto;
+}
+
+/* --- Figures, along the bottom ------------------------------------------- */
+
+.sm-stats {
+  position: absolute;
+  right: var(--edge);
+  bottom: var(--bottom-edge);
+  left: var(--edge);
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: clamp(0.75rem, 1.5cqw, 2rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sm-stat {
+  display: grid;
+  grid-template-columns: max-content max-content minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: baseline;
+  column-gap: clamp(0.65rem, 1.5cqw, 2rem);
+  min-width: 0;
+  font-size: clamp(1.2rem, 3cqw, 3.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.sm-stat:first-child {
+  grid-column: 1 / span 5;
+}
+
+.sm-stat:last-child {
+  grid-column: 8 / -1;
+}
+
+.sm-value {
+  grid-column: 1;
+  grid-row: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.sm-number-ticker {
+  display: inline-block;
+  min-width: 3.4ch;
+}
+
+.sm-track {
+  grid-column: 2;
+  grid-row: 1;
+  white-space: nowrap;
+}
+
+.sm-metric-leading {
+  grid-column: 3;
+  grid-row: 1;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.sm-metric-trailing {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  white-space: nowrap;
+}
+
+/* --- Slide 04: Alice, black on white ------------------------------------- */
+
+/* Driven by the slide's own tone rather than by which slide it is, so any
+   layout can sit on white. */
+.sm-slide[data-tone="light"] {
+  background: #fff;
+  color: #000;
+}
+
+.sm-artwork {
+  display: block;
+  flex: none;
+  width: 42.5cqw;
+  height: auto;
+}
+
+.sm-slide--alice .sm-combined {
+  gap: clamp(1.25rem, 7.2cqw, 8rem);
+  width: min(84cqw, 92rem);
+}
+
+.sm-slide--alice .sm-combined-copy {
+  max-width: 32.7cqw;
+  /* Sized so "STREAMS" falls to a second line, as in the reference. */
+  font-size: clamp(1rem, 2.95cqw, 3.2rem);
+}
+
+/* --- Slide 03: screen-blended title card over the clip ------------------- */
+
+.sm-card--blend {
+  width: min(26cqw, 28rem);
+  mix-blend-mode: screen;
+}
+
+.sm-figure {
+  position: absolute;
+  right: var(--edge);
+  bottom: var(--bottom-edge);
+  max-width: 34cqw;
+  margin: 0;
+  font-size: clamp(1.1rem, 3cqw, 3.5rem);
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  /* Justified, so the break before "STREAMS" comes from the measure. */
+  text-align: justify;
+  text-transform: uppercase;
+  hyphens: none;
+}
+
+/* --- Slide 02: the Spotify mark beside the combined figure --------------- */
+
+.sm-combined {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.5rem, 6.4cqw, 7rem);
+  width: min(90cqw, 78rem);
+  translate: -50% -50%;
+}
+
+.sm-logo {
+  display: block;
+  flex: none;
+  width: clamp(4.5rem, 16cqw, 17rem);
+  height: auto;
+}
+
+.sm-combined-copy {
+  max-width: 29cqw;
+  margin: 0;
+  font-size: clamp(0.95rem, 2.15cqw, 2.5rem);
+  line-height: 1.28;
+  letter-spacing: -0.02em;
+  /* Justified, so the break after "STREAMS" comes from the measure and the
+     first line stretches — exactly as set in the reference. */
+  text-align: justify;
+  text-transform: uppercase;
+  hyphens: none;
+}
+
+/* --- Pagination ---------------------------------------------------------- */
+
+.sm-pagination {
+  position: absolute;
+  z-index: 2;
+  top: var(--edge);
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-height: 44px;
+  translate: -50% 0;
+}
+
+/* The rail's controls sit outside the slides, so they follow the active
+   slide's tone rather than inheriting it. */
+.sm[data-tone="light"] .sm-pagination {
+  color: #000;
+}
+
+.sm-pagination-count {
+  margin: 0;
+  font-size: clamp(0.9rem, 1.5vw, 1.15rem);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.sm-pagination-button {
+  min-height: 44px;
+  padding: 0.2rem 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: clamp(0.8rem, 1.2vw, 1rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.sm-pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.sm-pagination-button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+/* --- Fade in on the way in, out on the way past -------------------------- */
+
+.sm-label,
+.sm-card,
+.sm-stat,
+.sm-combined,
+.sm-figure {
+  opacity: 0;
+  transition:
+    opacity 240ms ease-in,
+    transform 240ms ease-in;
+  will-change: opacity, transform;
+}
+
+.sm-label,
+.sm-stat,
+.sm-figure {
+  transform: translate3d(0, 0.9rem, 0);
+}
+
+.sm-card {
+  transform: translate3d(-50%, calc(-50% + 0.9rem), 0);
+}
+
+.sm[data-visible] [data-active] .sm-label,
+.sm[data-visible] [data-active] .sm-card,
+.sm[data-visible] [data-active] .sm-stat,
+.sm[data-visible] [data-active] .sm-combined,
+.sm[data-visible] [data-active] .sm-figure {
+  opacity: 1;
+  transition:
+    opacity 620ms var(--ease),
+    transform 620ms var(--ease);
+}
+
+.sm[data-visible] [data-active] .sm-label,
+.sm[data-visible] [data-active] .sm-stat,
+.sm[data-visible] [data-active] .sm-figure {
+  transform: translate3d(0, 0, 0);
+}
+
+.sm[data-visible] [data-active] .sm-card {
+  transform: translate3d(-50%, -50%, 0);
+}
+
+.sm-card {
+  transition-delay: 120ms;
+}
+
+.sm-stat {
+  transition-delay: calc(240ms + var(--i, 0) * 110ms);
+}
+
+.sm:not([data-visible]) .sm-card,
+.sm:not([data-visible]) .sm-stat {
+  transition-delay: 0ms;
+}
+
+.sm-combined,
+.sm-figure {
+  transition-delay: 120ms;
+}
+
+/* =========================================================================
+   Narrow
+   ========================================================================= */
+
+@media (max-width: 48rem) {
+  .sm-label {
+    right: var(--edge);
+    left: auto;
+    max-width: calc(100% - (var(--edge) * 2));
+    text-align: right;
+  }
+
+  .sm-pagination {
+    top: calc(var(--edge) + 3.25rem);
+  }
+
+  .sm-card {
+    width: min(78cqw, 24rem);
+  }
+
+  .sm-combined {
+    flex-direction: column;
+    gap: 1.5rem;
+    width: calc(100% - (var(--edge) * 2));
+    text-align: left;
+  }
+
+  .sm-logo {
+    width: clamp(4.5rem, 34cqw, 11rem);
+  }
+
+  .sm-combined-copy {
+    max-width: none;
+    font-size: clamp(0.95rem, 5cqw, 1.6rem);
+    text-align: left;
+  }
+
+  .sm-artwork {
+    width: min(78cqw, 22rem);
+  }
+
+  .sm-slide--alice .sm-combined-copy {
+    max-width: none;
+    font-size: clamp(1rem, 5.4cqw, 1.7rem);
+  }
+
+  .sm-card--blend {
+    width: min(52cqw, 15rem);
+  }
+
+  .sm-figure {
+    right: var(--edge);
+    left: var(--edge);
+    max-width: none;
+    font-size: clamp(1.1rem, 5.4cqw, 1.7rem);
+  }
+
+  .sm-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .sm-stat {
+    width: 100%;
+    font-size: clamp(1.1rem, 5.4cqw, 1.7rem);
+  }
+
+  .sm-stat:first-child,
+  .sm-stat:last-child {
+    grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sm-gallery {
+    scroll-behavior: auto;
+  }
+
+  .sm-label,
+  .sm-card,
+  .sm-stat,
+  .sm-combined,
+  .sm-figure {
+    opacity: 1;
+    transition: none;
+  }
+
+  .sm-label,
+  .sm-stat,
+  .sm-figure {
+    transform: none;
+  }
+
+  .sm-card {
+    transform: translate3d(-50%, -50%, 0);
+  }
+}

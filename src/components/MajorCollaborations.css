@@ -1,0 +1,527 @@
+/* =========================================================================
+   Major collaborations — taped polaroids on white. The grid is the index;
+   choosing one opens its credits beside a single frame.
+   ========================================================================= */
+
+.mc {
+  --edge: clamp(1.25rem, 3.6vw, 4rem);
+  --ink: #000;
+  --face: var(--typeface, "Arial Narrow", Arial, sans-serif);
+  /* The polaroid's black window, as a share of the paper. */
+  /* Defaults for the frame that ships with the project. The component sets
+     these from the content file, so a replacement frame brings its own. */
+  --window-top: 6%;
+  --window-side: 6%;
+  --window-bottom: 18%;
+
+  container-type: inline-size;
+  position: relative;
+  display: grid;
+  align-content: center;
+  width: 100%;
+  min-height: 100dvh;
+  padding: calc(var(--edge) * 2.6) var(--edge) var(--edge);
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--face);
+}
+
+.mc-label {
+  position: absolute;
+  top: var(--edge);
+  right: var(--edge);
+  margin: 0;
+  font-size: clamp(1.05rem, 2.45cqw, 3rem);
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.mc-label-no {
+  font-size: 0.5em;
+  letter-spacing: 0.04em;
+  vertical-align: 0.35em;
+}
+
+/* --- The polaroid -------------------------------------------------------- */
+
+.mc-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.mc-paper {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Sits in the paper's window, behind nothing — the frame art is opaque
+   around it, so a photo simply shows through. */
+.mc-photo {
+  position: absolute;
+  z-index: -1;
+  top: var(--window-top);
+  right: var(--window-side);
+  bottom: var(--window-bottom);
+  left: var(--window-side);
+  width: auto;
+  height: auto;
+  object-fit: cover;
+}
+
+/* --- Grid ---------------------------------------------------------------- */
+
+.mc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.25rem, 5.2cqw, 5.5rem);
+  width: min(100%, 62cqw);
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.mc-item {
+  min-width: 0;
+  /* Fade and lift in, one after another. */
+  animation: mc-enter 620ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+@keyframes mc-enter {
+  from {
+    opacity: 0;
+    translate: 0 1.4rem;
+  }
+}
+
+.mc-card {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  /* Each frame hangs at its own slight angle, as taped prints do. */
+  rotate: calc((var(--i, 0) - 2.5) * 0.5deg);
+  transition:
+    translate 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    rotate 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    scale 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 420ms ease;
+}
+
+.mc-card:hover,
+.mc-card:focus-visible {
+  translate: 0 -0.9rem;
+  rotate: 0deg;
+  scale: 1.035;
+  filter: drop-shadow(0 1.4rem 1.6rem rgb(0 0 0 / 22%));
+}
+
+.mc-card:active {
+  translate: 0 -0.3rem;
+  scale: 1.01;
+}
+
+.mc-card:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 0.6rem;
+}
+
+/* --- Collaboration dossier dialog -------------------------------------- */
+
+.mc-dialog {
+  position: fixed;
+  inset: 0;
+  width: min(calc(100vw - 2rem), 74rem);
+  max-width: none;
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  overflow: auto;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--face);
+  scrollbar-gutter: stable;
+  /* `allow-discrete` keeps the close transition in the top layer. */
+  opacity: 0;
+  scale: 0.975;
+  transition:
+    opacity 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    scale 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    overlay 300ms allow-discrete,
+    display 300ms allow-discrete;
+}
+
+.mc-dialog[open] {
+  opacity: 1;
+  scale: 1;
+}
+
+@starting-style {
+  .mc-dialog[open] {
+    opacity: 0;
+    scale: 0.975;
+  }
+}
+
+/* The page behind is white, so the scrim separates the dossier clearly. */
+.mc-dialog::backdrop {
+  background: rgb(0 0 0 / 0%);
+  transition:
+    background 300ms ease,
+    overlay 300ms allow-discrete,
+    display 300ms allow-discrete;
+}
+
+.mc-dialog[open]::backdrop {
+  background: rgb(0 0 0 / 58%);
+}
+
+@starting-style {
+  .mc-dialog[open]::backdrop {
+    background: rgb(0 0 0 / 0%);
+  }
+}
+
+.mc-dialog-shell {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: min(42rem, calc(100dvh - 2rem));
+}
+
+.mc-dialog-topbar {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.75rem) clamp(1.15rem, 3.2vw, 3rem);
+  background: #fff;
+}
+
+.mc-dialog-kicker,
+.mc-dialog-index,
+.mc-dialog-note-label {
+  margin: 0;
+  font-size: clamp(0.7rem, 0.9vw, 0.82rem);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.mc-dialog-panel {
+  display: grid;
+  grid-template-columns: minmax(13rem, 0.86fr) minmax(18rem, 1.14fr);
+  gap: clamp(2rem, 5vw, 6rem);
+  align-items: center;
+  padding: clamp(0.25rem, 1vw, 0.8rem) clamp(1.15rem, 5vw, 5rem) clamp(2rem, 5vw, 5rem);
+  animation: mc-dialog-panel-in 360ms cubic-bezier(0.22, 1, 0.36, 1) 70ms backwards;
+}
+
+@keyframes mc-dialog-panel-in {
+  from {
+    opacity: 0;
+    translate: 0 0.8rem;
+  }
+}
+
+.mc-dialog-frame-wrap {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+}
+
+.mc-frame--detail {
+  width: min(100%, 25rem);
+  rotate: -1deg;
+  transition:
+    translate 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    rotate 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    scale 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mc-dialog-frame-wrap:hover .mc-frame--detail {
+  translate: 0 -0.35rem;
+  rotate: 0deg;
+  scale: 1.012;
+}
+
+.mc-credits {
+  display: grid;
+  align-content: center;
+  gap: clamp(0.85rem, 1.7vw, 1.35rem);
+}
+
+.mc-dialog-index {
+  animation: mc-dialog-copy-in 300ms cubic-bezier(0.22, 1, 0.36, 1) 130ms backwards;
+}
+
+.mc-artists,
+.mc-track {
+  margin: 0;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.mc-artists {
+  font-size: clamp(0.95rem, 1.55vw, 1.45rem);
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  animation: mc-dialog-copy-in 340ms cubic-bezier(0.22, 1, 0.36, 1) 170ms backwards;
+}
+
+.mc-track {
+  max-width: 9ch;
+  font-size: clamp(2.8rem, 5.8vw, 6.5rem);
+  letter-spacing: -0.075em;
+  line-height: 0.82;
+  animation: mc-dialog-copy-in 380ms cubic-bezier(0.22, 1, 0.36, 1) 210ms backwards;
+}
+
+.mc-dialog-note {
+  display: grid;
+  gap: 0.55rem;
+  max-width: 54ch;
+  padding-top: clamp(0.4rem, 1.2vw, 0.9rem);
+  animation: mc-dialog-copy-in 400ms cubic-bezier(0.22, 1, 0.36, 1) 260ms backwards;
+}
+
+.mc-dialog-description {
+  margin: 0;
+  font-size: clamp(0.98rem, 1.35vw, 1.22rem);
+  letter-spacing: -0.012em;
+  line-height: 1.48;
+}
+
+.mc-dialog-media {
+  display: grid;
+  /* Spotify's native player needs a full line to keep its controls and
+     metadata readable. Stacking media also prevents a small player from
+     being squeezed beside a 16:9 video. */
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(1rem, 2vw, 1.4rem);
+  width: 100%;
+  max-width: 36rem;
+  padding-top: clamp(0.25rem, 0.7vw, 0.6rem);
+  animation: mc-dialog-copy-in 420ms cubic-bezier(0.22, 1, 0.36, 1) 300ms backwards;
+}
+
+.mc-dialog-media-item {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.mc-dialog-media-label {
+  margin: 0;
+  font-size: clamp(0.7rem, 0.9vw, 0.82rem);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.mc-dialog-embed {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: #f4f4f4;
+}
+
+.mc-dialog-embed--spotify {
+  min-width: 0;
+  /* Spotify's full embed uses this native height. A compact 152px player
+     truncates the release artwork and controls when the dialog is narrow. */
+  height: 352px;
+}
+
+.mc-dialog-embed--youtube {
+  aspect-ratio: 16 / 9;
+}
+
+.mc-dialog-media-item--unavailable {
+  min-height: 72px;
+  align-content: center;
+}
+
+.mc-dialog-media-item--unavailable p:last-child {
+  margin: 0;
+  color: #4d4d4d;
+  font-size: clamp(0.82rem, 1.05vw, 0.95rem);
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+
+.mc-return,
+.mc-close {
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.mc-return {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0;
+  font-size: clamp(0.75rem, 0.95vw, 0.86rem);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-underline-offset: 0.35em;
+  transition:
+    translate 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    text-decoration-color 250ms ease;
+  animation: mc-dialog-copy-in 420ms cubic-bezier(0.22, 1, 0.36, 1) 310ms backwards;
+}
+
+.mc-return:hover {
+  translate: -0.18rem 0;
+  text-decoration: underline;
+}
+
+.mc-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  padding: 0.45rem 0;
+  font-size: clamp(0.72rem, 0.9vw, 0.82rem);
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.mc-close-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  font-size: 1.65rem;
+  font-weight: 300;
+  letter-spacing: 0;
+  transition: rotate 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mc-close:hover .mc-close-mark {
+  rotate: 90deg;
+}
+
+.mc-close:focus-visible,
+.mc-return:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+
+@keyframes mc-dialog-copy-in {
+  from {
+    opacity: 0;
+    translate: 0 0.45rem;
+  }
+}
+
+/* =========================================================================
+   Narrow
+   ========================================================================= */
+
+@media (max-width: 48rem) {
+  .mc {
+    padding: calc(var(--edge) * 3.4) var(--edge) var(--edge);
+  }
+
+  .mc-label {
+    right: auto;
+    left: var(--edge);
+  }
+
+  .mc-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: clamp(1rem, 5vw, 2rem);
+  }
+
+  .mc-dialog-panel {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+    padding: 0.25rem 1.15rem 2rem;
+  }
+
+  .mc-dialog {
+    width: calc(100vw - 1rem);
+    max-height: calc(100dvh - 1rem);
+  }
+
+  .mc-dialog-shell {
+    min-height: 0;
+  }
+
+  .mc-dialog-topbar {
+    padding: 0.8rem 1.15rem;
+  }
+
+  .mc-dialog-frame-wrap {
+    justify-items: start;
+  }
+
+  .mc-frame--detail {
+    width: min(100%, 18rem);
+  }
+
+  .mc-credits {
+    padding-top: 0;
+  }
+
+  .mc-track {
+    font-size: clamp(2.6rem, 14vw, 4.6rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mc-item {
+    animation: none;
+  }
+
+  .mc-card,
+  .mc-close,
+  .mc-close-mark,
+  .mc-return,
+  .mc-frame--detail,
+  .mc-dialog,
+  .mc-dialog::backdrop {
+    transition: none;
+  }
+
+  .mc-dialog-panel,
+  .mc-dialog-index,
+  .mc-artists,
+  .mc-track,
+  .mc-dialog-note,
+  .mc-dialog-media,
+  .mc-return {
+    animation: none;
+  }
+
+  .mc-card:hover,
+  .mc-card:focus-visible {
+    translate: none;
+    scale: 1;
+  }
+
+  .mc-dialog-frame-wrap:hover .mc-frame--detail {
+    translate: none;
+    rotate: -1deg;
+    scale: 1;
+  }
+}
