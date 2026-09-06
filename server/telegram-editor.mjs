@@ -145,20 +145,31 @@ function supabaseAdmin() {
   });
 }
 
+function sameSiteAttribute() {
+  // Telegram commonly loads Mini Apps inside an iframe within its own
+  // client, which makes every request from this app back to its own origin
+  // "cross-site" from the cookie jar's point of view — the top-level page is
+  // Telegram's, not ours. SameSite=None is required for the session cookie
+  // to survive that context. It is only valid paired with Secure, so this
+  // stays Strict for local HTTP development, where None would otherwise be
+  // silently rejected by the browser.
+  return useSecureCookie() ? "SameSite=None" : "SameSite=Strict";
+}
+
 function sessionCookie(token) {
   const attributes = [
     `${COOKIE_NAME}=${encodeURIComponent(token)}`,
     "Path=/",
     `Max-Age=${SESSION_TTL_SECONDS}`,
     "HttpOnly",
-    "SameSite=Strict",
+    sameSiteAttribute(),
   ];
   if (useSecureCookie()) attributes.push("Secure");
   return attributes.join("; ");
 }
 
 function expiredSessionCookie() {
-  const attributes = [`${COOKIE_NAME}=`, "Path=/", "Max-Age=0", "HttpOnly", "SameSite=Strict"];
+  const attributes = [`${COOKIE_NAME}=`, "Path=/", "Max-Age=0", "HttpOnly", sameSiteAttribute()];
   if (useSecureCookie()) attributes.push("Secure");
   return attributes.join("; ");
 }

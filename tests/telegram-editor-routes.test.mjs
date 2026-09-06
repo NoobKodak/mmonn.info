@@ -137,7 +137,7 @@ test("server stays closed when more than one Telegram owner ID is configured", {
   }
 });
 
-test("HTTPS editor sessions receive a Secure HttpOnly cookie", { concurrency: false }, async () => {
+test("HTTPS editor sessions receive a Secure HttpOnly cookie usable inside Telegram's embedded webview", { concurrency: false }, async () => {
   const previous = process.env.PUBLIC_SITE_URL;
   process.env.PUBLIC_SITE_URL = "https://artist.example.test";
   try {
@@ -148,7 +148,11 @@ test("HTTPS editor sessions receive a Secure HttpOnly cookie", { concurrency: fa
     });
     assert.equal(response.status, 200, payload.message);
     assert.match(response.headers["Set-Cookie"], /HttpOnly/);
-    assert.match(response.headers["Set-Cookie"], /SameSite=Strict/);
+    // Telegram often loads the Mini App inside an iframe within its own
+    // client, making requests back to this origin "cross-site" from the
+    // cookie jar's perspective — SameSite=None (paired with Secure) is
+    // required for the session cookie to survive that context.
+    assert.match(response.headers["Set-Cookie"], /SameSite=None/);
     assert.match(response.headers["Set-Cookie"], /(?:^|; )Secure(?:;|$)/);
   } finally {
     process.env.PUBLIC_SITE_URL = previous;
