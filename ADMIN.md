@@ -55,6 +55,17 @@ server-only Supabase service-role key.
    The command configures `/edit`, `/status`, and `/help`, and uses
    `TELEGRAM_WEBHOOK_SECRET` to authenticate webhook deliveries.
 
+9. Before opening the Mini App, validate the server configuration without
+   printing any secrets. Replace the value with your own numeric Telegram ID:
+
+   ```powershell
+   npm run telegram:check -- YOUR_NUMERIC_TELEGRAM_ID
+   ```
+
+   Every line must begin with `OK`. If the public site is hosted as static
+   files only, deploy the Node server too: `/api/telegram/session` and the
+   secure editor API must share the same HTTPS origin as `admin.html`.
+
 ## Use
 
 From the allowed Telegram account, send the bot:

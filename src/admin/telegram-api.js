@@ -8,7 +8,13 @@
  */
 
 function errorFromResponse(response, payload) {
-  const error = new Error(payload?.message || "The secure editor request failed.");
+  const fallback =
+    response.status === 404
+      ? "The secure Telegram editor API is not deployed at this address. Deploy the Node server, then set Telegram's Web App URL to that same HTTPS address."
+      : response.status >= 500
+        ? "The secure Telegram editor server is not configured correctly. Check its server-only Telegram environment settings."
+        : "The secure editor request failed.";
+  const error = new Error(payload?.message || fallback);
   error.status = response.status;
   return error;
 }
