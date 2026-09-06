@@ -1,9 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
+import { readFileSync } from "node:fs";
 import { readdir, stat } from "node:fs/promises";
 import { extname, join, relative, resolve, sep } from "node:path";
 
 import { validateContent } from "../src/admin/validate.js";
-import defaultContent from "../src/data/content.json" with { type: "json" };
 import {
   TelegramAuthError,
   createEditorSession,
@@ -13,10 +13,15 @@ import {
   verifyTelegramInitData,
 } from "./telegram-auth.mjs";
 
-// A static import (rather than fs.readFile against a process.cwd()-relative
-// path) so this content bundles correctly into a Vercel serverless function,
-// where the working directory at runtime is not guaranteed to be the repo
-// root and dynamically-built fs paths are not reliably traced at build time.
+// Read relative to this module's own location (rather than fs.readFile
+// against a process.cwd()-relative path, or a JSON import attribute) so this
+// bundles correctly into a Vercel serverless function: process.cwd() is not
+// guaranteed to be the repo root at runtime there, and `with { type: "json" }`
+// import syntax was found to silently break that function's build.
+const defaultContent = JSON.parse(
+  readFileSync(new URL("../src/data/content.json", import.meta.url), "utf8"),
+);
+
 const ROOT = process.cwd();
 const PUBLIC_DIRECTORY = resolve(ROOT, "public");
 const COOKIE_NAME = "mmonn_editor";
