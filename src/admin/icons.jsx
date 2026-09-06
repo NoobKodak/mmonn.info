@@ -213,6 +213,14 @@ export const IconLock = (props) => (
   </svg>
 );
 
+export const IconMusic = (props) => (
+  <svg {...base} {...props}>
+    <path d="M8 15V5.6a1 1 0 0 1 .8-1L16 3v8" />
+    <circle cx="6" cy="15" r="2.3" />
+    <circle cx="14" cy="13.5" r="2.3" />
+  </svg>
+);
+
 export const IconHistory = (props) => (
   <svg {...base} {...props}>
     <path d="M3 10a7 7 0 1 1 2 4.9" />

@@ -11,11 +11,10 @@ export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
-      // The admin panel is a second, independent page (its own React root,
-      // its own entry script) rather than a route inside the public site, so
-      // it needs its own entry here to be part of the build at all. It talks
-      // to Supabase directly with no server of its own, so shipping it is
-      // just shipping a page — Postgres RLS is what actually gates access.
+      // The Telegram editor is a second, independent page (its own React
+      // root and entry script), so Vite needs it as an explicit build input.
+      // It calls only same-origin server routes; those routes verify Telegram
+      // WebApp initData and keep Supabase's service key server-side.
       input: {
         main: resolve(__dirname, "index.html"),
         admin: resolve(__dirname, "admin.html"),

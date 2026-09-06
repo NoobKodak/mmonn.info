@@ -2,24 +2,12 @@ import { useEffect, useState } from "react";
 
 import { useInView } from "../hooks/useInView.js";
 import { fetchSpotifyDiscography } from "../lib/spotify.js";
+import { useMusicVideos } from "../lib/content-store.jsx";
 import MusicMetrics from "./MusicMetrics.jsx";
 import "./MusicSection.css";
 
 const FALLBACK_ARTIST_URL = "https://open.spotify.com/artist/57wPsYZkEErG0C2ntgqNTe";
 const YOUTUBE_ALLOW = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-
-const MUSIC_VIDEOS = [
-  {
-    id: "amarad",
-    title: "AMARAD",
-    embedUrl: "https://www.youtube.com/embed/BEWqXUi_P4w?start=61",
-  },
-  {
-    id: "ply4",
-    title: "PLY4",
-    embedUrl: "https://www.youtube.com/embed/i2igE_cixyw?start=61",
-  },
-];
 
 const pad = (number) => String(number).padStart(2, "0");
 
@@ -100,6 +88,8 @@ function LoadingGrid() {
 }
 
 function MusicVideoShowcase() {
+  const videos = useMusicVideos();
+
   return (
     <section className="music-video-showcase" aria-labelledby="music-videos-title">
       <div className="music-video-showcase-heading">
@@ -108,7 +98,7 @@ function MusicVideoShowcase() {
       </div>
 
       <div className="music-video-showcase-grid">
-        {MUSIC_VIDEOS.map((video) => (
+        {videos.map((video) => (
           <article className="music-video-showcase-item" key={video.id}>
             <p className="music-video-showcase-label">{video.title}</p>
             <div className="music-video-showcase-frame">

@@ -4,11 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
+    <!-- Explicit, early signal that this page manages its own light/dark
+         theme. Chromium's browser-level "force dark" repainting (present in
+         Chrome, Edge and Opera GX) otherwise applies its own color-inversion
+         heuristic to pages it thinks are unstyled for dark mode — which can
+         make already-dark form fields render with broken or invisible
+         contrast. The CSS `color-scheme` property is enough for most
+         browsers, but this meta tag is read before any CSS parses and is the
+         documented way to opt out of that repainting specifically. -->
+    <meta name="color-scheme" content="dark light" />
     <link rel="icon" type="image/svg+xml" href="/assets/explore-icon.svg" />
-    <title>Content — MMONN</title>
+    <title>MMONN — Telegram editor</title>
   </head>
   <body>
     <div id="admin-root"></div>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script type="module" src="/src/admin/main.jsx"></script>
   </body>
 </html>

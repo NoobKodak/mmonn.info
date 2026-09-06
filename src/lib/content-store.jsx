@@ -15,10 +15,63 @@ import { isSupabaseConfigured, supabase } from "./supabase.js";
  */
 const ContentContext = createContext(bundledContent);
 
+/**
+ * A deployed content row can predate a newly editable field. Merge it with
+ * the bundled document so the public site stays stable until the first new
+ * Telegram-admin publish. Lists keep their stored order; collaborations get
+ * an item-level embed default because that field was added after launch.
+ */
+function mergeContent(defaultValue, storedValue) {
+  if (Array.isArray(defaultValue)) return Array.isArray(storedValue) ? storedValue : defaultValue;
+  if (!defaultValue || typeof defaultValue !== "object") {
+    return storedValue === undefined ? defaultValue : storedValue;
+  }
+  const stored = storedValue && typeof storedValue === "object" && !Array.isArray(storedValue) ? storedValue : {};
+  return Object.fromEntries(
+    Object.entries(defaultValue).map(([key, value]) => [key, mergeContent(value, stored[key])]),
+  );
+}
+
+export function normalizeContent(storedContent) {
+  const content = mergeContent(bundledContent, storedContent);
+  const mediaDefault = { spotifyEmbedUrl: "", youtubeEmbedUrl: "", youtubeLabel: "" };
+  const frameDefault = { src: "", width: 0, height: 0, window: { top: 6, side: 6, bottom: 18 } };
+  const defaultsById = new Map(bundledContent.collaborations.map((entry) => [entry.id, entry]));
+
+  return {
+    ...content,
+    collaborations: content.collaborations.map((entry) => {
+      const fallback = defaultsById.get(entry.id) || {};
+      return {
+        ...fallback,
+        ...entry,
+        media: { ...mediaDefault, ...fallback.media, ...entry.media },
+        frame: mergeContent(frameDefault, { ...fallback.frame, ...entry.frame }),
+      };
+    }),
+  };
+}
+
 export function ContentProvider({ children }) {
   const [content, setContent] = useState(bundledContent);
 
   useEffect(() => {
+    // Preview is deliberately an authenticated server route. A public visitor
+    // can add this query string but receives no draft content without the
+    // HttpOnly Telegram-editor session cookie.
+    if (new URLSearchParams(window.location.search).has("admin-preview")) {
+      let cancelled = false;
+      fetch("/api/editor/preview", { credentials: "same-origin" })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((payload) => {
+          if (!cancelled && payload?.content) setContent(normalizeContent(payload.content));
+        })
+        .catch(() => {});
+      return () => {
+        cancelled = true;
+      };
+    }
+
     if (!isSupabaseConfigured) return undefined;
     let cancelled = false;
 
@@ -29,7 +82,7 @@ export function ContentProvider({ children }) {
       .maybeSingle()
       .then(({ data, error }) => {
         if (cancelled || error || !data?.content) return;
-        setContent(data.content);
+        setContent(normalizeContent(data.content));
       });
 
     const channel = supabase
@@ -38,7 +91,7 @@ export function ContentProvider({ children }) {
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "site_content", filter: "id=eq.live" },
         (payload) => {
-          if (payload.new?.content) setContent(payload.new.content);
+          if (payload.new?.content) setContent(normalizeContent(payload.new.content));
         },
       )
       .subscribe();
@@ -141,4 +194,12 @@ export function useContactInfo() {
 
 export function useMusicMetrics() {
   return useContentValue().musicMetrics;
+}
+
+export function useMusicVideos() {
+  return useContentValue().music.videos;
+}
+
+export function usePerformances() {
+  return useContentValue().performances;
 }

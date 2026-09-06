@@ -3,7 +3,7 @@ import { access, readFile, stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, normalize, resolve } from "node:path";
 
-import { handleAdminRequest } from "./server-admin.mjs";
+import { handleTelegramEditorRequest } from "./server/telegram-editor.mjs";
 
 const ROOT = process.cwd();
 const DIST_DIRECTORY = resolve(ROOT, "dist");
@@ -375,9 +375,10 @@ if (!isProduction) {
 const server = createServer(async (request, response) => {
   const requestUrl = new URL(request.url, "http://localhost");
 
-  // Development only: the production server serves prebuilt files and must
-  // expose no way to write to the project.
-  if (!isProduction && (await handleAdminRequest(request, response, requestUrl.pathname))) {
+  // The Telegram editor is deliberately handled before any local/dev helpers:
+  // its mutations authenticate against Telegram and then use a server-only
+  // Supabase service key. No private editor route falls through to Vite.
+  if (await handleTelegramEditorRequest(request, response, requestUrl.pathname)) {
     return;
   }
 
@@ -409,9 +410,11 @@ const server = createServer(async (request, response) => {
 });
 
 const port = Number(process.env.PORT || 4173);
-server.listen(port, "127.0.0.1", () => {
-  console.log(`MMONN profile server running at http://127.0.0.1:${port}`);
+const host = process.env.HOST || (isProduction ? "0.0.0.0" : "127.0.0.1");
+server.listen(port, host, () => {
+  const printedHost = host === "0.0.0.0" ? "localhost" : host;
+  console.log(`MMONN profile server running at http://${printedHost}:${port}`);
   if (!isProduction) {
-    console.log(`Admin panel:                  http://127.0.0.1:${port}/admin.html`);
+    console.log(`Telegram editor:              http://${printedHost}:${port}/admin.html`);
   }
 });

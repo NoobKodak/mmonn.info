@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
-import { publicAsset } from "../assets.js";
+import { contentAsset } from "../lib/content-asset.js";
+import { usePerformances } from "../lib/content-store.jsx";
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion.js";
 import MajorCollaborations from "./MajorCollaborations.jsx";
 import MediaCoverage from "./MediaCoverage.jsx";
@@ -14,39 +15,15 @@ const HIGHLIGHT_CATEGORIES = [
   { id: "media-coverage", number: "04", label: "Media coverage" },
 ];
 
-// Each clip in public/performance becomes one full-bleed, horizontally
-// paginated Performance slide. Keep this list in the intended viewing order.
-const PERFORMANCE_SLIDES = [
-  {
-    id: "performance-01",
-    src: publicAsset("performance/_1.gif"),
-    label: "Performance visual 01",
-  },
-  {
-    id: "performance-02",
-    src: publicAsset("performance/_2.gif"),
-    label: "Performance visual 02",
-  },
-  {
-    id: "performance-03",
-    src: publicAsset("performance/_3.gif"),
-    label: "Performance visual 03",
-  },
-  {
-    id: "performance-04",
-    src: publicAsset("performance/_4.gif"),
-    label: "Performance visual 04",
-  },
-];
-
 const pad = (number) => String(number).padStart(2, "0");
 
 function PerformanceGallery() {
+  const { slides } = usePerformances();
   const galleryRef = useRef(null);
   const frameRef = useRef(null);
   const prefersReducedMotion = usePrefersReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
-  const hasMultipleSlides = PERFORMANCE_SLIDES.length > 1;
+  const hasMultipleSlides = slides.length > 1;
 
   const updatePageFromScroll = () => {
     const gallery = galleryRef.current;
@@ -54,7 +31,7 @@ function PerformanceGallery() {
 
     setActiveIndex(
       Math.min(
-        PERFORMANCE_SLIDES.length - 1,
+        slides.length - 1,
         Math.max(0, Math.round(gallery.scrollLeft / gallery.clientWidth)),
       ),
     );
@@ -84,7 +61,7 @@ function PerformanceGallery() {
     if (!gallery) return;
 
     const nextIndex = Math.min(
-      PERFORMANCE_SLIDES.length - 1,
+      slides.length - 1,
       Math.max(0, index),
     );
 
@@ -107,7 +84,7 @@ function PerformanceGallery() {
       goTo(0);
     } else if (event.key === "End") {
       event.preventDefault();
-      goTo(PERFORMANCE_SLIDES.length - 1);
+      goTo(slides.length - 1);
     }
   };
 
@@ -120,17 +97,16 @@ function PerformanceGallery() {
         aria-label="Performances gallery. Use the left and right arrow keys to change slides."
         onKeyDown={handleKeyDown}
       >
-        {PERFORMANCE_SLIDES.map((slide) => (
+        {slides.map((slide) => (
           <article
             className="performance-slide"
             key={slide.id}
-            aria-label={slide.label}
+            aria-label={slide.alt}
           >
             <img
               className="performance-slide-media"
-              src={slide.src}
-              alt=""
-              aria-hidden="true"
+              src={contentAsset(slide.src)}
+              alt={slide.alt}
             />
           </article>
         ))}
@@ -149,7 +125,7 @@ function PerformanceGallery() {
         )}
 
         <p className="performance-pagination-count" aria-live="polite">
-          {pad(activeIndex + 1)} / {pad(PERFORMANCE_SLIDES.length)}
+          {pad(activeIndex + 1)} / {pad(slides.length)}
         </p>
 
         {hasMultipleSlides && (
@@ -157,7 +133,7 @@ function PerformanceGallery() {
             className="performance-pagination-button"
             type="button"
             onClick={() => goTo(activeIndex + 1)}
-            disabled={activeIndex === PERFORMANCE_SLIDES.length - 1}
+            disabled={activeIndex === slides.length - 1}
           >
             Next
           </button>
@@ -169,6 +145,7 @@ function PerformanceGallery() {
 
 function HighlightPanel({ category, onBack }) {
   const titleRef = useRef(null);
+  const performances = usePerformances();
   const isPerformances = category.id === "performances";
   const isStreamingMilestones = category.id === "streaming-milestones";
   const isCollaborations = category.id === "major-collaborations";
@@ -196,7 +173,7 @@ function HighlightPanel({ category, onBack }) {
         ref={titleRef}
         tabIndex={-1}
       >
-        <span aria-hidden="true">{category.number}.</span> {category.label}
+        <span aria-hidden="true">{category.number}.</span> {isPerformances ? performances.label : category.label}
       </h3>
 
       {isCollaborations && (

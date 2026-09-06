@@ -1,12 +1,9 @@
 /**
  * Content validation for the admin panel.
  *
- * This used to run on a local Node server before writing to a file. Now the
- * panel writes straight to Supabase from the browser, and Postgres RLS is the
- * real security boundary (only a signed-in editor can write `site_content` at
- * all) — but nothing else checks the *shape* of what gets written, so a typo
- * would previously fail loudly and now would just save. This is that same
- * check, ported to run client-side before the request goes out.
+ * The Telegram editor runs this in the browser for helpful feedback and again
+ * on the server before any draft or publish mutation. Server-side validation
+ * is the authority; a browser never receives a Supabase service-role key.
  */
 
 export class ValidationError extends Error {}
@@ -88,6 +85,33 @@ function externalUrl(value, label) {
   return text;
 }
 
+function embedUrl(value, label, provider, { allowEmpty = true } = {}) {
+  const text = str(value, label, { max: 500, allowEmpty });
+  if (!text.trim()) return "";
+
+  let parsed;
+  try {
+    parsed = new URL(text);
+  } catch {
+    fail(`${label} must be a full embed URL.`);
+  }
+  if (parsed.protocol !== "https:") fail(`${label} must use https://.`);
+
+  const host = parsed.hostname.toLowerCase();
+  if (provider === "spotify") {
+    if (host !== "open.spotify.com" || !/^\/embed\/(artist|album|track|playlist)\//.test(parsed.pathname)) {
+      fail(`${label} must be an official Spotify embed URL.`);
+    }
+  }
+  if (provider === "youtube") {
+    const validHost = ["youtube.com", "www.youtube.com", "www.youtube-nocookie.com"].includes(host);
+    if (!validHost || !/^\/embed\/[A-Za-z0-9_-]{6,}/.test(parsed.pathname)) {
+      fail(`${label} must be an official YouTube embed URL.`);
+    }
+  }
+  return text;
+}
+
 const ACCENTS = ["tape", "star", "pin"];
 const SLIDE_KINDS = ["figures", "mark", "blend", "artwork"];
 const TONES = ["dark", "light"];
@@ -140,11 +164,13 @@ export function validateContent(payload, { knownAssets } = {}) {
     "version",
     "hero",
     "musicMetrics",
+    "music",
     "sections",
     "about",
     "polaroid",
     "collaborations",
     "milestones",
+    "performances",
     "media",
     "projects",
     "contact",
@@ -166,6 +192,14 @@ export function validateContent(payload, { knownAssets } = {}) {
     str(item.value, `musicMetrics.items[${i}].value`, { max: 40 });
   });
 
+  const music = exactKeys(payload.music, "music", ["videos"]);
+  list(music.videos, "music.videos", { max: 12 }).forEach((video, i) => {
+    exactKeys(video, `music.videos[${i}]`, ["id", "title", "embedUrl"]);
+    slug(video.id, `music.videos[${i}].id`);
+    str(video.title, `music.videos[${i}].title`, { max: 120 });
+    embedUrl(video.embedUrl, `music.videos[${i}].embedUrl`, "youtube", { allowEmpty: false });
+  });
+
   list(payload.sections, "sections", { min: 1, max: 8 }).forEach((section, i) => {
     exactKeys(section, `sections[${i}]`, ["id", "label"]);
     slug(section.id, `sections[${i}].id`);
@@ -184,7 +218,7 @@ export function validateContent(payload, { knownAssets } = {}) {
   validateFrame(payload.polaroid, "polaroid", { allowEmpty: false, knownAssets });
 
   list(payload.collaborations, "collaborations", { max: 24 }).forEach((item, i) => {
-    exactKeys(item, `collaborations[${i}]`, ["id", "track", "artists", "description", "photo", "frame"]);
+    exactKeys(item, `collaborations[${i}]`, ["id", "track", "artists", "description", "photo", "media", "frame"]);
     slug(item.id, `collaborations[${i}].id`);
     str(item.track, `collaborations[${i}].track`, { max: 120 });
     list(item.artists, `collaborations[${i}].artists`, { min: 1, max: 10 }).forEach((artist, j) =>
@@ -192,6 +226,21 @@ export function validateContent(payload, { knownAssets } = {}) {
     );
     str(item.description, `collaborations[${i}].description`, { max: 2000 });
     assetPath(item.photo, `collaborations[${i}].photo`, { knownAssets });
+    const collaborationMedia = exactKeys(item.media, `collaborations[${i}].media`, [
+      "spotifyEmbedUrl",
+      "youtubeEmbedUrl",
+      "youtubeLabel",
+    ]);
+    embedUrl(collaborationMedia.spotifyEmbedUrl, `collaborations[${i}].media.spotifyEmbedUrl`, "spotify", {
+      allowEmpty: true,
+    });
+    embedUrl(collaborationMedia.youtubeEmbedUrl, `collaborations[${i}].media.youtubeEmbedUrl`, "youtube", {
+      allowEmpty: true,
+    });
+    str(collaborationMedia.youtubeLabel, `collaborations[${i}].media.youtubeLabel`, {
+      max: 120,
+      allowEmpty: !collaborationMedia.youtubeEmbedUrl.trim(),
+    });
     validateFrame(item.frame, `collaborations[${i}].frame`, { knownAssets });
   });
 
@@ -226,6 +275,15 @@ export function validateContent(payload, { knownAssets } = {}) {
     if (!slide.art.src && !slide.copy.trim() && !slide.figures.length) {
       fail(`${at} needs artwork, a line of copy, or at least one figure.`);
     }
+  });
+
+  const performances = exactKeys(payload.performances, "performances", ["label", "slides"]);
+  str(performances.label, "performances.label", { max: 80 });
+  list(performances.slides, "performances.slides", { min: 1, max: 24 }).forEach((slide, i) => {
+    exactKeys(slide, `performances.slides[${i}]`, ["id", "src", "alt"]);
+    slug(slide.id, `performances.slides[${i}].id`);
+    assetPath(slide.src, `performances.slides[${i}].src`, { allowEmpty: false, knownAssets });
+    str(slide.alt, `performances.slides[${i}].alt`, { max: 300 });
   });
 
   list(payload.media, "media", { max: 24 }).forEach((item, i) => {

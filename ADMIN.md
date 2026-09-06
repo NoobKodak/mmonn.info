@@ -1,145 +1,108 @@
-# Content editor
+# MMONN Telegram editor
 
-An admin panel for editing the site's words and pictures without touching
-code. It runs entirely against Supabase — content, images and the editor
-account all live there — so it works from any machine with an internet
-connection, not only this one.
+The private editor is a Telegram Mini App at `/admin.html`. It does not have
+email/password sign-up, and it does not write to Supabase from the browser.
+Every editor request is verified server-side against Telegram WebApp
+`initData`, checked against `TELEGRAM_ADMIN_IDS`, and then performed with the
+server-only Supabase service-role key.
 
-## First-time setup
+## One-time secure setup
 
-1. Open the panel (see *Running it* below) and choose **First time here?
-   Create an account**, using the email and password you want to sign in
-   with.
-2. Supabase emails a confirmation link to that address. Click it.
-3. Come back and sign in.
+1. In **BotFather**, create or choose the MMONN bot. If a bot token was ever
+   pasted into a chat, code, screenshot, or commit, revoke it in BotFather and
+   generate a replacement before continuing.
+2. Deploy this Node server to an HTTPS domain. Telegram Mini Apps and webhooks
+   need public HTTPS; `127.0.0.1` is only for local interface work.
+3. Copy `.env.example` to your private `.env.local` or deployment secret
+   settings. Never commit that file.
+4. Find **your numeric Telegram user ID** (for example, message a trusted ID
+   bot), then set exactly that one value:
 
-Only one editor account is expected. Anyone who can sign in has full write
-access to the site's content.
+   ```env
+   TELEGRAM_ADMIN_IDS=YOUR_NUMERIC_TELEGRAM_ID
+   ```
 
-## Running it
+   Keep it to one ID. The server rejects an empty, malformed, or multi-user
+   value, so only that account can open the editor. Usernames are not accepted
+   because they can change.
+5. Generate two different secrets. With Node installed, run:
 
-The panel talks to Supabase directly from the browser, so it works wherever
-the site is deployed:
+   ```powershell
+   node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
+   ```
 
-**On the live site:** open `/admin.html` on the deployed domain — e.g.
-`https://mmonninfo.vercel.app/admin.html`. No install, no local machine
-needed.
+   Put one result in `TELEGRAM_SESSION_SECRET` and another in
+   `TELEGRAM_WEBHOOK_SECRET`.
+6. Set these production URLs (replace the example domain):
 
-**Locally, for development:**
+   ```env
+   PUBLIC_SITE_URL=https://your-domain.example
+   TELEGRAM_WEB_APP_URL=https://your-domain.example/admin.html
+   ```
 
-```bash
-npm run dev
+7. In Supabase SQL Editor, run
+   [`supabase/telegram-admin.sql`](supabase/telegram-admin.sql). It creates
+   draft/version/audit tables and revokes the former browser-admin write path.
+   Its Storage rule revokes direct authenticated uploads for every bucket in
+   this Supabase project; remove or narrow that final statement only if you
+   knowingly operate another authenticated Storage upload flow.
+8. Set the bot command menu and webhook after the deployment is live:
+
+   ```powershell
+   npm run telegram:webhook
+   ```
+
+   The command configures `/edit`, `/status`, and `/help`, and uses
+   `TELEGRAM_WEBHOOK_SECRET` to authenticate webhook deliveries.
+
+## Use
+
+From the allowed Telegram account, send the bot:
+
+```text
+/edit
 ```
 
-and open **http://127.0.0.1:4173/admin.html**. The site itself is at
-http://127.0.0.1:4173/.
+Tap **Open editor**. Directly visiting `/admin.html` in a normal browser
+shows an access-denied screen, by design.
 
-The only things that stay local-only are **Build site** and the *bundled*
-half of the image picker (see *Images* below) — both need this machine's own
-Vite toolchain, so they quietly do nothing useful from a deployed copy. Every
-other part of the panel — sign in, edit, save, upload — is identical on both.
+- **Save draft** stores private work only.
+- **Preview** opens the current draft through an authenticated preview route.
+- **Publish** requires confirmation, updates the public site, creates a
+  version record, and adds an audit entry.
+- **Drafts & history** restores a prior version to a draft first; it cannot
+  change the live site until you confirm Publish.
 
-## What it edits
+The editor supports the live content fields, images/SVGs/GIFs, performance
+GIF ordering, streaming milestone figures, collaboration Spotify/YouTube
+embeds, music-video embeds, roles, navigation, and contact details. Repeatable
+items use accessible move-up/move-down controls instead of drag-only sorting.
 
-Everything the panel changes lives in one row in Supabase — table
-`site_content`, column `content` — read and written straight from the browser:
+## Environment variables
 
-| Panel | Controls |
-| --- | --- |
-| Hero | The role line under the portrait |
-| Navigation | The scattered links, their labels and order (numbers follow the order) |
-| About | The bio paragraphs and image descriptions |
-| Collaborations | The shared polaroid frame, plus each entry's track, artists, release note, photo and — optionally — its own frame |
-| Streaming milestones | The slides themselves — add, remove or reorder them, each with its own layout, background, artwork and copy |
-| Media coverage | Each outlet: name, copy, background image |
-| Notable projects | The headline and each card |
-| Contact | Instagram handle, email, location |
+| Variable | Where it belongs | Purpose |
+| --- | --- | --- |
+| `TELEGRAM_BOT_TOKEN` | server only | Verifies Mini App launches and sends bot replies. |
+| `TELEGRAM_ADMIN_IDS` | server only | Exactly one numeric owner ID; all other accounts are denied. |
+| `TELEGRAM_SESSION_SECRET` | server only | Signs short-lived HttpOnly editor sessions. |
+| `TELEGRAM_WEBHOOK_SECRET` | server only | Validates Telegram webhook deliveries. |
+| `SUPABASE_URL` | server only | Server URL for the editor API. |
+| `SUPABASE_SERVICE_ROLE_KEY` | server only | Performs authorised draft/publish/storage actions. |
+| `PUBLIC_SITE_URL` | server only | Used for same-origin editor protections. |
+| `TELEGRAM_WEB_APP_URL` | server only | URL opened by `/edit`. |
+| `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` | browser-safe | Public-site live content and uploaded-asset reads only. |
 
-**The change is live immediately** — the public site holds an open connection
-to the same table and updates the moment a save lands, with no reload and no
-build step. Anyone with the site open sees the edit arrive in real time.
+Never use a `VITE_` prefix for a bot token, session secret, webhook secret, or
+Supabase service-role key.
 
-### What it deliberately does not edit
+## Local checks
 
-- **Layout-critical artwork** — the portrait, the title cards, the Spotify
-  mark. Their intrinsic dimensions drive the layouts, so swapping one is a
-  design change, not a copy edit. Their *descriptions* (alt text) are editable.
+```powershell
+npm test
+npm run build
+```
 
-  The **polaroid frames are the exception** and can be replaced or uploaded,
-  per entry or for all of them at once — see *Polaroid frames* below.
-- **The Spotify catalogue** — that is synced from Spotify, not hand-written.
-  Refresh it with `npm run sync:spotify`.
-
-## Images
-
-Every image field has two buttons:
-
-- **Browse** lists every image the site already has — both the artwork it shipped with and anything uploaded since.
-- **Upload** adds a new one, straight to Supabase Storage (bucket
-  `site-assets`), and it appears in the picker immediately. Existing files are
-  never overwritten — a clashing name gains a number.
-
-Only image files are accepted (`.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`,
-`.webp`, `.avif`), up to 12MB each.
-
-### Milestone slides
-
-The Streaming milestones rail is a list, so slides can be added, removed and
-reordered. Each slide picks a **layout**:
-
-| Layout | What it shows |
-| --- | --- |
-| `figures` | A background image, a title card, and numbers that count up |
-| `mark` | A logo or wordmark beside a line of copy |
-| `blend` | A background with the card blended over the footage |
-| `artwork` | Release artwork beside a line of copy |
-
-**Background tone** says whether the slide sits on black or white; the
-pagination inverts to match. Backgrounds and artwork can be browsed, uploaded
-or cleared like any other image.
-
-### Polaroid frames
-
-The Collaborations panel has one **shared frame** used by every polaroid, and
-each entry can override it with a frame of its own — useful for giving a
-release a different polaroid design.
-
-Picking or uploading a frame reads its pixel size automatically. The three
-**Opening** percentages say where the photo window sits inside that frame, so a
-frame with different margins needs those nudged until the photo lands in the
-window. Leave an entry's frame empty and it uses the shared one.
-
-## Publishing to the static build
-
-The panel writes straight to the live site — there is no separate "publish"
-step for a normal content edit. **Build site** exists for a different reason:
-this project can also be exported as a static `dist/` folder (for hosting
-somewhere that isn't running this Node server at all). That export bakes in
-whatever the content looked like at build time, so if you ever deploy that
-way, rebuild after editing. It only works from this machine, since it runs the
-project's own local build tool.
-
-## Safety notes
-
-- **Postgres Row Level Security is the actual gate**, not anything the panel
-  itself checks: the `site_content` table and `site-assets` bucket accept
-  reads from anyone (the site is public) but writes only from a signed-in
-  account. Confirmed directly: an anonymous request to write either one is
-  refused by the database itself, regardless of what calls it.
-- The panel also validates the shape of what it's about to save — an image
-  field must name a file that was actually chosen through Browse or Upload,
-  numbers must be numbers, and so on — so a slip doesn't quietly save garbage.
-- Each save states which version of the content it started from. If it
-  changed in the meantime — another tab, or a direct edit to the database —
-  the save is refused rather than quietly overwriting the newer copy. Press
-  **Reload** and reapply the change.
-- Every past version is kept in `site_content_history`, so a bad save is
-  recoverable by hand if it's ever needed.
-- The publishable API key embedded in the site is not a secret: it identifies
-  the project, and RLS is what decides what it's allowed to do. Never give the
-  *secret* Supabase key a `VITE_` prefix — that would ship it to every visitor.
-
-## If something breaks
-
-Every previous version of the content is in `site_content_history` — find the
-one before the bad edit and copy its `content` value back into the `live` row.
+The included tests cover Telegram HMAC validation, deny-by-default allowlists,
+session signing/expiry, and tamper rejection. The built site still needs an
+HTTPS deployment plus the environment and Supabase migration above before the
+Telegram editor can be used.

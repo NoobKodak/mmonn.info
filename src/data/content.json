@@ -22,6 +22,20 @@
       }
     ]
   },
+  "music": {
+    "videos": [
+      {
+        "id": "amarad",
+        "title": "AMARAD",
+        "embedUrl": "https://www.youtube.com/embed/BEWqXUi_P4w?start=61"
+      },
+      {
+        "id": "ply4",
+        "title": "PLY4",
+        "embedUrl": "https://www.youtube.com/embed/i2igE_cixyw?start=61"
+      }
+    ]
+  },
   "sections": [
     {
       "id": "about",
@@ -70,6 +84,11 @@
       ],
       "description": "A late-night collaboration that brings three distinct voices into one shared melodic frame. Replace this sample note with the official release story, production credits, or an artist note.",
       "photo": "",
+      "media": {
+        "spotifyEmbedUrl": "https://open.spotify.com/embed/track/1IZkg1yKs8wQOwXZveRkRN?utm_source=generator",
+        "youtubeEmbedUrl": "",
+        "youtubeLabel": ""
+      },
       "frame": {
         "src": "uploads/image-2026-09-03-192541971.png",
         "width": 736,
@@ -90,6 +109,11 @@
       ],
       "description": "A reworked PLY4 moment, pairing DEMI and MMONN in a new version of the record. Replace this sample note with the official release story, production credits, or an artist note.",
       "photo": "",
+      "media": {
+        "spotifyEmbedUrl": "https://open.spotify.com/embed/track/3nRlbohAuTQDgKdB7RQWBk?utm_source=generator",
+        "youtubeEmbedUrl": "https://www.youtube.com/embed/i2igE_cixyw?start=61",
+        "youtubeLabel": "PLY4 music video"
+      },
       "frame": {
         "src": "",
         "width": 0,
@@ -110,6 +134,11 @@
       ],
       "description": "A shared release that gives LANZETA and MMONN space to meet in the same restless, after-hours world. Replace this sample note with the official release story, production credits, or an artist note.",
       "photo": "",
+      "media": {
+        "spotifyEmbedUrl": "https://open.spotify.com/embed/track/5zwoGZDiCSCa0d0GcHMEC0?utm_source=generator",
+        "youtubeEmbedUrl": "",
+        "youtubeLabel": ""
+      },
       "frame": {
         "src": "",
         "width": 0,
@@ -130,6 +159,11 @@
       ],
       "description": "A direct two-artist collaboration, connecting RB Slatt and MMONN around a single release. Replace this sample note with the official release story, production credits, or an artist note.",
       "photo": "",
+      "media": {
+        "spotifyEmbedUrl": "https://open.spotify.com/embed/track/4lRspLX3zBJcjdR4lMlFwc?utm_source=generator",
+        "youtubeEmbedUrl": "",
+        "youtubeLabel": ""
+      },
       "frame": {
         "src": "",
         "width": 0,
@@ -151,6 +185,11 @@
       ],
       "description": "A three-way collaboration that puts SXBER, Ne7in, and MMONN in one shared track listing. Replace this sample note with the official release story, production credits, or an artist note.",
       "photo": "",
+      "media": {
+        "spotifyEmbedUrl": "https://open.spotify.com/embed/track/5P0OmLtPsQlNpQBHYt8S6o?utm_source=generator",
+        "youtubeEmbedUrl": "",
+        "youtubeLabel": ""
+      },
       "frame": {
         "src": "",
         "width": 0,
@@ -171,6 +210,11 @@
       ],
       "description": "A compact collaboration entry for Kyleaux and MMONN, held as a single piece in the archive. Replace this sample note with the official release story, production credits, or an artist note.",
       "photo": "",
+      "media": {
+        "spotifyEmbedUrl": "https://open.spotify.com/embed/artist/57wPsYZkEErG0C2ntgqNTe?utm_source=generator",
+        "youtubeEmbedUrl": "https://www.youtube.com/embed/BEWqXUi_P4w?start=61",
+        "youtubeLabel": "AMARAD music video"
+      },
       "frame": {
         "src": "",
         "width": 0,
@@ -280,6 +324,31 @@
         },
         "copy": "81K+ Alice Spotify streams",
         "figures": []
+      }
+    ]
+  },
+  "performances": {
+    "label": "Performances",
+    "slides": [
+      {
+        "id": "performance-01",
+        "src": "performance/_1.gif",
+        "alt": "Performance visual 01"
+      },
+      {
+        "id": "performance-02",
+        "src": "performance/_2.gif",
+        "alt": "Performance visual 02"
+      },
+      {
+        "id": "performance-03",
+        "src": "performance/_3.gif",
+        "alt": "Performance visual 03"
+      },
+      {
+        "id": "performance-04",
+        "src": "performance/_4.gif",
+        "alt": "Performance visual 04"
       }
     ]
   },

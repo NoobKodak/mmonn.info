@@ -8,41 +8,10 @@ import "./MajorCollaborations.css";
 const SPOTIFY_ARTIST_EMBED = "https://open.spotify.com/embed/artist/57wPsYZkEErG0C2ntgqNTe?utm_source=generator";
 const YOUTUBE_ALLOW = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
 
-/*
- * Keep the embeds paired with the release they belong to. The supplied video
- * links are only used for AMARAD and PLY4; the remaining dossiers never point
- * visitors to an unrelated video. A missing track id falls back to MMONN's
- * artist player until an official release-specific Spotify URL is available.
- */
-const COLLABORATION_MEDIA = {
-  lason: { spotifyTrackId: "1IZkg1yKs8wQOwXZveRkRN" },
-  "ply4-remix": {
-    spotifyTrackId: "3nRlbohAuTQDgKdB7RQWBk",
-    youtube: {
-      label: "PLY4 music video",
-      src: "https://www.youtube.com/embed/i2igE_cixyw?start=61",
-    },
-  },
-  "chillerong-busy": { spotifyTrackId: "5zwoGZDiCSCa0d0GcHMEC0" },
-  "pagod-na": { spotifyTrackId: "4lRspLX3zBJcjdR4lMlFwc" },
-  "kung-kakapit-ka": { spotifyTrackId: "5P0OmLtPsQlNpQBHYt8S6o" },
-  amarad: {
-    youtube: {
-      label: "AMARAD music video",
-      src: "https://www.youtube.com/embed/BEWqXUi_P4w?start=61",
-    },
-  },
-};
-
-function spotifyEmbed(trackId) {
-  return trackId
-    ? `https://open.spotify.com/embed/track/${trackId}?utm_source=generator`
-    : SPOTIFY_ARTIST_EMBED;
-}
-
 function CollaborationMedia({ collaboration }) {
-  const media = COLLABORATION_MEDIA[collaboration.id] || {};
-  const hasTrackEmbed = Boolean(media.spotifyTrackId);
+  const media = collaboration.media || {};
+  const spotifyEmbedUrl = media.spotifyEmbedUrl || SPOTIFY_ARTIST_EMBED;
+  const hasTrackEmbed = Boolean(media.spotifyEmbedUrl);
 
   return (
     <section className="mc-dialog-media" aria-label={`Listen to ${collaboration.track}`}>
@@ -50,7 +19,7 @@ function CollaborationMedia({ collaboration }) {
         <p className="mc-dialog-media-label">Spotify</p>
         <iframe
           className="mc-dialog-embed mc-dialog-embed--spotify"
-          src={spotifyEmbed(media.spotifyTrackId)}
+          src={spotifyEmbedUrl}
           title={
             hasTrackEmbed
               ? `Listen to ${collaboration.track} on Spotify`
@@ -61,13 +30,13 @@ function CollaborationMedia({ collaboration }) {
         />
       </div>
 
-      {media.youtube ? (
+      {media.youtubeEmbedUrl ? (
         <div className="mc-dialog-media-item">
           <p className="mc-dialog-media-label">YouTube</p>
           <iframe
             className="mc-dialog-embed mc-dialog-embed--youtube"
-            src={media.youtube.src}
-            title={media.youtube.label}
+            src={media.youtubeEmbedUrl}
+            title={media.youtubeLabel || `${collaboration.track} music video`}
             loading="lazy"
             allow={YOUTUBE_ALLOW}
             referrerPolicy="strict-origin-when-cross-origin"

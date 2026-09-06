@@ -1,34 +1,34 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { publicAsset } from "../assets.js";
+import NumberTicker from "../components/NumberTicker.jsx";
 import {
-  buildSite,
+  endSession,
   getSession,
   loadAssets,
   loadLocalAssets,
   loadContent,
   loadRecentHistory,
-  onAuthStateChange,
+  previewUrl,
+  publishContent,
+  restoreVersion,
   saveContent,
-  signIn,
-  signOut,
-  signUp,
   uploadAsset,
-} from "./api.js";
-import { ConfirmProvider, ToastProvider, useToast } from "./feedback.jsx";
+} from "./telegram-api.js";
+import { ConfirmProvider, ToastProvider, useConfirm, useToast } from "./feedback.jsx";
 import {
   IconChart,
   IconCompass,
   IconDashboard,
   IconExternal,
-  IconHammer,
   IconHero,
   IconHistory,
+  IconImage,
   IconInfo,
-  IconLock,
   IconLogOut,
   IconMail,
   IconMegaphone,
+  IconMusic,
   IconRefresh,
   IconStar,
   IconUsers,
@@ -37,7 +37,6 @@ import {
   AssetField,
   ItemList,
   NumberField,
-  PasswordField,
   SelectField,
   StringList,
   TextArea,
@@ -47,12 +46,15 @@ import "./admin.css";
 
 const PANELS = [
   { id: "dashboard", label: "Dashboard", icon: IconDashboard, group: "Overview" },
+  { id: "history", label: "Drafts & history", icon: IconHistory, group: "Overview" },
   { id: "hero", label: "Hero", icon: IconHero, group: "Content" },
   { id: "navigation", label: "Navigation", icon: IconCompass, group: "Content" },
   { id: "about", label: "About", icon: IconInfo, group: "Content" },
   { id: "collaborations", label: "Collaborations", icon: IconUsers, group: "Content" },
   { id: "milestones", label: "Streaming milestones", icon: IconChart, group: "Content" },
+  { id: "performances", label: "Performances", icon: IconImage, group: "Content" },
   { id: "media", label: "Media coverage", icon: IconMegaphone, group: "Content" },
+  { id: "music", label: "Music", icon: IconMusic, group: "Content" },
   { id: "projects", label: "Notable projects", icon: IconStar, group: "Content" },
   { id: "contact", label: "Contact", icon: IconMail, group: "Content" },
 ];
@@ -69,7 +71,9 @@ const FIELD_TO_PANEL = {
   polaroid: "collaborations",
   collaborations: "collaborations",
   milestones: "milestones",
+  performances: "performances",
   media: "media",
+  music: "music",
   projects: "projects",
   contact: "contact",
 };
@@ -106,26 +110,34 @@ export default function AdminApp() {
 
 function AdminShell() {
   const toast = useToast();
+  const confirm = useConfirm();
   const [session, setSession] = useState(undefined); // undefined = still checking
+  const [accessError, setAccessError] = useState("");
   const [content, setContent] = useState(null);
   const [saved, setSaved] = useState(null);
   const [assets, setAssets] = useState([]);
   const [history, setHistory] = useState([]);
   const [revision, setRevision] = useState(null);
+  const [draftUpdatedAt, setDraftUpdatedAt] = useState(null);
+  const [publishedAt, setPublishedAt] = useState(null);
   const [panel, setPanel] = useState(PANELS[0].id);
   const [busy, setBusy] = useState("loading");
-  const [bootMessage, setBootMessage] = useState("Signing in…");
+  const [bootMessage, setBootMessage] = useState("Verifying your Telegram account…");
   const mainRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
-    getSession().then((current) => {
-      if (!cancelled) setSession(current);
-    });
-    const unsubscribe = onAuthStateChange((next) => setSession(next));
+    getSession()
+      .then((current) => {
+        if (!cancelled) setSession(current);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setAccessError(error.message || "The Telegram editor could not verify this account.");
+        setSession(null);
+      });
     return () => {
       cancelled = true;
-      unsubscribe();
     };
   }, []);
 
@@ -150,6 +162,8 @@ function AdminShell() {
       setContent(contentPayload.content);
       setSaved(contentPayload.content);
       setRevision(contentPayload.revision);
+      setDraftUpdatedAt(contentPayload.draftUpdatedAt);
+      setPublishedAt(contentPayload.publishedAt);
       if (uploadedAssets) {
         setAssets([...localAssets, ...uploadedAssets].sort((a, b) => a.path.localeCompare(b.path)));
       }
@@ -165,9 +179,8 @@ function AdminShell() {
     }
   }, [toast]);
 
-  // Only once signed in — reading `site_content` needs no auth, but there is
-  // nothing useful to show before knowing who (if anyone) is signed in, and
-  // loading before that would flash the editor open for a moment on sign-out.
+  // The server only returns content after it validates this Telegram account.
+  // Keeping the editor blank until then prevents an unauthorised flash.
   useEffect(() => {
     if (session) refresh({ withAssets: true });
   }, [session, refresh]);
@@ -177,14 +190,14 @@ function AdminShell() {
     setBusy("saving");
 
     try {
-      const knownAssets = new Set(assets.map((entry) => entry.path));
-      const result = await saveContent(content, revision, { knownAssets });
+      const result = await saveContent(content, revision, draftUpdatedAt);
       setSaved(result.content);
       setContent(result.content);
       setRevision(result.revision);
+      setDraftUpdatedAt(result.savedAt);
       toast.push({
         tone: "success",
-        message: "Saved. The public site updates immediately — no rebuild needed for that.",
+        message: "Draft saved. Preview it, then publish when you are ready.",
       });
     } catch (error) {
       const leadField = error.message.match(/^[a-zA-Z]+/)?.[0];
@@ -206,7 +219,7 @@ function AdminShell() {
     } finally {
       setBusy(null);
     }
-  }, [busy, content, revision, assets, panel, toast]);
+  }, [busy, content, revision, draftUpdatedAt, panel, toast]);
 
   // Ctrl/Cmd+S is what anyone editing text will reach for.
   useEffect(() => {
@@ -227,17 +240,77 @@ function AdminShell() {
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
 
-  const build = async () => {
+  const publish = async () => {
     if (busy) return;
-    setBusy("building");
+    const ok = await confirm({
+      title: "Publish this draft?",
+      message: "This will replace the live MMONN site content. A version will be saved first, so you can restore it later.",
+      confirmLabel: "Publish now",
+      tone: "default",
+    });
+    if (!ok) return;
+
+    setBusy("publishing");
     try {
-      const result = await buildSite();
-      toast.push({ tone: result.ok ? "success" : "error", message: result.message });
+      const result = await publishContent(revision, draftUpdatedAt);
+      setContent(result.content);
+      setSaved(result.content);
+      setRevision(result.revision);
+      setPublishedAt(result.savedAt);
+      setDraftUpdatedAt(null);
+      setHistory((current) => [
+        {
+          id: `live-${result.revision}`,
+          editor_name: session.user.name,
+          summary: "Published current draft",
+          published_at: result.savedAt,
+          content: result.content,
+        },
+        ...current,
+      ]);
+      toast.push({ tone: "success", message: "Published. The live site is now updated." });
     } catch (error) {
       toast.push({ tone: "error", message: error.message });
     } finally {
       setBusy(null);
     }
+  };
+
+  const restore = async (entry) => {
+    if (busy) return;
+    const ok = await confirm({
+      title: "Restore this version to a draft?",
+      message: "The live site will not change until you review and publish this restored draft.",
+      confirmLabel: "Restore draft",
+      tone: "default",
+    });
+    if (!ok) return;
+
+    setBusy("restoring");
+    try {
+      const result = await restoreVersion(entry.id, draftUpdatedAt);
+      setContent(result.content);
+      setSaved(result.content);
+      setRevision(result.revision);
+      setDraftUpdatedAt(result.savedAt);
+      setPanel("dashboard");
+      mainRef.current?.scrollTo({ top: 0 });
+      toast.push({ tone: "success", message: "Version restored to a draft. Review it before publishing." });
+    } catch (error) {
+      toast.push({ tone: "error", message: error.message });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const lockEditor = async () => {
+    try {
+      await endSession();
+    } catch {
+      // The local session is removed even if the browser went offline during
+      // the request; reopening always requires a fresh verified launch.
+    }
+    setSession(null);
   };
 
   const patch = (key) => (value) => setContent((current) => ({ ...current, [key]: value }));
@@ -318,23 +391,55 @@ function AdminShell() {
     mainRef.current?.scrollTo({ top: 0 });
   };
 
+  // Telegram's own Main Button is the primary action inside the Mini App —
+  // it stays docked below the viewport (and above the keyboard) instead of
+  // scrolling away with the page, so it mirrors whichever action the header
+  // button would trigger next.
+  useEffect(() => {
+    const mainButton = window.Telegram?.WebApp?.MainButton;
+    if (!mainButton) return undefined;
+
+    if (!session || !content) {
+      mainButton.hide();
+      return undefined;
+    }
+
+    const readyToPublish = Boolean(draftUpdatedAt) && !dirty;
+    const isBusy = busy === "saving" || busy === "publishing" || busy === "restoring";
+    const handler = readyToPublish ? publish : save;
+
+    mainButton.setText(readyToPublish ? "PUBLISH CHANGES" : "SAVE DRAFT");
+    mainButton.show();
+    mainButton.onClick(handler);
+
+    if (isBusy) {
+      mainButton.showProgress(false);
+      mainButton.disable();
+    } else {
+      mainButton.hideProgress();
+      if (readyToPublish || dirty) mainButton.enable();
+      else mainButton.disable();
+    }
+
+    return () => mainButton.offClick(handler);
+  }, [session, content, dirty, draftUpdatedAt, busy, save, publish]);
+
   if (session === undefined) {
-    return <BootScreen message="Signing in…" />;
+    return <BootScreen message="Verifying your Telegram account…" />;
   }
 
   if (!session) {
-    return <SignInScreen />;
+    return <TelegramAccessScreen error={accessError} />;
   }
 
   if (!content) {
     return (
       <BootScreen
         message={bootMessage}
-        error={bootMessage !== "Signing in…"}
+        error={bootMessage !== "Verifying your Telegram account…"}
         hint={
           <>
-            Check that <code>site_content</code> has a row with id <code>live</code>, and that this
-            account is confirmed and signed in.
+            Check the secure-editor setup and make sure <code>site_content</code> has a row with id <code>live</code>.
           </>
         }
         action={{ label: "Try again", onClick: () => refresh({ withAssets: true }) }}
@@ -342,7 +447,7 @@ function AdminShell() {
     );
   }
 
-  const saveState = busy === "saving" ? "saving" : dirty ? "dirty" : "saved";
+  const saveState = busy === "saving" || busy === "publishing" || busy === "restoring" ? "saving" : dirty ? "dirty" : "saved";
   const currentPanel = PANELS.find((entry) => entry.id === panel) ?? PANELS[0];
 
   return (
@@ -361,15 +466,25 @@ function AdminShell() {
         <div className="ad-actions">
           <span className={`ad-state ad-state--${saveState}`} role="status">
             <span className="ad-state-dot" aria-hidden="true" />
-            {saveState === "saving" ? "Saving…" : saveState === "dirty" ? "Unsaved changes" : "All changes saved"}
+            {saveState === "saving"
+              ? busy === "publishing"
+                ? "Publishing…"
+                : busy === "restoring"
+                  ? "Restoring…"
+                  : "Saving draft…"
+              : saveState === "dirty"
+                ? "Unsaved changes"
+                : draftUpdatedAt
+                  ? "Draft saved"
+                  : "Published"}
           </span>
 
-          <span className="ad-account" title={session.user.email}>
-            {session.user.email}
+          <span className="ad-account" title={session.user.username ? `@${session.user.username}` : session.user.id}>
+            {session.user.name}
           </span>
 
-          <a className="ad-button ad-button--quiet ad-button--icon-collapse" href="/" target="_blank" rel="noreferrer">
-            <IconExternal /> <span className="ad-button-label">View site</span>
+          <a className="ad-button ad-button--quiet ad-button--icon-collapse" href={previewUrl()} target="_blank" rel="noreferrer">
+            <IconExternal /> <span className="ad-button-label">Preview</span>
           </a>
 
           <button
@@ -385,23 +500,23 @@ function AdminShell() {
           <button
             className="ad-button ad-button--quiet ad-button--icon-collapse"
             type="button"
-            onClick={build}
-            disabled={Boolean(busy)}
-            title="Build the static export in dist/ (this machine only)"
+            onClick={lockEditor}
           >
-            <IconHammer /> <span className="ad-button-label">{busy === "building" ? "Building…" : "Build site"}</span>
-          </button>
-
-          <button
-            className="ad-button ad-button--quiet ad-button--icon-collapse"
-            type="button"
-            onClick={() => signOut()}
-          >
-            <IconLogOut /> <span className="ad-button-label">Sign out</span>
+            <IconLogOut /> <span className="ad-button-label">Lock</span>
           </button>
 
           <button className="ad-button" type="button" onClick={save} disabled={!dirty || Boolean(busy)}>
-            {busy === "saving" ? "Saving…" : "Save"}
+            {busy === "saving" ? "Saving…" : "Save draft"}
+          </button>
+
+          <button
+            className="ad-button ad-button--publish"
+            type="button"
+            onClick={publish}
+            disabled={Boolean(busy) || !draftUpdatedAt || dirty}
+            title={!draftUpdatedAt || dirty ? "Save the current changes as a draft before publishing" : undefined}
+          >
+            {busy === "publishing" ? "Publishing…" : "Publish"}
           </button>
         </div>
       </header>
@@ -432,8 +547,17 @@ function AdminShell() {
 
         <main className="ad-main" ref={mainRef}>
           {panel === "dashboard" && (
-            <Dashboard content={content} history={history} session={session} onNavigate={goTo} />
+            <Dashboard
+              content={content}
+              draftUpdatedAt={draftUpdatedAt}
+              history={history}
+              publishedAt={publishedAt}
+              session={session}
+              onNavigate={goTo}
+            />
           )}
+
+          {panel === "history" && <HistoryPanel history={history} onRestore={restore} />}
 
           {panel === "hero" && (
             <Panel title="Hero" note="The role line under the portrait on the landing screen.">
@@ -589,6 +713,7 @@ function AdminShell() {
                   artists: ["MMONN"],
                   description: "",
                   photo: "",
+                  media: { spotifyEmbedUrl: "", youtubeEmbedUrl: "", youtubeLabel: "" },
                   // Empty src means this entry uses the shared frame.
                   frame: { src: "", width: 0, height: 0, window: { top: 6, side: 6, bottom: 18 } },
                 })}
@@ -614,6 +739,30 @@ function AdminShell() {
                       value={item.description}
                       onChange={(description) => update({ description })}
                     />
+                    <Group title="Embedded listening">
+                      <TextField
+                        label="Spotify embed URL"
+                        hint="Use an https://open.spotify.com/embed/... URL. Leave empty to show the MMONN artist player."
+                        value={item.media?.spotifyEmbedUrl || ""}
+                        onChange={(spotifyEmbedUrl) =>
+                          update({ media: { ...item.media, spotifyEmbedUrl } })
+                        }
+                      />
+                      <TextField
+                        label="YouTube embed URL"
+                        hint="Use an https://www.youtube.com/embed/... URL. Leave empty when there is no official video."
+                        value={item.media?.youtubeEmbedUrl || ""}
+                        onChange={(youtubeEmbedUrl) =>
+                          update({ media: { ...item.media, youtubeEmbedUrl } })
+                        }
+                      />
+                      <TextField
+                        label="YouTube player title"
+                        hint="Used by screen readers. Required when a YouTube URL is set."
+                        value={item.media?.youtubeLabel || ""}
+                        onChange={(youtubeLabel) => update({ media: { ...item.media, youtubeLabel } })}
+                      />
+                    </Group>
                     <AssetField
                       label="Photo"
                       hint="Optional. Fills the polaroid window; leave empty for a bare frame."
@@ -825,6 +974,56 @@ function AdminShell() {
             </Panel>
           )}
 
+          {panel === "performances" && (
+            <Panel
+              title="Performances"
+              note="Manage the full-bleed GIF rail. The order here is the horizontal viewing order on the public page."
+            >
+              <TextField
+                label="Section label"
+                value={content.performances.label}
+                onChange={(label) => patch("performances")({ ...content.performances, label })}
+              />
+              <ItemList
+                label="Performance GIFs"
+                hint="Each slide fills the viewport. Use move controls to set the left-to-right pagination order."
+                items={content.performances.slides}
+                onChange={(slides) => patch("performances")({ ...content.performances, slides })}
+                itemLabel="GIF"
+                min={1}
+                title={(item) => item.alt || item.id}
+                thumbnail={(item) => item.src}
+                makeItem={(items) => ({
+                  id: uniqueSlug("performance", items.map((entry) => entry.id)),
+                  src: "",
+                  alt: "New performance visual",
+                })}
+                addLabel="Add performance GIF"
+              >
+                {(item, update) => (
+                  <>
+                    <AssetField
+                      label="GIF or image"
+                      hint="Upload or choose a GIF. It will be covered full-screen with the page's black edge treatment."
+                      value={item.src}
+                      assets={assets}
+                      allowEmpty={false}
+                      onUpload={handleUpload}
+                      onChange={(src) => update({ src })}
+                    />
+                    <TextField
+                      label="Description"
+                      hint="Accessible description for this performance visual."
+                      value={item.alt}
+                      onChange={(alt) => update({ alt })}
+                    />
+                    <TextField label="Id" value={item.id} onChange={(id) => update({ id })} />
+                  </>
+                )}
+              </ItemList>
+            </Panel>
+          )}
+
           {panel === "media" && (
             <Panel
               title="Media coverage"
@@ -870,6 +1069,70 @@ function AdminShell() {
                       label="Background description"
                       value={item.background.alt}
                       onChange={(alt) => update({ background: { ...item.background, alt } })}
+                    />
+                    <TextField label="Id" value={item.id} onChange={(id) => update({ id })} />
+                  </>
+                )}
+              </ItemList>
+            </Panel>
+          )}
+
+          {panel === "music" && (
+            <Panel
+              title="Music"
+              note="Audience figures appear at the top-right of the music section. Music-video embeds appear above the Spotify catalog."
+            >
+              <Group title="Audience figures">
+                <TextField
+                  label="Accessible label"
+                  value={content.musicMetrics.label}
+                  onChange={(label) => patch("musicMetrics")({ ...content.musicMetrics, label })}
+                />
+                <ItemList
+                  label="Figures"
+                  items={content.musicMetrics.items}
+                  onChange={(items) => patch("musicMetrics")({ ...content.musicMetrics, items })}
+                  itemLabel="figure"
+                  title={(item) => `${item.label}: ${item.value}`}
+                  makeItem={(items) => ({
+                    id: uniqueSlug("metric", items.map((entry) => entry.id)),
+                    label: "Metric",
+                    value: "0",
+                  })}
+                  addLabel="Add figure"
+                >
+                  {(item, update) => (
+                    <>
+                      <TextField label="Label" value={item.label} onChange={(label) => update({ label })} />
+                      <TextField label="Value" value={item.value} onChange={(value) => update({ value })} />
+                      <TextField label="Id" value={item.id} onChange={(id) => update({ id })} />
+                    </>
+                  )}
+                </ItemList>
+              </Group>
+
+              <ItemList
+                label="Music video embeds"
+                hint="Use official YouTube embed URLs. These are shown in the music section."
+                items={content.music.videos}
+                onChange={(videos) => patch("music")({ ...content.music, videos })}
+                itemLabel="video"
+                title={(item) => item.title || item.id}
+                makeItem={(items) => ({
+                  id: uniqueSlug("video", items.map((entry) => entry.id)),
+                  title: "New music video",
+                  embedUrl: "",
+                })}
+                addLabel="Add music video"
+              >
+                {(item, update) => (
+                  <>
+                    <TextField label="Title" value={item.title} onChange={(title) => update({ title })} />
+                    <TextField
+                      label="YouTube embed URL"
+                      hint="Example: https://www.youtube.com/embed/VIDEO_ID"
+                      value={item.embedUrl}
+                      onChange={(embedUrl) => update({ embedUrl })}
                     />
                     <TextField label="Id" value={item.id} onChange={(id) => update({ id })} />
                   </>
@@ -997,43 +1260,64 @@ const DASHBOARD_CARDS = [
     id: "collaborations",
     icon: IconUsers,
     label: "Major collaborations",
-    describe: (c) => `${c.collaborations.length} release${c.collaborations.length === 1 ? "" : "s"}`,
+    count: (c) => c.collaborations.length,
+    unit: (n) => `release${n === 1 ? "" : "s"}`,
   },
   {
     id: "milestones",
     icon: IconChart,
     label: "Streaming milestones",
-    describe: (c) => `${c.milestones.slides.length} slide${c.milestones.slides.length === 1 ? "" : "s"}`,
+    count: (c) => c.milestones.slides.length,
+    unit: (n) => `slide${n === 1 ? "" : "s"}`,
+  },
+  {
+    id: "performances",
+    icon: IconImage,
+    label: "Performances",
+    count: (c) => c.performances.slides.length,
+    unit: (n) => `GIF${n === 1 ? "" : "s"}`,
   },
   {
     id: "media",
     icon: IconMegaphone,
     label: "Media coverage",
-    describe: (c) => `${c.media.length} outlet${c.media.length === 1 ? "" : "s"}`,
+    count: (c) => c.media.length,
+    unit: (n) => `outlet${n === 1 ? "" : "s"}`,
   },
   {
     id: "projects",
     icon: IconStar,
     label: "Notable projects",
-    describe: (c) => `${c.projects.items.length} project${c.projects.items.length === 1 ? "" : "s"}`,
+    count: (c) => c.projects.items.length,
+    unit: (n) => `project${n === 1 ? "" : "s"}`,
+  },
+  {
+    id: "music",
+    icon: IconMusic,
+    label: "Music",
+    count: (c) => c.music.videos.length,
+    unit: (n) => `video${n === 1 ? "" : "s"}`,
   },
   {
     id: "navigation",
     icon: IconCompass,
     label: "Navigation",
-    describe: (c) => `${c.sections.length} link${c.sections.length === 1 ? "" : "s"}`,
+    count: (c) => c.sections.length,
+    unit: (n) => `link${n === 1 ? "" : "s"}`,
   },
   {
     id: "about",
     icon: IconInfo,
     label: "About",
-    describe: (c) => `${c.about.paragraphs.length} paragraph${c.about.paragraphs.length === 1 ? "" : "s"}`,
+    count: (c) => c.about.paragraphs.length,
+    unit: (n) => `paragraph${n === 1 ? "" : "s"}`,
   },
   {
     id: "hero",
     icon: IconHero,
     label: "Hero",
-    describe: (c) => `${c.hero.roles.length} role${c.hero.roles.length === 1 ? "" : "s"}`,
+    count: (c) => c.hero.roles.length,
+    unit: (n) => `role${n === 1 ? "" : "s"}`,
   },
   {
     id: "contact",
@@ -1055,7 +1339,7 @@ function formatRelativeTime(iso) {
   return `${days} day${days === 1 ? "" : "s"} ago`;
 }
 
-function Dashboard({ content, history, session, onNavigate }) {
+function Dashboard({ content, draftUpdatedAt, history, publishedAt, session, onNavigate }) {
   return (
     <div className="ad-panel">
       <header className="ad-panel-head">
@@ -1078,7 +1362,16 @@ function Dashboard({ content, history, session, onNavigate }) {
                 </span>
               </div>
               <h3>{card.label}</h3>
-              <p>{card.describe(content)}</p>
+              <p>
+                {card.count ? (
+                  <>
+                    <NumberTicker value={card.count(content)} className="ad-dashboard-card-count-value" />{" "}
+                    {card.unit(card.count(content))}
+                  </>
+                ) : (
+                  card.describe(content)
+                )}
+              </p>
             </button>
           ))}
         </div>
@@ -1088,12 +1381,20 @@ function Dashboard({ content, history, session, onNavigate }) {
             <h3>Account</h3>
             <dl className="ad-summary-list">
               <div className="ad-summary-row">
-                <dt>Signed in as</dt>
-                <dd title={session.user.email}>{session.user.email}</dd>
+                <dt>Telegram editor</dt>
+                <dd title={session.user.username ? `@${session.user.username}` : session.user.id}>{session.user.name}</dd>
               </div>
               <div className="ad-summary-row">
-                <dt>Backend</dt>
-                <dd>Supabase</dd>
+                <dt>Access</dt>
+                <dd>Verified + allowlisted</dd>
+              </div>
+              <div className="ad-summary-row">
+                <dt>Live site</dt>
+                <dd>{publishedAt ? formatRelativeTime(publishedAt) : "Unknown"}</dd>
+              </div>
+              <div className="ad-summary-row">
+                <dt>Draft</dt>
+                <dd>{draftUpdatedAt ? `Saved ${formatRelativeTime(draftUpdatedAt)}` : "No draft"}</dd>
               </div>
             </dl>
           </div>
@@ -1106,10 +1407,14 @@ function Dashboard({ content, history, session, onNavigate }) {
               <p className="ad-summary-empty">No saves yet.</p>
             ) : (
               <dl className="ad-summary-list">
-                {history.map((entry, index) => (
-                  <div className="ad-summary-row" key={entry.saved_at}>
-                    <dt>{index === 0 ? "Last saved" : "Saved"}</dt>
-                    <dd>{formatRelativeTime(entry.saved_at)}</dd>
+                {history.slice(0, 5).map((entry, index) => (
+                  <div
+                    className="ad-summary-row ad-summary-row--enter"
+                    key={entry.id || entry.published_at}
+                    style={{ animationDelay: `${index * 45}ms` }}
+                  >
+                    <dt>{index === 0 ? "Last publish" : "Published"}</dt>
+                    <dd>{formatRelativeTime(entry.published_at)}</dd>
                   </div>
                 ))}
               </dl>
@@ -1118,6 +1423,38 @@ function Dashboard({ content, history, session, onNavigate }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function HistoryPanel({ history, onRestore }) {
+  return (
+    <Panel
+      title="Drafts & history"
+      note="Every publish is versioned with the Telegram editor and timestamp. Restoring creates a draft first, so the live site never changes without a new Publish confirmation."
+    >
+      {history.length === 0 ? (
+        <div className="ad-empty">
+          <IconHistory width="28" height="28" />
+          <strong>No published versions yet</strong>
+          <span>Publish the first reviewed draft to start version history.</span>
+        </div>
+      ) : (
+        <div className="ad-history-list">
+          {history.map((entry) => (
+            <article className="ad-history-entry" key={entry.id}>
+              <div>
+                <p className="ad-history-time">{new Date(entry.published_at).toLocaleString()}</p>
+                <h3>{entry.summary || "Published content"}</h3>
+                <p>Published by {entry.editor_name || "Telegram editor"}</p>
+              </div>
+              <button className="ad-button ad-button--quiet" type="button" onClick={() => onRestore(entry)}>
+                Restore to draft
+              </button>
+            </article>
+          ))}
+        </div>
+      )}
+    </Panel>
   );
 }
 
@@ -1168,98 +1505,22 @@ function BootScreen({ message, error, hint, action }) {
   );
 }
 
-/**
- * There is no editor account until the first person creates one, so this
- * screen offers both: sign in for everyone after that, sign up once at the
- * start. Supabase requires a confirmation click by default — on a fresh
- * project that email arrives from Supabase's own address, not this domain.
- */
-function SignInScreen() {
-  const [mode, setMode] = useState("signin");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState(null);
-
-  const submit = async (event) => {
-    event.preventDefault();
-    setBusy(true);
-    setMessage(null);
-    try {
-      if (mode === "signup") {
-        await signUp(email, password);
-        setMessage({
-          tone: "success",
-          text: "Account created. Check your email to confirm it, then sign in.",
-        });
-        setMode("signin");
-      } else {
-        await signIn(email, password);
-      }
-    } catch (error) {
-      setMessage({ tone: "error", text: error.message });
-    } finally {
-      setBusy(false);
-    }
-  };
-
+function TelegramAccessScreen({ error }) {
   return (
     <div className="ad-boot">
-      <form className="ad-signin" onSubmit={submit}>
+      <div className="ad-signin">
         <div className="ad-signin-head">
-          <span className="ad-boot-mark" aria-hidden="true">
-            M
-          </span>
+          <span className="ad-boot-mark" aria-hidden="true">M</span>
           <div>
-            <h1>MMONN — content</h1>
-            <p className="ad-signin-note">
-              {mode === "signup"
-                ? "Create the editor account. This only needs doing once."
-                : "Sign in to edit the site."}
-            </p>
+            <h1>MMONN — editor</h1>
+            <p className="ad-signin-note">This private workspace can only be opened from the authorized Telegram account.</p>
           </div>
         </div>
-
-        <TextField
-          label="Email"
-          type="email"
-          autoComplete="email"
-          value={email}
-          onChange={setEmail}
-          required
-        />
-        <PasswordField
-          label="Password"
-          autoComplete={mode === "signup" ? "new-password" : "current-password"}
-          value={password}
-          onChange={setPassword}
-          required
-        />
-
-        {message && (
-          <p className={`ad-signin-message ad-signin-message--${message.tone}`} role="status">
-            {message.tone === "success" ? <IconMail /> : <IconLock />}
-            {message.text}
-          </p>
-        )}
-
-        <button className="ad-button" type="submit" disabled={busy}>
-          {busy ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
-        </button>
-
-        <div className="ad-signin-divider" />
-
-        <button
-          className="ad-button ad-button--quiet"
-          type="button"
-          onClick={() => {
-            setMode((current) => (current === "signup" ? "signin" : "signup"));
-            setMessage(null);
-          }}
-        >
-          {mode === "signup" ? "Already have an account? Sign in" : "First time here? Create an account"}
-        </button>
-      </form>
+        <p className="ad-signin-message ad-signin-message--error" role="alert">
+          {error || "Open the editor with the /edit command in the MMONN Telegram bot."}
+        </p>
+        <p className="ad-boot-hint">Direct browser access is intentionally disabled.</p>
+      </div>
     </div>
   );
 }

@@ -11,7 +11,9 @@
     "start": "node server.mjs --production",
     "vite": "vite",
     "sync:spotify": "node scripts/sync-spotify.mjs",
-    "admin": "node server.mjs"
+    "admin": "node server.mjs",
+    "test": "node --test tests/telegram-auth.test.mjs tests/telegram-editor-routes.test.mjs",
+    "telegram:webhook": "node scripts/set-telegram-webhook.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.114.0",
