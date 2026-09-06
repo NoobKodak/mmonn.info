@@ -13,6 +13,11 @@ server-only Supabase service-role key.
    generate a replacement before continuing.
 2. Deploy this Node server to an HTTPS domain. Telegram Mini Apps and webhooks
    need public HTTPS; `127.0.0.1` is only for local interface work.
+
+   A static-only host (including GitHub Pages) cannot run the secure editor.
+   Use a host that runs Node or Docker. This repository includes a
+   `Dockerfile`; configure the service to expose its assigned `PORT`, use the
+   public site domain for both URLs below, and do not deploy `dist/` by itself.
 3. Copy `.env.example` to your private `.env.local` or deployment secret
    settings. Never commit that file.
 4. Find **your numeric Telegram user ID** (for example, message a trusted ID
