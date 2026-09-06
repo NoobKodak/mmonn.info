@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "description": "Artist profile for MMONN — music artist, songwriter, and performer.",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "node server.mjs",
     "build": "vite build",

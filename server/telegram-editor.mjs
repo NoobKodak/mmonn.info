@@ -1,8 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
-import { readdir, readFile, stat } from "node:fs/promises";
+import { readdir, stat } from "node:fs/promises";
 import { extname, join, relative, resolve, sep } from "node:path";
 
 import { validateContent } from "../src/admin/validate.js";
+import defaultContent from "../src/data/content.json" with { type: "json" };
 import {
   TelegramAuthError,
   createEditorSession,
@@ -12,13 +13,20 @@ import {
   verifyTelegramInitData,
 } from "./telegram-auth.mjs";
 
+// A static import (rather than fs.readFile against a process.cwd()-relative
+// path) so this content bundles correctly into a Vercel serverless function,
+// where the working directory at runtime is not guaranteed to be the repo
+// root and dynamically-built fs paths are not reliably traced at build time.
 const ROOT = process.cwd();
 const PUBLIC_DIRECTORY = resolve(ROOT, "public");
-const CONTENT_PATH = join(ROOT, "src", "data", "content.json");
 const COOKIE_NAME = "mmonn_editor";
 const CONTENT_ID = "live";
 const MAX_JSON_BYTES = 1_000_000;
-const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
+// Vercel Serverless Functions cap request bodies well below what a
+// Node-hosted server would allow (historically ~4.5MB), so this stays
+// comfortably under that ceiling rather than accepting uploads the platform
+// itself would reject before this code ever runs.
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 const SESSION_TTL_SECONDS = 2 * 60 * 60;
 const ASSET_EXTENSIONS = new Set([".gif", ".jpeg", ".jpg", ".png", ".svg", ".webp", ".avif"]);
 const CONTENT_TYPES = new Map([
@@ -30,7 +38,6 @@ const CONTENT_TYPES = new Map([
   [".webp", "image/webp"],
   [".avif", "image/avif"],
 ]);
-let defaultContentPromise;
 const rateWindows = new Map();
 
 function isProductionRuntime() {
@@ -152,6 +159,12 @@ function expiredSessionCookie() {
 }
 
 function clientAddress(request) {
+  // Behind Vercel (and most reverse proxies), the socket's remote address is
+  // the proxy itself — the real client IP arrives via this header instead.
+  const forwarded = request.headers["x-forwarded-for"];
+  if (typeof forwarded === "string" && forwarded.trim()) {
+    return forwarded.split(",")[0].trim();
+  }
   return request.socket?.remoteAddress || "unknown";
 }
 
@@ -234,10 +247,7 @@ function publicUser(user) {
 }
 
 async function getDefaultContent() {
-  if (!defaultContentPromise) {
-    defaultContentPromise = readFile(CONTENT_PATH, "utf8").then((source) => JSON.parse(source));
-  }
-  return defaultContentPromise;
+  return defaultContent;
 }
 
 /** Merges only known defaults. Arrays intentionally replace as whole lists. */
@@ -723,7 +733,7 @@ async function handleEditorContent(request, response, pathname) {
     await ensureEditorTables(client);
     const body = await readBody(request, MAX_UPLOAD_BYTES + 64 * 1024);
     const file = parseMultipartFile(body, request.headers["content-type"]);
-    if (file.body.length > MAX_UPLOAD_BYTES) throw new HttpError(413, "Media files must be 12MB or smaller.");
+    if (file.body.length > MAX_UPLOAD_BYTES) throw new HttpError(413, "Media files must be 4MB or smaller.");
     const asset = await uploadAsset(client, file);
     await audit(client, user, "asset_uploaded", `Uploaded ${asset.path}`, { path: asset.path, size: asset.size });
     sendJson(response, 201, { asset });

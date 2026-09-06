@@ -11,13 +11,16 @@ server-only Supabase service-role key.
 1. In **BotFather**, create or choose the MMONN bot. If a bot token was ever
    pasted into a chat, code, screenshot, or commit, revoke it in BotFather and
    generate a replacement before continuing.
-2. Deploy this Node server to an HTTPS domain. Telegram Mini Apps and webhooks
-   need public HTTPS; `127.0.0.1` is only for local interface work.
-
-   A static-only host (including GitHub Pages) cannot run the secure editor.
-   Use a host that runs Node or Docker. This repository includes a
-   `Dockerfile`; configure the service to expose its assigned `PORT`, use the
-   public site domain for both URLs below, and do not deploy `dist/` by itself.
+2. Deploy on Vercel — not as a static site. The routes under
+   [`api/`](api) (`api/telegram/session.js`, `api/telegram/webhook.js`,
+   `api/editor/[...path].js`, `api/spotify/discography.js`) are Vercel
+   Serverless Functions that Vercel builds and deploys automatically
+   alongside the static `dist/` output; no separate Node server, container,
+   or host is needed. They all import the same `server/telegram-auth.mjs` and
+   `server/telegram-editor.mjs` modules used by local `npm run dev`, so the
+   verification and access-control logic is identical in both places. A
+   plain static deployment (no `api/` functions running) is what causes
+   "The secure Telegram editor API is not deployed at this address."
 3. Copy `.env.example` to your private `.env.local` or deployment secret
    settings. Never commit that file.
 4. Find **your numeric Telegram user ID** (for example, message a trusted ID
@@ -67,9 +70,9 @@ server-only Supabase service-role key.
    npm run telegram:check -- YOUR_NUMERIC_TELEGRAM_ID
    ```
 
-   Every line must begin with `OK`. If the public site is hosted as static
-   files only, deploy the Node server too: `/api/telegram/session` and the
-   secure editor API must share the same HTTPS origin as `admin.html`.
+   Every line must begin with `OK`. If this fails after deploying, confirm the
+   Vercel project actually built the `api/` functions (check the deployment's
+   Functions tab) rather than only the static `dist/` output.
 
 ## Use
 
