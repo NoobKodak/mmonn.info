@@ -1,40 +1,40 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { cn } from "cn";
 
 import { contentAsset } from "../lib/content-asset.js";
+import { Button } from "./components/ui/button.jsx";
+import { Input } from "./components/ui/input.jsx";
+import { Label } from "./components/ui/label.jsx";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/select.jsx";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./components/ui/sheet.jsx";
+import { Textarea } from "./components/ui/textarea.jsx";
 import { useConfirm } from "./feedback.jsx";
-import {
-  IconChevronRight,
-  IconEye,
-  IconEyeOff,
-  IconFolder,
-  IconImage,
-  IconPlus,
-  IconTrash,
-  IconUpload,
-  IconX,
-} from "./icons.jsx";
+import { IconChevronRight, IconEye, IconEyeOff, IconFolder, IconImage, IconPlus, IconTrash, IconUpload } from "./icons.jsx";
 
 /* ---------------------------------------------------------------------------
    Primitive fields
    ------------------------------------------------------------------------ */
 
+/** Wraps a control in a native, implicitly-associated label — Radix's Label
+ *  still renders a plain <label> element, so nesting the control keeps the
+ *  same accessible behavior the hand-rolled version had. */
 export function Field({ label, hint, children }) {
   return (
-    <label className="ad-field">
-      <span className="ad-field-label">
+    <Label className="flex w-full flex-col items-start gap-1.5 text-sm font-medium text-foreground">
+      <span className="flex flex-wrap items-baseline gap-x-2">
         {label}
-        {hint && <span className="ad-field-hint">{hint}</span>}
+        {hint && <span className="text-xs font-normal text-muted-foreground">{hint}</span>}
       </span>
       {children}
-    </label>
+    </Label>
   );
 }
 
-export function TextField({ label, hint, value, onChange, ...rest }) {
+export function TextField({ label, hint, value, onChange, className, ...rest }) {
   return (
     <Field label={label} hint={hint}>
-      <input
-        className="ad-input"
+      <Input
+        className={cn("h-11 text-base", className)}
         type="text"
         value={value ?? ""}
         onChange={(event) => onChange(event.target.value)}
@@ -50,33 +50,34 @@ export function PasswordField({ label, hint, value, onChange, ...rest }) {
 
   return (
     <Field label={label} hint={hint}>
-      <div className="ad-password-row">
-        <input
-          className="ad-input"
+      <div className="flex w-full items-center gap-2">
+        <Input
+          className="h-11 flex-1 text-base"
           type={visible ? "text" : "password"}
           value={value ?? ""}
           onChange={(event) => onChange(event.target.value)}
           {...rest}
         />
-        <button
-          className="ad-password-toggle"
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-touch"
           onClick={() => setVisible((current) => !current)}
           aria-label={visible ? "Hide password" : "Show password"}
           aria-pressed={visible}
         >
           {visible ? <IconEyeOff /> : <IconEye />}
-        </button>
+        </Button>
       </div>
     </Field>
   );
 }
 
-export function NumberField({ label, hint, value, onChange, ...rest }) {
+export function NumberField({ label, hint, value, onChange, className, ...rest }) {
   return (
     <Field label={label} hint={hint}>
-      <input
-        className="ad-input"
+      <Input
+        className={cn("h-11 text-base", className)}
         type="number"
         value={Number.isFinite(value) ? value : ""}
         onChange={(event) => {
@@ -90,7 +91,7 @@ export function NumberField({ label, hint, value, onChange, ...rest }) {
 }
 
 /** Grows with its content so long copy stays readable while editing. */
-export function TextArea({ label, hint, value, onChange, rows = 4, ...rest }) {
+export function TextArea({ label, hint, value, onChange, rows = 4, className, ...rest }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -102,8 +103,8 @@ export function TextArea({ label, hint, value, onChange, rows = 4, ...rest }) {
 
   return (
     <Field label={label} hint={hint}>
-      <textarea
-        className="ad-input ad-textarea"
+      <Textarea
+        className={cn("min-h-11 text-base", className)}
         ref={ref}
         rows={rows}
         value={value ?? ""}
@@ -117,13 +118,18 @@ export function TextArea({ label, hint, value, onChange, rows = 4, ...rest }) {
 export function SelectField({ label, hint, value, options, onChange }) {
   return (
     <Field label={label} hint={hint}>
-      <select className="ad-input" value={value} onChange={(event) => onChange(event.target.value)}>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger className="h-11 w-full text-base">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option} value={option}>
+              {option}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </Field>
   );
 }
@@ -135,10 +141,10 @@ export function SelectField({ label, hint, value, options, onChange }) {
 export function EmptyState({ icon, title, hint }) {
   const Icon = icon || IconFolder;
   return (
-    <div className="ad-empty">
+    <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border px-4 py-8 text-center text-muted-foreground">
       <Icon width="28" height="28" />
-      <strong>{title}</strong>
-      {hint && <span>{hint}</span>}
+      <strong className="text-sm font-medium text-foreground">{title}</strong>
+      {hint && <span className="text-sm">{hint}</span>}
     </div>
   );
 }
@@ -165,37 +171,41 @@ function RowControls({ index, count, onMove, onRemove, label, itemNoun = "item",
   };
 
   return (
-    <div className="ad-row-controls">
-      <button
-        className="ad-icon-button"
+    <div className="flex shrink-0 items-center gap-0.5">
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-touch"
         onClick={() => onMove(index, index - 1)}
         disabled={index === 0}
         aria-label={`Move ${label} up`}
         title="Move up"
       >
         <IconChevronRight style={{ rotate: "-90deg" }} />
-      </button>
-      <button
-        className="ad-icon-button"
+      </Button>
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-touch"
         onClick={() => onMove(index, index + 1)}
         disabled={index === count - 1}
         aria-label={`Move ${label} down`}
         title="Move down"
       >
         <IconChevronRight style={{ rotate: "90deg" }} />
-      </button>
-      <button
-        className="ad-icon-button ad-icon-button--danger"
+      </Button>
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-touch"
+        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
         onClick={handleRemove}
         disabled={!canRemove}
         aria-label={`Remove ${label}`}
         title={canRemove ? "Remove" : "At least one entry is required"}
       >
         <IconTrash />
-      </button>
+      </Button>
     </div>
   );
 }
@@ -219,26 +229,26 @@ export function StringList({
   itemLabel = "item",
   min = 1,
 }) {
-  const Input = multiline ? "textarea" : "input";
+  const InputComponent = multiline ? Textarea : Input;
 
   return (
-    <div className="ad-list">
-      <div className="ad-list-head">
-        <h3 className="ad-list-title">{label}</h3>
-        <span className="ad-list-count">
-          {items.length} {items.length === 1 ? itemLabel : `${itemLabel}s`}
-        </span>
-        {hint && <p className="ad-list-hint">{hint}</p>}
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1">
+        <div className="flex items-baseline justify-between gap-2">
+          <h3 className="text-sm font-semibold text-foreground">{label}</h3>
+          <span className="text-xs text-muted-foreground">
+            {items.length} {items.length === 1 ? itemLabel : `${itemLabel}s`}
+          </span>
+        </div>
+        {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
       </div>
 
-      {items.length === 0 && (
-        <EmptyState title={`No ${itemLabel}s yet`} hint={`Add the first one below.`} />
-      )}
+      {items.length === 0 && <EmptyState title={`No ${itemLabel}s yet`} hint="Add the first one below." />}
 
       {items.map((item, index) => (
-        <div className="ad-row" key={index}>
-          <Input
-            className={`ad-input${multiline ? " ad-textarea" : ""}`}
+        <div className="flex items-start gap-2" key={index}>
+          <InputComponent
+            className={cn("h-11 flex-1 text-base", multiline && "min-h-11")}
             rows={multiline ? 5 : undefined}
             value={item}
             aria-label={`${itemLabel} ${index + 1}`}
@@ -260,11 +270,15 @@ export function StringList({
         </div>
       ))}
 
-      <button className="ad-add" type="button" onClick={() => onChange([...items, ""])}>
+      <Button type="button" variant="outline" size="touch" className="self-start" onClick={() => onChange([...items, ""])}>
         <IconPlus /> {addLabel}
-      </button>
+      </Button>
     </div>
   );
+}
+
+function rowKey(item, index) {
+  return item?.id ?? index;
 }
 
 /**
@@ -303,18 +317,18 @@ export function ItemList({
   };
 
   return (
-    <div className="ad-list">
-      <div className="ad-list-head">
-        <h3 className="ad-list-title">{label}</h3>
-        <span className="ad-list-count">
-          {items.length} {items.length === 1 ? itemLabel : `${itemLabel}s`}
-        </span>
-        {hint && <p className="ad-list-hint">{hint}</p>}
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1">
+        <div className="flex items-baseline justify-between gap-2">
+          <h3 className="text-sm font-semibold text-foreground">{label}</h3>
+          <span className="text-xs text-muted-foreground">
+            {items.length} {items.length === 1 ? itemLabel : `${itemLabel}s`}
+          </span>
+        </div>
+        {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
       </div>
 
-      {items.length === 0 && (
-        <EmptyState title={`No ${itemLabel}s yet`} hint="Add the first one below to get started." />
-      )}
+      {items.length === 0 && <EmptyState title={`No ${itemLabel}s yet`} hint="Add the first one below to get started." />}
 
       {items.map((item, index) => {
         const key = rowKey(item, index);
@@ -323,40 +337,49 @@ export function ItemList({
         const thumbSrc = thumbnail?.(item);
 
         return (
-          <article className={`ad-card${isOpen ? " is-open" : ""}`} key={key}>
-            <div className="ad-card-toggle-row">
+          <article
+            key={key}
+            className={cn(
+              "flex flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground",
+              isOpen && "ring-1 ring-ring/30",
+            )}
+          >
+            <div className="flex items-center gap-1 p-2">
               <button
-                className="ad-card-toggle"
                 type="button"
+                className="flex min-h-11 flex-1 items-center gap-3 rounded-lg px-2 py-1 text-left hover:bg-muted/50"
                 aria-expanded={isOpen}
                 onClick={() => toggle(key)}
               >
-                <span className="ad-card-thumb" aria-hidden="true">
-                  {thumbSrc ? <img src={contentAsset(thumbSrc)} alt="" loading="lazy" /> : <IconImage />}
+                <span
+                  className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-muted-foreground"
+                  aria-hidden="true"
+                >
+                  {thumbSrc ? (
+                    <img src={contentAsset(thumbSrc)} alt="" loading="lazy" className="size-full object-cover" />
+                  ) : (
+                    <IconImage />
+                  )}
                 </span>
-                <h4 className="ad-card-title">
-                  <span className="ad-card-index">{String(index + 1).padStart(2, "0")}</span>
-                  {displayTitle}
-                </h4>
-                <span className="ad-card-chevron">
-                  <IconChevronRight />
+                <span className="flex min-w-0 flex-1 items-baseline gap-2 text-sm font-medium">
+                  <span className="text-xs text-muted-foreground">{String(index + 1).padStart(2, "0")}</span>
+                  <span className="truncate">{displayTitle}</span>
                 </span>
+                <IconChevronRight className={cn("shrink-0 transition-transform", isOpen && "rotate-90")} />
               </button>
-              <div className="ad-card-controls">
-                <RowControls
-                  index={index}
-                  count={items.length}
-                  label={displayTitle}
-                  itemNoun={itemLabel}
-                  canRemove={items.length > min}
-                  onMove={(from, to) => onChange(move(items, from, to))}
-                  onRemove={(at) => onChange(items.filter((_, i) => i !== at))}
-                />
-              </div>
+              <RowControls
+                index={index}
+                count={items.length}
+                label={displayTitle}
+                itemNoun={itemLabel}
+                canRemove={items.length > min}
+                onMove={(from, to) => onChange(move(items, from, to))}
+                onRemove={(at) => onChange(items.filter((_, i) => i !== at))}
+              />
             </div>
 
             {isOpen && (
-              <div className="ad-card-body">
+              <div className="flex flex-col gap-4 border-t border-border p-4">
                 {children(
                   item,
                   (patch) => {
@@ -373,16 +396,12 @@ export function ItemList({
       })}
 
       {makeItem && (
-        <button className="ad-add" type="button" onClick={addItem}>
+        <Button type="button" variant="outline" size="touch" className="self-start" onClick={addItem}>
           <IconPlus /> {addLabel}
-        </button>
+        </Button>
       )}
     </div>
   );
-}
-
-function rowKey(item, index) {
-  return item?.id ?? index;
 }
 
 /* ---------------------------------------------------------------------------
@@ -392,13 +411,14 @@ function rowKey(item, index) {
 /**
  * Picks an image already available to the site (bundled in the project, or
  * previously uploaded), or uploads a new one straight to Supabase Storage.
+ * The picker is a bottom Sheet rather than a centered dialog — it reads as a
+ * native mobile picker and needs no extra work to be usable on a phone.
  */
 export function AssetField({ label, hint, value, assets, onChange, onUpload, allowEmpty = true }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
-  const dialogRef = useRef(null);
   const fileRef = useRef(null);
   const listId = useId();
 
@@ -421,21 +441,6 @@ export function AssetField({ label, hint, value, assets, onChange, onUpload, all
     }
   };
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
-    if (!open && dialog.open) dialog.close();
-  }, [open]);
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return undefined;
-    const sync = () => setOpen(false);
-    dialog.addEventListener("close", sync);
-    return () => dialog.removeEventListener("close", sync);
-  }, []);
-
   const matches = useMemo(() => {
     const needle = query.trim().toLowerCase();
     if (!needle) return assets;
@@ -443,31 +448,26 @@ export function AssetField({ label, hint, value, assets, onChange, onUpload, all
   }, [assets, query]);
 
   return (
-    <div className="ad-asset">
+    <div className="flex flex-col gap-2">
       <Field label={label} hint={hint}>
-        <div className="ad-asset-row">
-          <input
-            className="ad-input"
+        <div className="flex w-full flex-wrap items-center gap-2">
+          <Input
+            className="h-11 min-w-0 flex-1 text-base"
             type="text"
             value={value ?? ""}
             placeholder={allowEmpty ? "None chosen" : "Choose an image"}
             onChange={(event) => onChange(event.target.value)}
           />
-          <button className="ad-button ad-button--quiet ad-button--sm" type="button" onClick={() => setOpen(true)}>
-            <IconFolder /> <span className="ad-button-label">Browse</span>
-          </button>
+          <Button type="button" variant="outline" size="touch" onClick={() => setOpen(true)}>
+            <IconFolder /> Browse
+          </Button>
           {onUpload && (
             <>
-              <button
-                className="ad-button ad-button--quiet ad-button--sm"
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                disabled={uploading}
-              >
-                <IconUpload /> <span className="ad-button-label">{uploading ? "Uploading…" : "Upload"}</span>
-              </button>
+              <Button type="button" variant="outline" size="touch" onClick={() => fileRef.current?.click()} disabled={uploading}>
+                <IconUpload /> {uploading ? "Uploading…" : "Upload"}
+              </Button>
               <input
-                className="visually-hidden"
+                className="sr-only"
                 ref={fileRef}
                 type="file"
                 accept="image/png,image/jpeg,image/gif,image/svg+xml,image/webp,image/avif"
@@ -476,61 +476,70 @@ export function AssetField({ label, hint, value, assets, onChange, onUpload, all
             </>
           )}
           {allowEmpty && value && (
-            <button className="ad-button ad-button--quiet ad-button--sm" type="button" onClick={() => onChange("")}>
+            <Button type="button" variant="ghost" size="touch" onClick={() => onChange("")}>
               Clear
-            </button>
+            </Button>
           )}
         </div>
       </Field>
 
-      {uploadError && <p className="ad-asset-error">{uploadError}</p>}
+      {uploadError && <p className="text-sm text-destructive">{uploadError}</p>}
 
       {value && (
-        <div className="ad-asset-preview">
-          <img src={contentAsset(value)} alt="" loading="lazy" />
+        <div className="overflow-hidden rounded-lg border border-border">
+          <img src={contentAsset(value)} alt="" loading="lazy" className="block max-h-48 w-full object-contain" />
         </div>
       )}
 
-      <dialog className="ad-dialog" ref={dialogRef}>
-        <header className="ad-dialog-head">
-          <h3>Choose an image</h3>
-          <button className="ad-icon-button" type="button" onClick={() => setOpen(false)} aria-label="Close">
-            <IconX />
-          </button>
-        </header>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="bottom" className="max-h-[85vh]">
+          <SheetHeader>
+            <SheetTitle>Choose an image</SheetTitle>
+          </SheetHeader>
 
-        <input
-          className="ad-input"
-          type="search"
-          value={query}
-          placeholder="Filter by name"
-          aria-controls={listId}
-          onChange={(event) => setQuery(event.target.value)}
-        />
+          <div className="flex flex-col gap-3 overflow-y-auto px-4 pb-4">
+            <Input
+              className="h-11 text-base"
+              type="search"
+              value={query}
+              placeholder="Filter by name"
+              aria-controls={listId}
+              onChange={(event) => setQuery(event.target.value)}
+            />
 
-        <ul className="ad-asset-grid" id={listId}>
-          {matches.map((asset) => (
-            <li key={asset.path}>
-              <button
-                className={`ad-asset-tile${asset.path === value ? " is-current" : ""}`}
-                type="button"
-                onClick={() => {
-                  onChange(asset.path);
-                  setOpen(false);
-                }}
-              >
-                <img src={contentAsset(asset.path)} alt="" loading="lazy" />
-                <span className="ad-asset-name">{asset.path}</span>
-              </button>
-            </li>
-          ))}
-          {!matches.length && (
-            <li className="ad-asset-empty">
-              {assets.length === 0 ? "No images yet — upload one above." : "No files match that filter."}
-            </li>
-          )}
-        </ul>
-      </dialog>
+            <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3" id={listId}>
+              {matches.map((asset) => (
+                <li key={asset.path}>
+                  <button
+                    type="button"
+                    className={cn(
+                      "flex w-full flex-col gap-1 rounded-lg border border-border p-2 text-left hover:bg-muted/50",
+                      asset.path === value && "border-ring ring-1 ring-ring",
+                    )}
+                    onClick={() => {
+                      onChange(asset.path);
+                      setOpen(false);
+                    }}
+                  >
+                    <img
+                      src={contentAsset(asset.path)}
+                      alt=""
+                      loading="lazy"
+                      className="aspect-square w-full rounded-md object-cover"
+                    />
+                    <span className="truncate text-xs text-muted-foreground">{asset.path}</span>
+                  </button>
+                </li>
+              ))}
+              {!matches.length && (
+                <li className="col-span-full py-6 text-center text-sm text-muted-foreground">
+                  {assets.length === 0 ? "No images yet — upload one above." : "No files match that filter."}
+                </li>
+              )}
+            </ul>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

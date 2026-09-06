@@ -2,13 +2,24 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   // Relative base so a production build also runs from a subdirectory.
   base: "./",
-  plugins: [react()],
+  // The Tailwind plugin only processes CSS files that actually
+  // `@import "tailwindcss"` — only src/admin/tailwind.css does, so this has
+  // no effect on the public site's own hand-written CSS.
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    // shadcn/ui's CLI and generated components expect a "@" alias to the
+    // project's src/ directory.
+    alias: {
+      "@": resolve(__dirname, "src"),
+    },
+  },
   build: {
     rollupOptions: {
       // The Telegram editor is a second, independent page (its own React

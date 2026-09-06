@@ -1,5 +1,15 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./components/ui/alert-dialog.jsx";
 import { IconAlert, IconCheck, IconInfo, IconX } from "./icons.jsx";
 
 /* ---------------------------------------------------------------------------
@@ -103,41 +113,28 @@ export function useToast() {
 /* ---------------------------------------------------------------------------
    Confirm dialog
 
-   One shared native <dialog> for every destructive action in the panel —
+   One shared AlertDialog for every destructive action in the panel —
    removing a collaboration, a slide, an outlet, a role — so nothing is ever
    deleted from a single click. `confirm()` resolves true/false, the same
    shape `window.confirm` has, but styled, accessible, and not blocking.
+   Radix's AlertDialog restores focus to whatever triggered it on close, so
+   this needs no manual focus bookkeeping.
    ------------------------------------------------------------------------ */
 
 const ConfirmContext = createContext(null);
 
 export function ConfirmProvider({ children }) {
   const [request, setRequest] = useState(null);
-  const dialogRef = useRef(null);
-  const triggerRef = useRef(null);
 
   const confirm = useCallback(({ title, message, confirmLabel = "Remove", tone = "danger" }) => {
-    triggerRef.current = document.activeElement;
     return new Promise((resolve) => {
       setRequest({ title, message, confirmLabel, tone, resolve });
     });
   }, []);
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (request && !dialog.open) dialog.showModal();
-    if (!request && dialog.open) dialog.close();
-  }, [request]);
-
   const settle = (result) => {
     request?.resolve(result);
     setRequest(null);
-    // The trigger button is often removed along with its list row on
-    // confirm, so only try to refocus it when it is still there.
-    window.requestAnimationFrame(() => {
-      if (triggerRef.current?.isConnected) triggerRef.current.focus({ preventScroll: true });
-    });
   };
 
   const value = useMemo(() => ({ confirm }), [confirm]);
@@ -145,40 +142,34 @@ export function ConfirmProvider({ children }) {
   return (
     <ConfirmContext.Provider value={value}>
       {children}
-      <dialog
-        className="ad-confirm"
-        ref={dialogRef}
-        onCancel={(event) => {
-          event.preventDefault();
-          settle(false);
-        }}
-        onClick={(event) => {
-          if (event.target === dialogRef.current) settle(false);
-        }}
-      >
-        {request && (
-          <>
-            <span className="ad-confirm-icon">
-              <IconAlert />
-            </span>
-            <h3>{request.title}</h3>
-            <p>{request.message}</p>
-            <div className="ad-confirm-actions">
-              <button className="ad-button ad-button--quiet" type="button" onClick={() => settle(false)}>
-                Cancel
-              </button>
-              <button
-                className={`ad-button ${request.tone === "danger" ? "ad-button--danger" : ""}`}
-                type="button"
-                onClick={() => settle(true)}
-                autoFocus
-              >
-                {request.confirmLabel}
-              </button>
-            </div>
-          </>
-        )}
-      </dialog>
+      <AlertDialog open={Boolean(request)} onOpenChange={(open) => !open && settle(false)}>
+        <AlertDialogContent>
+          {request && (
+            <>
+              <AlertDialogHeader>
+                <span className="ad-confirm-icon" aria-hidden="true">
+                  <IconAlert />
+                </span>
+                <AlertDialogTitle>{request.title}</AlertDialogTitle>
+                <AlertDialogDescription>{request.message}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel size="touch" onClick={() => settle(false)}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  size="touch"
+                  variant={request.tone === "danger" ? "destructive" : "default"}
+                  onClick={() => settle(true)}
+                  autoFocus
+                >
+                  {request.confirmLabel}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </>
+          )}
+        </AlertDialogContent>
+      </AlertDialog>
     </ConfirmContext.Provider>
   );
 }
