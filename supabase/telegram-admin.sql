@@ -65,25 +65,91 @@ revoke all on table public.editor_content_drafts from public, anon, authenticate
 revoke all on table public.editor_content_versions from public, anon, authenticated;
 revoke all on table public.editor_audit from public, anon, authenticated;
 
--- The server reads and writes the owner's current draft directly (outside
--- the publish transaction below), and only reads version history. Keep its
--- ACLs explicit; it never needs browser grants.
-grant select, insert, update on table public.editor_content_drafts to service_role;
+-- The server reads the owner's current draft and version history directly.
+-- All draft mutations run inside the security-definer functions below.
+grant select on table public.editor_content_drafts to service_role;
 grant select on table public.editor_content_versions to service_role;
 grant insert on table public.editor_audit to service_role;
 grant usage, select on sequence public.editor_audit_id_seq to service_role;
 grant select on table public.site_content to service_role;
 
--- Publish, version, clear the private draft, and audit as one database
--- transaction. If the live revision changed, nothing is written.
+-- Draft writes are compare-and-swap operations. A second owner tab cannot
+-- overwrite a newer draft, and the draft mutation and its audit entry commit
+-- together.
+drop function if exists public.save_telegram_draft(jsonb, timestamptz, text, text, timestamptz, text, text, jsonb);
+
+create or replace function public.save_telegram_draft(
+  p_content jsonb,
+  p_base_revision timestamptz,
+  p_editor_id text,
+  p_editor_name text,
+  p_expected_draft_revision timestamptz,
+  p_action text,
+  p_summary text,
+  p_metadata jsonb
+)
+returns table (updated_at timestamptz)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  saved_at timestamptz;
+begin
+  if p_action not in ('draft_saved', 'version_restored_to_draft') then
+    raise exception 'Unsupported draft audit action.' using errcode = '22023';
+  end if;
+
+  if p_expected_draft_revision is null then
+    insert into public.editor_content_drafts (
+      editor_id, editor_name, content, base_revision, updated_at
+    ) values (
+      p_editor_id, p_editor_name, p_content, p_base_revision, pg_catalog.clock_timestamp()
+    )
+    on conflict (editor_id) do nothing
+    returning public.editor_content_drafts.updated_at into saved_at;
+  else
+    update public.editor_content_drafts as draft
+    set editor_name = p_editor_name,
+        content = p_content,
+        base_revision = p_base_revision,
+        updated_at = pg_catalog.clock_timestamp()
+    where draft.editor_id = p_editor_id
+      and draft.updated_at = p_expected_draft_revision
+    returning draft.updated_at into saved_at;
+  end if;
+
+  if not found then
+    raise exception 'The draft changed while this request was in progress.' using errcode = 'P0001';
+  end if;
+
+  insert into public.editor_audit (
+    editor_id, editor_name, action, summary, metadata
+  ) values (
+    p_editor_id, p_editor_name, p_action, p_summary, coalesce(p_metadata, '{}'::jsonb)
+  );
+
+  return query select saved_at;
+end;
+$$;
+
+revoke all on function public.save_telegram_draft(jsonb, timestamptz, text, text, timestamptz, text, text, jsonb)
+  from public, anon, authenticated;
+grant execute on function public.save_telegram_draft(jsonb, timestamptz, text, text, timestamptz, text, text, jsonb)
+  to service_role;
+
+-- Publish exactly the stored, reviewed draft. The row lock makes a concurrent
+-- save fail safely instead of losing the newer draft. Versioning, publish,
+-- draft removal, and audit logging are one transaction.
 drop function if exists public.publish_telegram_content(jsonb, timestamptz, bigint, text, text);
+drop function if exists public.publish_telegram_content(jsonb, timestamptz, text, text, text);
 
 create or replace function public.publish_telegram_content(
-  p_content jsonb,
   p_expected_revision timestamptz,
   p_editor_id text,
   p_editor_name text,
-  p_summary text
+  p_summary text,
+  p_expected_draft_revision timestamptz
 )
 returns table (content jsonb, updated_at timestamptz)
 language plpgsql
@@ -91,17 +157,31 @@ security definer
 set search_path = ''
 as $$
 declare
+  draft_row record;
   published_row record;
 begin
+  if p_expected_draft_revision is null then
+    raise exception 'Save a draft before publishing.' using errcode = 'P0001';
+  end if;
+
+  select draft.content, draft.updated_at into draft_row
+  from public.editor_content_drafts as draft
+  where draft.editor_id = p_editor_id
+    and draft.updated_at = p_expected_draft_revision
+  for update;
+
+  if not found then
+    raise exception 'The draft changed while this publish was in progress.' using errcode = 'P0001';
+  end if;
+
   update public.site_content as live
-  set content = p_content,
-      updated_at = clock_timestamp()
+  set content = draft_row.content,
+      updated_at = pg_catalog.clock_timestamp()
   where live.id = 'live' and live.updated_at = p_expected_revision
   returning live.content, live.updated_at into published_row;
 
   if not found then
-    raise exception 'The live site changed while this publish was in progress.'
-      using errcode = 'P0001';
+    raise exception 'The live site changed while this publish was in progress.' using errcode = 'P0001';
   end if;
 
   insert into public.editor_content_versions (
@@ -110,30 +190,41 @@ begin
     p_editor_id, p_editor_name, published_row.content, p_summary, published_row.updated_at
   );
 
-  delete from public.editor_content_drafts where editor_id = p_editor_id;
+  delete from public.editor_content_drafts as draft
+  where draft.editor_id = p_editor_id
+    and draft.updated_at = p_expected_draft_revision;
 
   insert into public.editor_audit (
     editor_id, editor_name, action, summary, metadata
   ) values (
     p_editor_id, p_editor_name, 'published', p_summary,
-    jsonb_build_object('revision', published_row.updated_at)
+    pg_catalog.jsonb_build_object('revision', published_row.updated_at)
   );
 
   return query select published_row.content, published_row.updated_at;
 end;
 $$;
 
-revoke all on function public.publish_telegram_content(jsonb, timestamptz, text, text, text)
+revoke all on function public.publish_telegram_content(timestamptz, text, text, text, timestamptz)
   from public, anon, authenticated;
-grant execute on function public.publish_telegram_content(jsonb, timestamptz, text, text, text)
+grant execute on function public.publish_telegram_content(timestamptz, text, text, text, timestamptz)
   to service_role;
 
--- Retire the former direct-browser editor path. Public SELECT remains so the
--- public site can still read site_content, but writes now require the server.
+-- Retire the former browser editor path. Public visitors can read only the
+-- live row; all writes now require the verified server and service role.
 alter table public.site_content enable row level security;
 revoke insert, update, delete on table public.site_content from public, anon, authenticated;
+grant select on table public.site_content to anon, authenticated;
+drop policy if exists "Public can read live site content" on public.site_content;
+create policy "Public can read live site content"
+  on public.site_content
+  for select
+  to anon, authenticated
+  using (id = 'live');
 
 -- The Mini App uploads through the verified server route. This revokes direct
 -- browser mutations for Supabase Storage. Keep public reads configured for the
 -- site-assets bucket if the site uses uploaded artwork publicly.
 revoke insert, update, delete on table storage.objects from public, anon, authenticated;
+
+commit;

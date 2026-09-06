@@ -46,14 +46,26 @@ if (missing.length) {
 
 const botToken = process.env.TELEGRAM_BOT_TOKEN;
 const endpoint = `https://api.telegram.org/bot${botToken}`;
-const webhookUrl = new URL("/api/telegram/webhook", process.env.PUBLIC_SITE_URL).toString();
+let publicUrl;
+try {
+  publicUrl = new URL(process.env.PUBLIC_SITE_URL);
+  if (publicUrl.protocol !== "https:") throw new Error("not https");
+} catch {
+  throw new Error("PUBLIC_SITE_URL must be a valid HTTPS URL before configuring Telegram.");
+}
+const webhookUrl = new URL("/api/telegram/webhook", publicUrl).toString();
 
 async function telegram(method, body) {
-  const response = await fetch(`${endpoint}/${method}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  let response;
+  try {
+    response = await fetch(`${endpoint}/${method}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new Error(`Telegram ${method} could not be reached.`);
+  }
   const payload = await response.json().catch(() => null);
   if (!response.ok || !payload?.ok) throw new Error(payload?.description || `Telegram ${method} failed.`);
   return payload.result;

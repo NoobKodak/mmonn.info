@@ -91,7 +91,8 @@ body {
 .ad {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  height: 100dvh;
+  height: var(--tg-viewport-stable-height, 100dvh);
+  min-height: 100dvh;
   background: var(--bg);
   color: var(--ink);
   font: 14px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -145,6 +146,9 @@ body {
 .ad-asset-tile:focus-visible,
 .ad-card-toggle:focus-visible,
 .ad-dashboard-card:focus-visible,
+.ad-mobile-section-trigger:focus-visible,
+.ad-mobile-dock-button:focus-visible,
+.ad-mobile-scrim:focus-visible,
 .ad-toast-dismiss:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -211,6 +215,20 @@ body {
   white-space: nowrap;
 }
 
+.ad-local-preview {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--accent-tint);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
 /* --- Save-state pill ------------------------------------------------------ */
 
 .ad-state {
@@ -272,6 +290,16 @@ body {
   font-size: 0.8rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* The compact phone workspace is intentionally absent on tablet and desktop.
+   On a phone it replaces the cramped horizontal scroller with a section
+   picker and a four-action bottom dock. */
+.ad-mobile-section-trigger,
+.ad-mobile-nav-head,
+.ad-mobile-dock,
+.ad-mobile-scrim {
+  display: none;
 }
 
 /* =========================================================================
@@ -551,6 +579,14 @@ body {
   display: grid;
   gap: 1.5rem;
   width: min(100%, 62rem);
+  animation: ad-panel-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes ad-panel-in {
+  from {
+    opacity: 0;
+    translate: 0 0.45rem;
+  }
 }
 
 .ad-panel-head h2 {
@@ -1489,6 +1525,13 @@ body {
     flex-direction: row;
     padding: 0.5rem;
     overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+
+  .ad-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .ad-nav-group {
@@ -1508,6 +1551,7 @@ body {
 
   .ad-nav-button {
     width: max-content;
+    scroll-snap-align: start;
     white-space: nowrap;
   }
 
@@ -1522,6 +1566,8 @@ body {
 
 @media (max-width: 40rem) {
   .ad-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     padding: 0.65rem 0.85rem;
   }
 
@@ -1530,8 +1576,75 @@ body {
     display: none;
   }
 
+  .ad-local-preview {
+    justify-self: start;
+    font-size: 0.7rem;
+  }
+
   .ad-main {
-    padding: 1.25rem 0.9rem 4rem;
+    padding: 1.1rem 0.85rem max(4rem, calc(1.25rem + env(safe-area-inset-bottom)));
+  }
+
+  .ad-panel {
+    gap: 1.1rem;
+  }
+
+  .ad-panel-head h2 {
+    font-size: 1.28rem;
+  }
+
+  .ad-actions {
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 0.4rem;
+  }
+
+  .ad-actions .ad-state {
+    flex-basis: 100%;
+    justify-content: center;
+  }
+
+  .ad-actions .ad-button--icon-collapse {
+    width: 44px;
+    padding-inline: 0;
+  }
+
+  .ad-actions > .ad-button:not(.ad-button--quiet) {
+    flex: 1 1 4.15rem;
+    min-width: 0;
+    padding-inline: 0.45rem;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .ad-nav {
+    padding: 0.45rem 0.65rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--sidebar-ink) 12%, transparent);
+  }
+
+  .ad-nav-button {
+    min-height: 42px;
+    padding-inline: 0.7rem;
+    font-size: 0.82rem;
+  }
+
+  .ad-list,
+  .ad-group,
+  .ad-summary-card {
+    padding: 0.9rem;
+    border-radius: 12px;
+  }
+
+  .ad-dashboard-card {
+    min-height: 108px;
+    padding: 1rem;
+  }
+
+  .ad-dialog,
+  .ad-confirm {
+    width: min(100vw - 1rem, 34rem);
+    max-height: min(86dvh, var(--tg-viewport-stable-height, 86dvh));
+    padding: 1rem;
   }
 
   .ad-toast-stack {
@@ -1548,6 +1661,263 @@ body {
 
   .ad-history-entry .ad-button {
     width: 100%;
+  }
+
+  /* Pocket Studio — a sheet-based editor for Telegram-sized viewports. */
+  .ad-top {
+    gap: 0.6rem;
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+  }
+
+  .ad-actions {
+    display: none;
+  }
+
+  .ad-mobile-section-trigger {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.05rem 0.75rem;
+    align-items: center;
+    width: 100%;
+    min-height: 58px;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: border-color 180ms ease, background-color 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .ad-mobile-section-trigger:active {
+    transform: scale(0.985);
+  }
+
+  .ad-mobile-section-trigger[aria-expanded="true"] {
+    border-color: var(--accent);
+    background: var(--accent-tint);
+  }
+
+  .ad-mobile-section-trigger strong {
+    grid-row: 2;
+    overflow: hidden;
+    font-size: 1rem;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ad-mobile-section-trigger svg {
+    grid-row: span 2;
+    width: 1.15rem;
+    height: 1.15rem;
+    color: var(--muted);
+    transition: transform 180ms ease;
+  }
+
+  .ad-mobile-section-trigger[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+  }
+
+  .ad-mobile-section-kicker {
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .ad-main {
+    padding: 1.15rem 0.85rem max(6.9rem, calc(5.8rem + env(safe-area-inset-bottom)));
+  }
+
+  .ad-nav {
+    position: fixed;
+    z-index: 80;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    max-height: min(78dvh, 42rem);
+    padding: 0.55rem 0.75rem calc(1rem + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 22px 22px 0 0;
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(calc(100% + 1rem));
+    visibility: hidden;
+    transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), visibility 0ms linear 240ms;
+    overscroll-behavior: contain;
+  }
+
+  .ad-nav.is-mobile-open {
+    transform: translateY(0);
+    visibility: visible;
+    transition-delay: 0ms;
+  }
+
+  .ad-mobile-nav-head {
+    position: sticky;
+    top: -0.55rem;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: -0.55rem -0.75rem 0.7rem;
+    padding: 0.8rem 0.85rem 0.65rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  .ad-mobile-nav-head div {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .ad-mobile-nav-head span {
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .ad-mobile-nav-head strong {
+    font-size: 1rem;
+  }
+
+  .ad-nav-group {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0 0 0.8rem;
+  }
+
+  .ad-nav-group-label {
+    display: block;
+    margin: 0.25rem 0.55rem 0;
+    color: var(--muted);
+  }
+
+  .ad-nav ul {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .ad-nav-button {
+    width: 100%;
+    min-height: 48px;
+    padding-inline: 0.75rem;
+    border-radius: 10px;
+    background: var(--surface-2);
+    color: var(--ink);
+    font-size: 0.92rem;
+    white-space: normal;
+  }
+
+  .ad-nav-button svg {
+    color: var(--muted);
+  }
+
+  .ad-nav-button:hover,
+  .ad-nav-button:active {
+    background: var(--accent-tint-strong);
+  }
+
+  .ad-nav-button.is-active,
+  .ad-nav-button.is-active svg {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .ad-mobile-scrim {
+    position: fixed;
+    z-index: 70;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: rgb(0 0 0 / 48%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+  }
+
+  .ad-mobile-scrim.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .ad-mobile-dock {
+    position: fixed;
+    z-index: 60;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.35rem;
+    padding: 0.5rem 0.55rem max(0.5rem, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    box-shadow: 0 -8px 24px rgb(20 20 26 / 8%);
+    backdrop-filter: blur(12px);
+  }
+
+  .ad-mobile-dock-button {
+    display: grid;
+    place-items: center;
+    gap: 0.15rem;
+    min-width: 0;
+    min-height: 52px;
+    padding: 0.35rem 0.2rem;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.66rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background-color 180ms ease, color 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .ad-mobile-dock-button svg {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .ad-mobile-dock-button.is-active {
+    background: var(--accent-tint);
+    color: var(--accent);
+  }
+
+  .ad-mobile-dock-button--primary {
+    background: var(--ink);
+    color: var(--surface);
+  }
+
+  .ad-mobile-dock-button:active:not(:disabled) {
+    transform: scale(0.96);
+  }
+
+  .ad-mobile-dock-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.42;
+  }
+
+  .ad-toast-stack {
+    bottom: max(5.9rem, calc(5.25rem + env(safe-area-inset-bottom)));
   }
 }
 

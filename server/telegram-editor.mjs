@@ -19,7 +19,7 @@ const COOKIE_NAME = "mmonn_editor";
 const CONTENT_ID = "live";
 const MAX_JSON_BYTES = 1_000_000;
 const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
-const SESSION_TTL_SECONDS = 8 * 60 * 60;
+const SESSION_TTL_SECONDS = 2 * 60 * 60;
 const ASSET_EXTENSIONS = new Set([".gif", ".jpeg", ".jpg", ".png", ".svg", ".webp", ".avif"]);
 const CONTENT_TYPES = new Map([
   [".gif", "image/gif"],
@@ -33,14 +33,27 @@ const CONTENT_TYPES = new Map([
 let defaultContentPromise;
 const rateWindows = new Map();
 
+function isProductionRuntime() {
+  return process.argv.includes("--production") || process.env.NODE_ENV === "production";
+}
+
 function useSecureCookie() {
   // server.mjs loads .env.local after importing this module, so the
   // environment must be read when a cookie is issued rather than at import.
   return (
-    process.argv.includes("--production") ||
-    process.env.NODE_ENV === "production" ||
+    isProductionRuntime() ||
     /^https:/i.test(process.env.PUBLIC_SITE_URL || "")
   );
+}
+
+function httpsUrl(name, rawValue) {
+  try {
+    const url = new URL(rawValue);
+    if (url.protocol !== "https:") throw new Error("not https");
+    return url;
+  } catch {
+    throw new HttpError(503, `${name} must be a valid HTTPS URL in production.`);
+  }
 }
 
 class HttpError extends Error {
@@ -96,6 +109,14 @@ function editorConfig() {
       503,
       "Telegram editor access is closed until exactly one TELEGRAM_ADMIN_IDS value is configured.",
     );
+  }
+
+  if (isProductionRuntime()) {
+    const publicUrl = httpsUrl("PUBLIC_SITE_URL", process.env.PUBLIC_SITE_URL);
+    const webAppUrl = httpsUrl("TELEGRAM_WEB_APP_URL", process.env.TELEGRAM_WEB_APP_URL);
+    if (publicUrl.origin !== webAppUrl.origin) {
+      throw new HttpError(503, "TELEGRAM_WEB_APP_URL must use the PUBLIC_SITE_URL origin in production.");
+    }
   }
 
   return { botToken, sessionSecret, adminIds };
@@ -330,14 +351,43 @@ function parseMultipartFile(body, contentType) {
   throw new HttpError(400, "Choose one media file to upload.");
 }
 
+function hasBytes(body, bytes, offset = 0) {
+  return bytes.every((value, index) => body[offset + index] === value);
+}
+
+function validateUploadBytes(file, extension) {
+  const { body } = file;
+  let valid = false;
+
+  if (extension === ".gif") valid = body.subarray(0, 6).toString("ascii") === "GIF87a" || body.subarray(0, 6).toString("ascii") === "GIF89a";
+  if (extension === ".png") valid = hasBytes(body, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  if (extension === ".jpg" || extension === ".jpeg") valid = hasBytes(body, [0xff, 0xd8, 0xff]);
+  if (extension === ".webp") {
+    valid = body.subarray(0, 4).toString("ascii") === "RIFF" && body.subarray(8, 12).toString("ascii") === "WEBP";
+  }
+  if (extension === ".avif") {
+    valid = body.subarray(4, 8).toString("ascii") === "ftyp" && ["avif", "avis"].includes(body.subarray(8, 12).toString("ascii"));
+  }
+  if (extension === ".svg") {
+    const source = body.toString("utf8");
+    valid = /<svg[\s>]/i.test(source);
+    if (/<script\b|<foreignObject\b|\son\w+\s*=|\b(?:href|xlink:href)\s*=\s*["']\s*(?:https?:|javascript:|data:)/i.test(source)) {
+      throw new HttpError(400, "SVG uploads cannot include scripts, event handlers, or external resources.");
+    }
+  }
+
+  if (!valid) throw new HttpError(400, "The uploaded file does not match its image format.");
+}
+
 async function uploadAsset(client, file) {
   if (!file.body.length) throw new HttpError(400, "The selected file is empty.");
   const filename = safeUploadName(file.filename);
   const extension = extname(filename).toLowerCase();
   const allowedType = CONTENT_TYPES.get(extension);
-  if (file.type && !file.type.startsWith("image/") && file.type !== "application/octet-stream") {
+  if (file.type && file.type !== allowedType && file.type !== "application/octet-stream") {
     throw new HttpError(400, "Only image and GIF assets are supported.");
   }
+  validateUploadBytes(file, extension);
 
   const stem = filename.slice(0, -extension.length);
   for (let number = 1; number < 500; number += 1) {
@@ -441,37 +491,24 @@ async function saveDraftAtomically(client, {
   summary,
   metadata = {},
 }) {
-  const { data: existing, error: existingError } = await client
-    .from("editor_content_drafts")
-    .select("updated_at")
-    .eq("editor_id", user.id)
-    .maybeSingle();
-  if (existingError) throw tableSetupError(existingError);
-
-  const existingRevision = existing?.updated_at || null;
-  if ((expectedDraftRevision || existingRevision) && expectedDraftRevision !== existingRevision) {
-    throw new HttpError(409, "This draft changed in another editor. Reload before saving again.");
+  const { data, error } = await client.rpc("save_telegram_draft", {
+    p_content: content,
+    p_base_revision: publishedRevision,
+    p_editor_id: user.id,
+    p_editor_name: user.name,
+    p_expected_draft_revision: expectedDraftRevision,
+    p_action: action,
+    p_summary: summary,
+    p_metadata: metadata,
+  });
+  if (error) {
+    if (error.code === "P0001" || /draft changed while/i.test(error.message || "")) {
+      throw new HttpError(409, "This draft changed in another editor. Reload before saving again.");
+    }
+    throw tableSetupError(error);
   }
-
-  const { data, error } = await client
-    .from("editor_content_drafts")
-    .upsert(
-      {
-        editor_id: user.id,
-        editor_name: user.name,
-        content,
-        base_revision: publishedRevision,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "editor_id" },
-    )
-    .select("updated_at");
-  if (error) throw tableSetupError(error);
   const result = Array.isArray(data) ? data[0] : data;
   if (!result?.updated_at) throw new HttpError(502, "Saving did not return a draft revision.");
-
-  await audit(client, user, action, summary, metadata);
-
   return result;
 }
 
@@ -607,11 +644,11 @@ async function handleEditorContent(request, response, pathname) {
     const content = await validateEditorContent(client, draft.content);
     const summary = summarizeChange(content);
     const { data, error } = await client.rpc("publish_telegram_content", {
-      p_content: content,
       p_expected_revision: published.revision,
       p_editor_id: user.id,
       p_editor_name: user.name,
       p_summary: summary,
+      p_expected_draft_revision: expectedDraftRevision,
     });
     if (error) {
       if (error.code === "P0001" || /changed while this publish was in progress|draft changed while/i.test(error.message || "")) {

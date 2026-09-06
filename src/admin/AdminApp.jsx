@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { publicAsset } from "../assets.js";
+import bundledContent from "../data/content.json";
 import NumberTicker from "../components/NumberTicker.jsx";
 import {
   endSession,
@@ -18,6 +19,8 @@ import {
 import { ConfirmProvider, ToastProvider, useConfirm, useToast } from "./feedback.jsx";
 import {
   IconChart,
+  IconCheck,
+  IconChevronDown,
   IconCompass,
   IconDashboard,
   IconExternal,
@@ -32,6 +35,7 @@ import {
   IconRefresh,
   IconStar,
   IconUsers,
+  IconX,
 } from "./icons.jsx";
 import {
   AssetField,
@@ -84,6 +88,14 @@ const TONES = ["dark", "light"];
 
 const emptyImage = () => ({ src: "", width: 0, height: 0, alt: "" });
 
+// A browser can safely inspect the Mini App layout during local development,
+// but it must never become a route around Telegram authorization or the API.
+function isLocalDesignPreview() {
+  const hostname = window.location.hostname;
+  const isLoopback = ["localhost", "127.0.0.1", "::1", "[::1]"].includes(hostname);
+  return isLoopback && (import.meta.env.DEV || new URLSearchParams(window.location.search).has("preview"));
+}
+
 /** Ids are anchors and React keys, so they are slugged and kept unique. */
 function uniqueSlug(base, taken) {
   const root =
@@ -111,6 +123,7 @@ export default function AdminApp() {
 function AdminShell() {
   const toast = useToast();
   const confirm = useConfirm();
+  const localPreview = useMemo(isLocalDesignPreview, []);
   const [session, setSession] = useState(undefined); // undefined = still checking
   const [accessError, setAccessError] = useState("");
   const [content, setContent] = useState(null);
@@ -121,11 +134,17 @@ function AdminShell() {
   const [draftUpdatedAt, setDraftUpdatedAt] = useState(null);
   const [publishedAt, setPublishedAt] = useState(null);
   const [panel, setPanel] = useState(PANELS[0].id);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [busy, setBusy] = useState("loading");
   const [bootMessage, setBootMessage] = useState("Verifying your Telegram account…");
   const mainRef = useRef(null);
 
   useEffect(() => {
+    if (localPreview) {
+      setSession({ user: { id: "local-preview", name: "Local layout preview", username: "" } });
+      return undefined;
+    }
+
     let cancelled = false;
     getSession()
       .then((current) => {
@@ -139,7 +158,7 @@ function AdminShell() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [localPreview]);
 
   const dirty = useMemo(
     () => Boolean(content && saved) && JSON.stringify(content) !== JSON.stringify(saved),
@@ -148,6 +167,23 @@ function AdminShell() {
 
   const refresh = useCallback(async ({ withAssets = false, announce = false } = {}) => {
     setBusy("loading");
+
+    if (localPreview) {
+      const previewContent = structuredClone(bundledContent);
+      setContent(previewContent);
+      setSaved(previewContent);
+      setRevision("local-preview");
+      setDraftUpdatedAt(null);
+      setPublishedAt(null);
+      if (withAssets) {
+        setAssets([]);
+        setHistory([]);
+      }
+      if (announce) toast.push({ tone: "info", message: "Reloaded the local design preview." });
+      setBusy(null);
+      return true;
+    }
+
     try {
       const [contentPayload, uploadedAssets, localAssets, recent] = await Promise.all([
         loadContent(),
@@ -177,7 +213,7 @@ function AdminShell() {
     } finally {
       setBusy(null);
     }
-  }, [toast]);
+  }, [localPreview, toast]);
 
   // The server only returns content after it validates this Telegram account.
   // Keeping the editor blank until then prevents an unauthorised flash.
@@ -187,6 +223,10 @@ function AdminShell() {
 
   const save = useCallback(async () => {
     if (!content || busy) return;
+    if (localPreview) {
+      toast.push({ tone: "info", message: "Local preview is read-only. Open the Mini App from Telegram to save a draft." });
+      return;
+    }
     setBusy("saving");
 
     try {
@@ -219,7 +259,7 @@ function AdminShell() {
     } finally {
       setBusy(null);
     }
-  }, [busy, content, revision, draftUpdatedAt, panel, toast]);
+  }, [busy, content, revision, draftUpdatedAt, localPreview, panel, toast]);
 
   // Ctrl/Cmd+S is what anyone editing text will reach for.
   useEffect(() => {
@@ -242,6 +282,10 @@ function AdminShell() {
 
   const publish = async () => {
     if (busy) return;
+    if (localPreview) {
+      toast.push({ tone: "info", message: "Local preview is read-only. Publishing is only available from Telegram." });
+      return;
+    }
     const ok = await confirm({
       title: "Publish this draft?",
       message: "This will replace the live MMONN site content. A version will be saved first, so you can restore it later.",
@@ -278,6 +322,10 @@ function AdminShell() {
 
   const restore = async (entry) => {
     if (busy) return;
+    if (localPreview) {
+      toast.push({ tone: "info", message: "Local preview is read-only. Restore a version from the Telegram Mini App." });
+      return;
+    }
     const ok = await confirm({
       title: "Restore this version to a draft?",
       message: "The live site will not change until you review and publish this restored draft.",
@@ -318,6 +366,10 @@ function AdminShell() {
   /** Uploads land in Supabase Storage and join the picker straight away, so a
    *  newly added file can be chosen without reloading the editor. */
   const handleUpload = async (file) => {
+    if (localPreview) {
+      toast.push({ tone: "info", message: "Uploads are disabled in the local design preview." });
+      return "";
+    }
     const { asset } = await uploadAsset(file);
     setAssets((current) =>
       [...current.filter((entry) => entry.path !== asset.path), asset].sort((a, b) =>
@@ -388,6 +440,7 @@ function AdminShell() {
 
   const goTo = (id) => {
     setPanel(id);
+    setMobileNavOpen(false);
     mainRef.current?.scrollTo({ top: 0 });
   };
 
@@ -458,15 +511,19 @@ function AdminShell() {
             M
           </span>
           <div className="ad-brand-text">
-            <h1>MMONN — content</h1>
-            <span className="ad-brand-sub">{currentPanel.label}</span>
+            <h1>MMONN Studio</h1>
+            <span className="ad-brand-sub">Telegram Mini App · {currentPanel.label}</span>
           </div>
         </div>
+
+        {localPreview && <span className="ad-local-preview">Local layout preview · read only</span>}
 
         <div className="ad-actions">
           <span className={`ad-state ad-state--${saveState}`} role="status">
             <span className="ad-state-dot" aria-hidden="true" />
-            {saveState === "saving"
+            {localPreview
+              ? "Preview only"
+              : saveState === "saving"
               ? busy === "publishing"
                 ? "Publishing…"
                 : busy === "restoring"
@@ -497,32 +554,67 @@ function AdminShell() {
             <IconRefresh /> <span className="ad-button-label">{busy === "loading" ? "Reloading…" : "Reload"}</span>
           </button>
 
-          <button
-            className="ad-button ad-button--quiet ad-button--icon-collapse"
-            type="button"
-            onClick={lockEditor}
-          >
-            <IconLogOut /> <span className="ad-button-label">Lock</span>
-          </button>
+          {!localPreview && (
+            <button
+              className="ad-button ad-button--quiet ad-button--icon-collapse"
+              type="button"
+              onClick={lockEditor}
+            >
+              <IconLogOut /> <span className="ad-button-label">Lock</span>
+            </button>
+          )}
 
-          <button className="ad-button" type="button" onClick={save} disabled={!dirty || Boolean(busy)}>
-            {busy === "saving" ? "Saving…" : "Save draft"}
+          <button className="ad-button" type="button" onClick={save} disabled={localPreview || !dirty || Boolean(busy)}>
+            {localPreview ? "Read only" : busy === "saving" ? "Saving…" : "Save draft"}
           </button>
 
           <button
             className="ad-button ad-button--publish"
             type="button"
             onClick={publish}
-            disabled={Boolean(busy) || !draftUpdatedAt || dirty}
-            title={!draftUpdatedAt || dirty ? "Save the current changes as a draft before publishing" : undefined}
+            disabled={localPreview || Boolean(busy) || !draftUpdatedAt || dirty}
+            title={localPreview ? "Publishing is disabled in the local preview" : !draftUpdatedAt || dirty ? "Save the current changes as a draft before publishing" : undefined}
           >
             {busy === "publishing" ? "Publishing…" : "Publish"}
           </button>
         </div>
+
+        <button
+          className="ad-mobile-section-trigger"
+          type="button"
+          aria-expanded={mobileNavOpen}
+          aria-controls="mobile-content-sections"
+          onClick={() => setMobileNavOpen((open) => !open)}
+        >
+          <span className="ad-mobile-section-kicker">Editing</span>
+          <strong>{currentPanel.label}</strong>
+          <IconChevronDown />
+        </button>
       </header>
 
       <div className="ad-body">
-        <nav className="ad-nav" aria-label="Content sections">
+        <button
+          className={`ad-mobile-scrim${mobileNavOpen ? " is-visible" : ""}`}
+          type="button"
+          aria-label="Close section picker"
+          tabIndex={mobileNavOpen ? 0 : -1}
+          onClick={() => setMobileNavOpen(false)}
+        />
+
+        <nav
+          id="mobile-content-sections"
+          className={`ad-nav${mobileNavOpen ? " is-mobile-open" : ""}`}
+          aria-label="Content sections"
+        >
+          <div className="ad-mobile-nav-head">
+            <div>
+              <span>MMONN Studio</span>
+              <strong>Choose a section</strong>
+            </div>
+            <button className="ad-icon-button" type="button" aria-label="Close section picker" onClick={() => setMobileNavOpen(false)}>
+              <IconX />
+            </button>
+          </div>
           {NAV_GROUPS.map((group) => (
             <div className="ad-nav-group" key={group}>
               <p className="ad-nav-group-label">{group}</p>
@@ -1247,6 +1339,44 @@ function AdminShell() {
           )}
         </main>
       </div>
+
+      <nav className="ad-mobile-dock" aria-label="Mobile workspace actions">
+        <button
+          className={`ad-mobile-dock-button${panel === "dashboard" ? " is-active" : ""}`}
+          type="button"
+          onClick={() => goTo("dashboard")}
+        >
+          <IconDashboard />
+          <span>Home</span>
+        </button>
+        <button
+          className={`ad-mobile-dock-button${mobileNavOpen ? " is-active" : ""}`}
+          type="button"
+          aria-expanded={mobileNavOpen}
+          aria-controls="mobile-content-sections"
+          onClick={() => setMobileNavOpen((open) => !open)}
+        >
+          <IconCompass />
+          <span>Sections</span>
+        </button>
+        <button
+          className={`ad-mobile-dock-button${panel === "history" ? " is-active" : ""}`}
+          type="button"
+          onClick={() => goTo("history")}
+        >
+          <IconHistory />
+          <span>History</span>
+        </button>
+        <button
+          className="ad-mobile-dock-button ad-mobile-dock-button--primary"
+          type="button"
+          onClick={Boolean(draftUpdatedAt) && !dirty ? publish : save}
+          disabled={localPreview || Boolean(busy) || (!dirty && !draftUpdatedAt)}
+        >
+          <IconCheck />
+          <span>{Boolean(draftUpdatedAt) && !dirty ? "Publish" : "Save"}</span>
+        </button>
+      </nav>
     </div>
   );
 }

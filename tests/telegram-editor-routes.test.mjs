@@ -91,16 +91,17 @@ function editorFetch({ published = content, draft = null, rpcResult } = {}) {
       // instead of failing before the draft/publish write is reached.
       return json([{ id: "test-upload", name: "uploads/image-2026-09-03-192541971.png", metadata: { size: 1 } }]);
     }
-    if (path.endsWith("/editor_content_drafts") && method === "GET") return json(draft ? [draft] : []);
+    if (path.endsWith("/editor_content_drafts") && method === "GET") {
+      return json(url.searchParams.get("select") === "editor_id" ? [] : draft ? [draft] : []);
+    }
     if (path.endsWith("/editor_content_versions") && method === "GET") return json([]);
     if (path.endsWith("/editor_audit") && method === "GET") return json([]);
     if (path.endsWith("/site_content") && method === "GET") {
       return json([{ content: published, updated_at: revision }]);
     }
-    if (path.endsWith("/editor_content_drafts") && method === "POST") {
+    if (path.endsWith("/rpc/save_telegram_draft") && method === "POST") {
       return json([{ updated_at: "2026-09-06T00:01:00.000Z" }]);
     }
-    if (path.endsWith("/editor_audit") && method === "POST") return json({});
     if (path.endsWith("/rpc/publish_telegram_content") && method === "POST") {
       return json(rpcResult || [{ content: published, updated_at: "2026-09-06T00:02:00.000Z" }]);
     }
@@ -182,6 +183,15 @@ test("server publishes through the atomic version-and-audit RPC", { concurrency:
   assert.equal(payload.draft, false);
   assert.equal(payload.revision, publishedAt);
   assert.notEqual(payload.revision, revision);
+});
+
+test("server requires a saved draft before publishing", { concurrency: false }, async () => {
+  const { response, payload } = await withFetch(editorFetch(), () =>
+    invoke({ method: "POST", path: "/api/editor/publish", body: { revision, draftRevision: null } }),
+  );
+
+  assert.equal(response.status, 409);
+  assert.match(payload.message, /Save a draft before publishing/);
 });
 
 test("server rejects an unsafe YouTube embed before saving a draft", { concurrency: false }, async () => {

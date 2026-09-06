@@ -3,19 +3,23 @@ import { createRoot } from "react-dom/client";
 
 import AdminApp from "./AdminApp.jsx";
 
-function syncTelegramTheme() {
+function setupTelegramMiniApp() {
   const webApp = window.Telegram?.WebApp;
   if (!webApp) return () => {};
 
   const apply = () => {
     document.documentElement.dataset.telegramTheme = webApp.colorScheme === "dark" ? "dark" : "light";
+    webApp.setHeaderColor?.("secondary_bg_color");
+    webApp.setBackgroundColor?.("bg_color");
   };
+  webApp.ready?.();
+  webApp.expand?.();
   apply();
   webApp.onEvent?.("themeChanged", apply);
   return () => webApp.offEvent?.("themeChanged", apply);
 }
 
-syncTelegramTheme();
+setupTelegramMiniApp();
 
 createRoot(document.getElementById("admin-root")).render(
   <StrictMode>
