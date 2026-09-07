@@ -46,6 +46,13 @@ import {
   TextArea,
   TextField,
 } from "./ui.jsx";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "./components/ui/sheet.jsx";
 import "./admin.css";
 
 const PANELS = [
@@ -583,7 +590,7 @@ function AdminShell() {
           className="ad-mobile-section-trigger"
           type="button"
           aria-expanded={mobileNavOpen}
-          aria-controls="mobile-content-sections"
+          aria-controls="mobile-section-sheet"
           onClick={() => setMobileNavOpen((open) => !open)}
         >
           <span className="ad-mobile-section-kicker">Editing</span>
@@ -602,7 +609,6 @@ function AdminShell() {
         />
 
         <nav
-          id="mobile-content-sections"
           className={`ad-nav${mobileNavOpen ? " is-mobile-open" : ""}`}
           aria-label="Content sections"
         >
@@ -1340,6 +1346,13 @@ function AdminShell() {
         </main>
       </div>
 
+      <MobileSectionSheet
+        open={mobileNavOpen}
+        onOpenChange={setMobileNavOpen}
+        panel={panel}
+        onNavigate={goTo}
+      />
+
       <nav className="ad-mobile-dock" aria-label="Mobile workspace actions">
         <button
           className={`ad-mobile-dock-button${panel === "dashboard" ? " is-active" : ""}`}
@@ -1353,7 +1366,7 @@ function AdminShell() {
           className={`ad-mobile-dock-button${mobileNavOpen ? " is-active" : ""}`}
           type="button"
           aria-expanded={mobileNavOpen}
-          aria-controls="mobile-content-sections"
+          aria-controls="mobile-section-sheet"
           onClick={() => setMobileNavOpen((open) => !open)}
         >
           <IconCompass />
@@ -1384,6 +1397,43 @@ function AdminShell() {
 /* ---------------------------------------------------------------------------
    Dashboard
    ------------------------------------------------------------------------ */
+
+function MobileSectionSheet({ open, onOpenChange, panel, onNavigate }) {
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent id="mobile-section-sheet" side="bottom" className="ad-framework-mobile-sheet" aria-describedby="mobile-section-sheet-description">
+        <SheetHeader className="ad-framework-mobile-sheet-head">
+          <span className="ad-framework-mobile-sheet-kicker">MMONN Studio</span>
+          <SheetTitle>Choose a section</SheetTitle>
+          <SheetDescription id="mobile-section-sheet-description">
+            Your current edits stay on screen while you move between sections.
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="ad-framework-mobile-sheet-list">
+          {NAV_GROUPS.map((group) => (
+            <section key={group} aria-label={group}>
+              <p>{group}</p>
+              {PANELS.filter((entry) => entry.group === group).map((entry) => (
+                <button
+                  className={`ad-framework-mobile-sheet-item${panel === entry.id ? " is-active" : ""}`}
+                  type="button"
+                  key={entry.id}
+                  aria-current={panel === entry.id ? "page" : undefined}
+                  onClick={() => onNavigate(entry.id)}
+                >
+                  <entry.icon />
+                  <span>{entry.label}</span>
+                  {panel === entry.id && <IconCheck />}
+                </button>
+              ))}
+            </section>
+          ))}
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
 
 const DASHBOARD_CARDS = [
   {

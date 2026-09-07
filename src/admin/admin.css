@@ -1566,6 +1566,8 @@ body {
 
 @media (max-width: 40rem) {
   .ad-top {
+    position: relative;
+    z-index: 50;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     padding: 0.65rem 0.85rem;
@@ -1583,14 +1585,23 @@ body {
 
   .ad-main {
     padding: 1.1rem 0.85rem max(4rem, calc(1.25rem + env(safe-area-inset-bottom)));
+    background: var(--surface-2);
   }
 
   .ad-panel {
     gap: 1.1rem;
+    width: 100%;
   }
 
   .ad-panel-head h2 {
-    font-size: 1.28rem;
+    font-size: 1.45rem;
+    letter-spacing: -0.025em;
+  }
+
+  .ad-panel-head p {
+    margin-top: 0.45rem;
+    font-size: 0.92rem;
+    line-height: 1.55;
   }
 
   .ad-actions {
@@ -1631,13 +1642,77 @@ body {
   .ad-list,
   .ad-group,
   .ad-summary-card {
-    padding: 0.9rem;
-    border-radius: 12px;
+    padding: 1rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
   }
 
   .ad-dashboard-card {
-    min-height: 108px;
-    padding: 1rem;
+    min-height: 116px;
+    padding: 1.1rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .ad-dashboard-card:active {
+    transform: scale(0.985);
+  }
+
+  /* Native-size controls prevent iOS zoom and make long editing sessions
+     comfortable inside Telegram's constrained webview. */
+  .ad-field {
+    gap: 0.42rem;
+    margin-bottom: 1rem;
+  }
+
+  .ad-field-label {
+    font-size: 0.86rem;
+  }
+
+  .ad-field-hint,
+  .ad-list-hint {
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+
+  .ad-input {
+    min-height: 48px;
+    padding: 0.7rem 0.8rem;
+    border-radius: 10px;
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  .ad-textarea {
+    min-height: 8rem;
+  }
+
+  .ad-list-head {
+    gap: 0.4rem 0.8rem;
+  }
+
+  .ad-list-title {
+    font-size: 1rem;
+  }
+
+  .ad-row {
+    gap: 0.7rem;
+  }
+
+  .ad-row-controls {
+    gap: 0.4rem;
+  }
+
+  .ad-icon-button,
+  .ad-add,
+  .ad-button--sm {
+    min-height: 48px;
+  }
+
+  .ad-icon-button {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
   }
 
   .ad-dialog,
@@ -1854,6 +1929,123 @@ body {
   .ad-mobile-scrim.is-visible {
     opacity: 1;
     pointer-events: auto;
+  }
+
+  /* Desktop keeps its sidebar. On phones the framework-owned Radix Sheet
+     below is the sole section picker, so it receives focus management and
+     reliable Escape/backdrop dismissal for free. */
+  .ad-nav,
+  .ad-mobile-scrim {
+    display: none !important;
+  }
+
+  [data-slot="sheet-overlay"] {
+    z-index: 90 !important;
+    background: rgb(0 0 0 / 48%) !important;
+  }
+
+  .ad-framework-mobile-sheet {
+    z-index: 100 !important;
+    width: 100%;
+    max-height: min(78dvh, 42rem);
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 22px 22px 0 0;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .ad-framework-mobile-sheet-head {
+    flex: none;
+    gap: 0.15rem;
+    padding: 1rem 3.7rem 0.8rem 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .ad-framework-mobile-sheet-kicker {
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .ad-framework-mobile-sheet-head h2 {
+    font-size: 1.1rem;
+    letter-spacing: -0.015em;
+  }
+
+  .ad-framework-mobile-sheet-head p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+    line-height: 1.4;
+  }
+
+  .ad-framework-mobile-sheet-list {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    gap: 1rem;
+    padding: 0.8rem 0.75rem max(1rem, env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .ad-framework-mobile-sheet-list section {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .ad-framework-mobile-sheet-list section > p {
+    margin: 0 0.3rem;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .ad-framework-mobile-sheet-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.7rem;
+    align-items: center;
+    min-height: 48px;
+    padding: 0.6rem 0.75rem;
+    border: 0;
+    border-radius: 10px;
+    background: var(--surface-2);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), background-color 180ms ease, color 180ms ease;
+  }
+
+  .ad-framework-mobile-sheet-item svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--muted);
+  }
+
+  .ad-framework-mobile-sheet-item.is-active {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .ad-framework-mobile-sheet-item.is-active svg {
+    color: var(--accent-ink);
+  }
+
+  .ad-framework-mobile-sheet-item:active {
+    transform: scale(0.98);
   }
 
   .ad-mobile-dock {
