@@ -366,7 +366,11 @@ function parseMultipartFile(body, contentType) {
     const separator = chunk.indexOf("\r\n\r\n");
     if (separator < 0) continue;
     const headers = chunk.slice(0, separator);
-    const disposition = /content-disposition:\s*form-data;[^\r\n]*name="([^"]+)"(?:;\s*filename="([^"]*)")?/i.exec(headers);
+    // Keep the `name` parameter bounded to one parameter. The previous
+    // greedy expression could match the `name` at the end of `filename`,
+    // which made ordinary browser FormData uploads look as if they did not
+    // contain the required `file` field.
+    const disposition = /content-disposition:\s*form-data;\s*name="([^"]+)"(?:;\s*filename="([^"]*)")?/i.exec(headers);
     if (!disposition || disposition[1] !== "file" || !disposition[2]) continue;
 
     const type = /content-type:\s*([^\r\n;]+)/i.exec(headers)?.[1]?.toLowerCase() || "";

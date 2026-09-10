@@ -36,8 +36,9 @@ function signedInitData() {
   return values.toString();
 }
 
-function makeRequest({ method, path, body, userId = "123456789" }) {
-  const stream = Readable.from(body ? [Buffer.from(JSON.stringify(body))] : []);
+function makeRequest({ method, path, body, rawBody, contentType, userId = "123456789" }) {
+  const payload = rawBody ?? (body ? Buffer.from(JSON.stringify(body)) : null);
+  const stream = Readable.from(payload ? [payload] : []);
   const session = createEditorSession({ id: userId, name: "MMONN", username: "mmonn" }, sessionSecret);
   Object.assign(stream, {
     method,
@@ -46,7 +47,7 @@ function makeRequest({ method, path, body, userId = "123456789" }) {
       cookie: `mmonn_editor=${encodeURIComponent(session)}`,
       origin: "http://localhost",
       "x-mmonn-editor": "1",
-      ...(body ? { "content-type": "application/json" } : {}),
+      ...(contentType ? { "content-type": contentType } : body ? { "content-type": "application/json" } : {}),
     },
     socket: { remoteAddress: "127.0.0.1" },
   });
@@ -79,6 +80,21 @@ function json(payload, status = 200) {
   });
 }
 
+function multipartFile({ filename, type, body }) {
+  const boundary = "----mmonn-editor-route-test";
+  return {
+    contentType: `multipart/form-data; boundary=${boundary}`,
+    body: Buffer.concat([
+      Buffer.from(
+        `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${filename}"\r\nContent-Type: ${type}\r\n\r\n`,
+        "utf8",
+      ),
+      body,
+      Buffer.from(`\r\n--${boundary}--\r\n`, "utf8"),
+    ]),
+  };
+}
+
 function editorFetch({ published = content, draft = null, rpcResult } = {}) {
   return async (input, init = {}) => {
     const url = new URL(String(input));
@@ -91,11 +107,13 @@ function editorFetch({ published = content, draft = null, rpcResult } = {}) {
       // instead of failing before the draft/publish write is reached.
       return json([{ id: "test-upload", name: "uploads/image-2026-09-03-192541971.png", metadata: { size: 1 } }]);
     }
+    if (path.startsWith("/storage/v1/object/site-assets/uploads/") && method === "POST") return json({});
     if (path.endsWith("/editor_content_drafts") && method === "GET") {
       return json(url.searchParams.get("select") === "editor_id" ? [] : draft ? [draft] : []);
     }
     if (path.endsWith("/editor_content_versions") && method === "GET") return json([]);
     if (path.endsWith("/editor_audit") && method === "GET") return json([]);
+    if (path.endsWith("/editor_audit") && method === "POST") return json([]);
     if (path.endsWith("/site_content") && method === "GET") {
       return json([{ content: published, updated_at: revision }]);
     }
@@ -207,4 +225,19 @@ test("server rejects an unsafe YouTube embed before saving a draft", { concurren
 
   assert.equal(response.status, 400);
   assert.match(payload.message, /embedUrl must use https|official YouTube embed URL/);
+});
+
+test("server accepts a valid collaboration photo through the protected upload route", { concurrency: false }, async () => {
+  const upload = multipartFile({
+    filename: "collaboration-photo.png",
+    type: "image/png",
+    body: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00]),
+  });
+  const { response, payload } = await withFetch(editorFetch(), () =>
+    invoke({ method: "POST", path: "/api/editor/assets", rawBody: upload.body, contentType: upload.contentType }),
+  );
+
+  assert.equal(response.status, 201, payload.message);
+  assert.equal(payload.asset.path, "uploads/collaboration-photo.png");
+  assert.equal(payload.asset.size, 10);
 });

@@ -483,6 +483,12 @@ export function AssetField({ label, hint, value, assets, onChange, onUpload, all
         </div>
       </Field>
 
+      {onUpload && (
+        <p className="text-xs leading-5 text-muted-foreground">
+          Photos over 3.5 MB are prepared for upload automatically. GIFs, SVGs, and AVIF files must already be below 4 MB.
+        </p>
+      )}
+
       {uploadError && <p className="text-sm text-destructive">{uploadError}</p>}
 
       {value && (
