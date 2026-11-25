@@ -25,6 +25,10 @@ export default function MusicDiscGallery({ tracks, artistUrl }) {
     let suppressClick = false;
     let active = 0;
 
+    // Layout is stable during a swipe; only refresh these measurements on resize.
+    let railWidth = rail.clientWidth;
+    let geometry = cards.map((card) => ({ left: card.offsetLeft, width: card.offsetWidth }));
+    const coarsePointer = window.matchMedia("(pointer: coarse)");
     const maxScroll = () => Math.max(0, rail.scrollWidth - rail.clientWidth);
     const paint = () => {
       paintFrame = null;
@@ -35,12 +39,15 @@ export default function MusicDiscGallery({ tracks, artistUrl }) {
       lastPaint = now;
       let nearest = 0;
       let distance = Infinity;
-      const mobile = rail.clientWidth < 700;
-      const geometry = cards.map((card) => ({ left: card.offsetLeft, width: card.offsetWidth }));
+      const mobile = railWidth < 700 || coarsePointer.matches;
+      const scrollLeft = rail.scrollLeft;
       for (const [index, card] of cards.entries()) {
         const { left, width } = geometry[index];
-        const offset = (left + width / 2 - rail.scrollLeft - rail.clientWidth / 2) / (width * 0.84);
+        const offset = (left + width / 2 - scrollLeft - railWidth / 2) / (width * 0.84);
         if (Math.abs(offset) < distance) { distance = Math.abs(offset); nearest = index; }
+        // Offscreen discs need no style work. Native scrolling composites the
+        // mobile artwork without continuously rerasterizing its masked layers.
+        if (mobile || Math.abs(offset) > 2.8) continue;
         const position = clamp(offset, -2.4, 2.4);
         card.style.setProperty("--disc-lift", `${reducedMotion ? 0 : -position * (mobile ? 30 : 66)}px`);
         card.style.setProperty("--disc-scale", reducedMotion ? "1" : String(1.02 + clamp(position, -1.8, 1.8) * 0.1));
@@ -141,6 +148,8 @@ export default function MusicDiscGallery({ tracks, artistUrl }) {
       stop();
       lostCapture();
       rail.style.setProperty("--rail-width", `${rail.clientWidth}px`);
+      railWidth = rail.clientWidth;
+      geometry = cards.map((card) => ({ left: card.offsetLeft, width: card.offsetWidth }));
       const card = cards[active];
       rail.scrollLeft = clamp(card.offsetLeft + card.offsetWidth / 2 - rail.clientWidth / 2, 0, maxScroll());
       target = lastScroll = rail.scrollLeft;

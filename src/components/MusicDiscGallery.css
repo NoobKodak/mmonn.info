@@ -75,3 +75,29 @@
   .music-disc-rail .music-catalog-card:focus-visible .disc-artwork { transform: none; transition: none; }
   .music-disc-rail .music-catalog-card-copy { transition: none; opacity: 1; }
 }
+
+/* Keep touch momentum on the compositor: static perspective artwork avoids
+   retargeting 31 masked, blended discs on every native scroll frame. */
+@media (max-width: 700px), (pointer: coarse) {
+  .music-disc-rail { -webkit-overflow-scrolling: touch; }
+  .music-disc-rail .music-catalog-card {
+    transform: translate3d(0, 0, 0);
+  }
+  .music-disc-rail .music-catalog-item:nth-child(3n + 1) .music-catalog-card {
+    transform: translate3d(0, 18px, 0);
+  }
+  .music-disc-rail .music-catalog-item:nth-child(3n) .music-catalog-card {
+    transform: translate3d(0, -18px, 0);
+  }
+  .music-disc-rail .disc-artwork,
+  .music-disc-rail .music-catalog-card:hover .disc-artwork,
+  .music-disc-rail .music-catalog-card:focus-visible .disc-artwork {
+    transform: perspective(1100px) rotateX(8deg) rotateY(-18deg) rotateZ(-13deg);
+    transition: none;
+  }
+  .music-disc-rail .disc-artwork-reflection { mix-blend-mode: normal; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-disc-rail .music-catalog-item .music-catalog-card,
+  .music-disc-rail .music-catalog-item .disc-artwork { transform: none; }
+}
