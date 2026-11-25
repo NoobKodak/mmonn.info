@@ -2,6 +2,7 @@ import "./SocialFooter.css";
 
 const PROFILES = [
   ["Instagram", "https://www.instagram.com/mmonn.msc/", "instagram"],
+  ["TikTok", "https://www.tiktok.com/@mmonn.music", "tiktok"],
   ["Spotify", "https://open.spotify.com/artist/57wPsYZkEErG0C2ntgqNTe", "spotify"],
   ["Apple Music", "https://music.apple.com/ph/artist/mmonn/1632799825", "apple-music"],
   ["Facebook", "https://www.facebook.com/MMONN.MUSIC/", "facebook"],
@@ -30,6 +31,7 @@ function SocialIcon({ kind }) {
         <ellipse cx="15.2" cy="15.3" rx="2.3" ry="1.7" fill="currentColor" />
       </>}
       {kind === "facebook" && <path fill="currentColor" d="M14 22v-9h3l.5-3H14V8c0-1 .4-1.5 1.7-1.5H18V3.2c-.7-.1-1.8-.2-2.8-.2C12.4 3 11 4.7 11 7.6V10H8v3h3v9z" />}
+      {kind === "tiktok" && <path fill="currentColor" d="M12 2h2.2c.3 1.9 1.5 3.3 3.5 3.7v2.2c-1.3 0-2.5-.3-3.5-1v5.9a4.8 4.8 0 1 1-4-4.73v2.2a2.6 2.6 0 1 0 1.8 2.48V2z" />}
       {kind === "youtube" && <>
         <rect x="2" y="5" width="20" height="14" rx="4" fill="currentColor" />
         <path d="m10 9 6 3-6 3z" fill="#000" />
