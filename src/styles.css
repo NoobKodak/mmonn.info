@@ -475,9 +475,10 @@ ul {
   transform: translate(0.08em, -0.08em);
 }
 
-/* The leading "Back" entry closes the overlay; it's a <button>, not an <a>,
-   so it needs its own reset before the shared .nav-link treatment applies. */
-.amarad-back-link {
+/* The leading "Back" entry (NavBack.jsx, shared by SectionNav and AmaradNav)
+   closes/reverses the reveal; it's a <button>, not an <a>, so it needs its
+   own reset before the shared .nav-link treatment applies. */
+.nav-back-link {
   border: 0;
   background: none;
   padding: 0;
@@ -487,17 +488,17 @@ ul {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
-.amarad-back-icon {
+.nav-back-icon {
   font-size: clamp(1.1rem, 4vw, 1.375rem);
   transition: transform 180ms ease;
 }
-.amarad-back-link:hover .amarad-back-icon,
-.amarad-back-link:focus-visible .amarad-back-icon {
+.nav-back-link:hover .nav-back-icon,
+.nav-back-link:focus-visible .nav-back-icon {
   transform: translateX(-0.15em);
 }
 @media (prefers-reduced-motion: reduce) {
   .amarad-arrow,
-  .amarad-back-icon { transition: none; }
+  .nav-back-icon { transition: none; }
 }
 @media (max-width: 39.999rem) {
   .hero-title { font-size: clamp(1.0625rem, 4.5vw, 1.25rem); }
@@ -785,6 +786,7 @@ ul {
   .nav-item--music { --x: 771; --base: 514; }
   .nav-item--notable-projects { --x: 718; --base: 691; }
   .nav-item--contact { --x: 517; --base: 622; }
+  .nav-item--social { --x: 420; --base: 800; }
 
   .nav-slash {
     font-size: calc(34 * var(--px));
@@ -799,15 +801,16 @@ ul {
   }
 
   /* Amarad reuses the --about/--music/--contact scatter slots above for a
-     pixel-identical match to the reference composition; only its own "Back"
-     entry (shown above the portrait, clear of that cluster) needs a slot. */
-  .amarad-back { --x: 199; --base: 437; }
+     pixel-identical match to the reference composition. Both navs' "Back"
+     entry (NavBack.jsx) shares one slot, shown above the portrait, clear of
+     either cluster. */
+  .nav-back { --x: 199; --base: 437; }
 
   .amarad-arrow {
     font-size: calc(40 * var(--px));
   }
 
-  .amarad-back-icon {
+  .nav-back-icon {
     font-size: calc(30 * var(--px));
   }
 }

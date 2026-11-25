@@ -29,6 +29,7 @@ export default function Hero() {
   const [amaradOpen, setAmaradOpen] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
   const timerRef = useRef(null);
+  const exploreButtonRef = useRef(null);
 
   const revealed = phase === "nav";
 
@@ -38,6 +39,15 @@ export default function Hero() {
     // keyboard activation keeps focus moving into the newly visible nav.
     setFocusNavigation(event.detail === 0);
     setPhase(prefersReducedMotion ? "nav" : "leaving");
+  };
+
+  // The nav's own back arrow reverses the one-way reveal: no leave transition
+  // to play back, so it snaps straight to "intro" and hands focus to the
+  // button that re-mounts in its place.
+  const handleBack = () => {
+    window.clearTimeout(timerRef.current);
+    setPhase("intro");
+    requestAnimationFrame(() => exploreButtonRef.current?.focus());
   };
 
   // Safety net: advance even if the transition never reports finishing.
@@ -94,6 +104,7 @@ export default function Hero() {
 
             <div className="hero-actions">
               <ExploreButton
+                buttonRef={exploreButtonRef}
                 controls={NAV_ID}
                 expanded={revealed}
                 onActivate={handleExplore}
@@ -113,6 +124,7 @@ export default function Hero() {
           id={NAV_ID}
           revealed={revealed}
           shouldFocusFirstLink={focusNavigation}
+          onBack={handleBack}
         />
 
         <AmaradNav

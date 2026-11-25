@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 
+import NavBack from "./NavBack.jsx";
+
 /**
  * Mirrors SectionNav.jsx: same numbered /01 treatment, same stay-mounted
  * -and-toggle-hidden approach — but toggled independently by the Amarad
@@ -52,18 +54,7 @@ export default function AmaradNav({ id, open, onClose, toggleId }) {
       aria-label="Amarad listening links"
     >
       <ul className="nav-list">
-        <li className="nav-item amarad-back" style={{ "--i": 0 }}>
-          <button
-            type="button"
-            className="nav-link amarad-back-link"
-            onClick={onClose}
-            aria-label="Back"
-          >
-            <span className="material-symbols-outlined amarad-back-icon" aria-hidden="true">
-              arrow_back
-            </span>
-          </button>
-        </li>
+        <NavBack onActivate={onClose} />
         {LINKS.map(([number, label, url, slot], index) => (
           <li
             className={`nav-item nav-item--${slot} amarad-item`}

@@ -40,7 +40,7 @@ function SocialIcon({ kind }) {
 
 export default function SocialFooter() {
   return (
-    <footer className="social-footer">
+    <footer className="social-footer" id="social">
       <nav aria-label="Social and music profiles">
         {PROFILES.map(([name, href, kind]) => (
           <a href={href} key={kind} aria-label={name} title={name}

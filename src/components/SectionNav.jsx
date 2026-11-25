@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 
 import { useSections } from "../lib/content-store.jsx";
+import NavBack from "./NavBack.jsx";
 
 /**
  * Stays mounted and toggles `hidden` rather than mounting on reveal: it keeps
@@ -8,7 +9,7 @@ import { useSections } from "../lib/content-store.jsx";
  * staggered entrance is a CSS animation, which browsers start when a box goes
  * from `display: none` to displayed — so no forced-reflow trick is needed.
  */
-export default function SectionNav({ id, revealed, shouldFocusFirstLink }) {
+export default function SectionNav({ id, revealed, shouldFocusFirstLink, onBack }) {
   const SECTIONS = useSections();
   const firstLinkRef = useRef(null);
 
@@ -26,11 +27,12 @@ export default function SectionNav({ id, revealed, shouldFocusFirstLink }) {
       aria-label="Artist profile sections"
     >
       <ul className="nav-list">
+        <NavBack onActivate={onBack} />
         {SECTIONS.map((section, index) => (
           <li
             className={`nav-item nav-item--${section.id}`}
             key={section.id}
-            style={{ "--i": index }}
+            style={{ "--i": index + 1 }}
           >
             <a
               className="nav-link"
@@ -45,6 +47,18 @@ export default function SectionNav({ id, revealed, shouldFocusFirstLink }) {
             </a>
           </li>
         ))}
+        <li
+          className="nav-item nav-item--social"
+          style={{ "--i": SECTIONS.length + 1 }}
+        >
+          <a className="nav-link" href="#social">
+            <span className="nav-slash" aria-hidden="true">
+              /
+            </span>
+            <span className="nav-number">{String(SECTIONS.length + 1).padStart(2, "0")}</span>
+            <span className="nav-label">social media</span>
+          </a>
+        </li>
       </ul>
     </nav>
   );
