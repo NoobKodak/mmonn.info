@@ -4,23 +4,105 @@
     "id": "57wPsYZkEErG0C2ntgqNTe",
     "spotifyUrl": "https://open.spotify.com/artist/57wPsYZkEErG0C2ntgqNTe"
   },
-  "source": "embed",
-  "fetchedAt": "2026-09-02T05:14:30.396Z",
+  "source": "public-spotify-pages",
+  "isCompleteCatalog": false,
+  "fetchedAt": "2026-11-25T11:12:15.863Z",
+  "inventoryCheckedAt": "2026-11-25",
+  "releaseSources": [
+    "https://open.spotify.com/album/5WfzKtkIMjDAlPgQg2bQq8",
+    "https://open.spotify.com/album/2ANEf1IAk7z2nZHHgYWTbl",
+    "https://open.spotify.com/album/43UFuKtDxLB0XAV6THq0KT",
+    "https://open.spotify.com/album/3uBdLkGzbRcS9f7ba1e0bl",
+    "https://open.spotify.com/album/4PFg4CMcodcsNhjpgIlE8I",
+    "https://open.spotify.com/album/1pjgSL6hP3LmD21fwZkhQP",
+    "https://open.spotify.com/album/6DhRtH9jblZqLbS1VoiqLR",
+    "https://open.spotify.com/album/4E2JetNa2hHTYnyQIx5h13",
+    "https://open.spotify.com/album/7Bd6bjdTa59hLvhqP59rc5",
+    "https://open.spotify.com/album/6CxfuAaYRHWkKCuAfbYygQ",
+    "https://open.spotify.com/album/1fHEuSnq9yXq8exTEkXoFK",
+    "https://open.spotify.com/album/68S42qO9HXqFA9c8kEvoG1",
+    "https://open.spotify.com/album/6RErIL6KplZzUBGH7RXOxc",
+    "https://open.spotify.com/album/4jhcgwXgbrXW6APyJV0BWH",
+    "https://open.spotify.com/album/3gvxmxAFCY9gypFJ0RUW3A",
+    "https://open.spotify.com/album/1Alk6S6DpJxR00FBBYjOYe",
+    "https://open.spotify.com/album/2tnctzCuBx06Y0XO3QOiuR",
+    "https://open.spotify.com/album/3zFtFHLKoHWapgdmaAMdI2",
+    "https://open.spotify.com/album/5rcl7i80BE1pnP88xf1Ciq",
+    "https://open.spotify.com/album/5nXX4FTrtyTwtVHCZXuv8g",
+    "https://open.spotify.com/album/3M7fsKaov3BlSP3Stortcp",
+    "https://open.spotify.com/album/3ehsWoVHfrpovrr0pnwbAM",
+    "https://open.spotify.com/album/58b8FjaYM7xTfgVzUeJSql",
+    "https://open.spotify.com/album/6XaJoFHt2oby2wVf2aF9LY",
+    "https://open.spotify.com/album/2viBgX45Fw5WskxO2lvl7U",
+    "https://open.spotify.com/album/5czFvng5qXaj4ldZ3exB4K",
+    "https://open.spotify.com/album/0sFGJ3MTtfIozMYAi5Zqew",
+    "https://open.spotify.com/album/2ludN2wy4NY3v0TN0wZftb"
+  ],
   "tracks": [
     {
-      "id": "3nRlbohAuTQDgKdB7RQWBk",
-      "name": "PLY4",
+      "id": "39FiebEYh6byehwJuSMEqH",
+      "name": "Amarad",
       "artists": [
-        "DEMI",
+        "MMONN",
+        "kyleaux"
+      ],
+      "releaseDate": "2026-09-04",
+      "durationMs": 204454,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/39FiebEYh6byehwJuSMEqH",
+      "album": {
+        "id": "5WfzKtkIMjDAlPgQg2bQq8",
+        "name": "Amarad",
+        "image": "covers/39FiebEYh6byehwJuSMEqH.jpg"
+      }
+    },
+    {
+      "id": "6hFTpybHEefCqqOoP0RvOr",
+      "name": "Panganib",
+      "artists": [
         "MMONN"
       ],
-      "releaseDate": "2025-06-27T00:00:00Z",
-      "durationMs": 236129,
-      "explicit": true,
-      "spotifyUrl": "https://open.spotify.com/track/3nRlbohAuTQDgKdB7RQWBk",
+      "releaseDate": "2026-04-03",
+      "durationMs": 280785,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/6hFTpybHEefCqqOoP0RvOr",
       "album": {
-        "name": null,
-        "image": "covers/3nRlbohAuTQDgKdB7RQWBk.jpg"
+        "id": "2ANEf1IAk7z2nZHHgYWTbl",
+        "name": "Panganib",
+        "image": "covers/6hFTpybHEefCqqOoP0RvOr.jpg"
+      }
+    },
+    {
+      "id": "3MkdcTiYmm3luhr6Pe1ObK",
+      "name": "UMASA",
+      "artists": [
+        "L8NIGHTJ",
+        "MMONN"
+      ],
+      "releaseDate": "2026-01-09",
+      "durationMs": 141992,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/3MkdcTiYmm3luhr6Pe1ObK",
+      "album": {
+        "id": "0sFGJ3MTtfIozMYAi5Zqew",
+        "name": "SORRY, I'M L8",
+        "image": "covers/3MkdcTiYmm3luhr6Pe1ObK.jpg"
+      }
+    },
+    {
+      "id": "54wX2ULUVGODWNPcjXiliN",
+      "name": "Naga City Baby",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2025-11-13",
+      "durationMs": 125993,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/54wX2ULUVGODWNPcjXiliN",
+      "album": {
+        "id": "43UFuKtDxLB0XAV6THq0KT",
+        "name": "Naga City Baby",
+        "image": "covers/54wX2ULUVGODWNPcjXiliN.jpg"
       }
     },
     {
@@ -31,58 +113,47 @@
         "Because",
         "MMONN"
       ],
-      "releaseDate": "2025-10-19T00:00:00Z",
+      "releaseDate": "2025-10-19",
       "durationMs": 183215,
       "explicit": true,
       "spotifyUrl": "https://open.spotify.com/track/1IZkg1yKs8wQOwXZveRkRN",
       "album": {
-        "name": null,
+        "id": "5czFvng5qXaj4ldZ3exB4K",
+        "name": "Memento Mori",
         "image": "covers/1IZkg1yKs8wQOwXZveRkRN.jpg"
       }
     },
     {
-      "id": "16qiO1gfdcLyBEzAkCSjGV",
-      "name": "Ply4",
+      "id": "3GfVuFbLq4J4gcIuRhFYEX",
+      "name": "Hvndg",
       "artists": [
         "MMONN"
       ],
-      "releaseDate": "2023-07-01T00:00:00Z",
-      "durationMs": 180019,
+      "releaseDate": "2025-08-06",
+      "durationMs": 101052,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/3GfVuFbLq4J4gcIuRhFYEX",
+      "album": {
+        "id": "4PFg4CMcodcsNhjpgIlE8I",
+        "name": "Hvndg",
+        "image": "covers/3GfVuFbLq4J4gcIuRhFYEX.jpg"
+      }
+    },
+    {
+      "id": "3nRlbohAuTQDgKdB7RQWBk",
+      "name": "PLY4",
+      "artists": [
+        "DEMI",
+        "MMONN"
+      ],
+      "releaseDate": "2025-06-27",
+      "durationMs": 236129,
       "explicit": true,
-      "spotifyUrl": "https://open.spotify.com/track/16qiO1gfdcLyBEzAkCSjGV",
+      "spotifyUrl": "https://open.spotify.com/track/3nRlbohAuTQDgKdB7RQWBk",
       "album": {
-        "name": null,
-        "image": "covers/16qiO1gfdcLyBEzAkCSjGV.jpg"
-      }
-    },
-    {
-      "id": "6hFTpybHEefCqqOoP0RvOr",
-      "name": "Panganib",
-      "artists": [
-        "MMONN"
-      ],
-      "releaseDate": "2026-04-03T00:00:00Z",
-      "durationMs": 280785,
-      "explicit": false,
-      "spotifyUrl": "https://open.spotify.com/track/6hFTpybHEefCqqOoP0RvOr",
-      "album": {
-        "name": null,
-        "image": "covers/6hFTpybHEefCqqOoP0RvOr.jpg"
-      }
-    },
-    {
-      "id": "54wX2ULUVGODWNPcjXiliN",
-      "name": "Naga City Baby",
-      "artists": [
-        "MMONN"
-      ],
-      "releaseDate": "2025-11-13T00:00:00Z",
-      "durationMs": 125993,
-      "explicit": false,
-      "spotifyUrl": "https://open.spotify.com/track/54wX2ULUVGODWNPcjXiliN",
-      "album": {
-        "name": null,
-        "image": "covers/54wX2ULUVGODWNPcjXiliN.jpg"
+        "id": "1pjgSL6hP3LmD21fwZkhQP",
+        "name": "PLY4",
+        "image": "covers/3nRlbohAuTQDgKdB7RQWBk.jpg"
       }
     },
     {
@@ -92,13 +163,160 @@
         "MMONN",
         "Ne7in"
       ],
-      "releaseDate": "2024-12-27T00:00:00Z",
+      "releaseDate": "2024-12-27",
       "durationMs": 231784,
       "explicit": true,
       "spotifyUrl": "https://open.spotify.com/track/5P0OmLtPsQlNpQBHYt8S6o",
       "album": {
-        "name": null,
+        "id": "6DhRtH9jblZqLbS1VoiqLR",
+        "name": "Kung Kakapit Ka",
         "image": "covers/5P0OmLtPsQlNpQBHYt8S6o.jpg"
+      }
+    },
+    {
+      "id": "02A7iplAOQugscMqmPSTvY",
+      "name": "Puso",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2024-10-24",
+      "durationMs": 218783,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/02A7iplAOQugscMqmPSTvY",
+      "album": {
+        "id": "4E2JetNa2hHTYnyQIx5h13",
+        "name": "Puso",
+        "image": "covers/02A7iplAOQugscMqmPSTvY.jpg"
+      }
+    },
+    {
+      "id": "5ckoqtWZS1uTAZ6Z4wIhFu",
+      "name": "Lason",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2024-05-31",
+      "durationMs": 120995,
+      "explicit": true,
+      "spotifyUrl": "https://open.spotify.com/track/5ckoqtWZS1uTAZ6Z4wIhFu",
+      "album": {
+        "id": "7Bd6bjdTa59hLvhqP59rc5",
+        "name": "Lason",
+        "image": "covers/5ckoqtWZS1uTAZ6Z4wIhFu.jpg"
+      }
+    },
+    {
+      "id": "5PilbICIrjM1jJbUl78T3r",
+      "name": "HIRAP",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2024-05-31",
+      "durationMs": 168026,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/5PilbICIrjM1jJbUl78T3r",
+      "album": {
+        "id": "7Bd6bjdTa59hLvhqP59rc5",
+        "name": "Lason",
+        "image": "covers/5PilbICIrjM1jJbUl78T3r.jpg"
+      }
+    },
+    {
+      "id": "1X787LRiRXnguxU24MHZ9E",
+      "name": "Alam Mo Naman",
+      "artists": [
+        "Colt",
+        "MMONN"
+      ],
+      "releaseDate": "2024-04-19",
+      "durationMs": 178000,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/1X787LRiRXnguxU24MHZ9E",
+      "album": {
+        "id": "2ludN2wy4NY3v0TN0wZftb",
+        "name": "Alam Mo Naman",
+        "image": "covers/1X787LRiRXnguxU24MHZ9E.jpg"
+      }
+    },
+    {
+      "id": "2CAoWqY9luI4WmNNGxdbTf",
+      "name": "Bicolana - Remix",
+      "artists": [
+        "MMONN",
+        "ibvrrv"
+      ],
+      "releaseDate": "2024-01-25",
+      "durationMs": 192325,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/2CAoWqY9luI4WmNNGxdbTf",
+      "album": {
+        "id": "6CxfuAaYRHWkKCuAfbYygQ",
+        "name": "One 4 You",
+        "image": "covers/2CAoWqY9luI4WmNNGxdbTf.jpg"
+      }
+    },
+    {
+      "id": "7sa1RWgTVrcGJiFFrRJTBA",
+      "name": "Kung Di Man",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2024-01-25",
+      "durationMs": 158783,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/7sa1RWgTVrcGJiFFrRJTBA",
+      "album": {
+        "id": "6CxfuAaYRHWkKCuAfbYygQ",
+        "name": "One 4 You",
+        "image": "covers/7sa1RWgTVrcGJiFFrRJTBA.jpg"
+      }
+    },
+    {
+      "id": "7fzMoKUniZejudGjhevjAh",
+      "name": "14U",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2024-01-25",
+      "durationMs": 223504,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/7fzMoKUniZejudGjhevjAh",
+      "album": {
+        "id": "6CxfuAaYRHWkKCuAfbYygQ",
+        "name": "One 4 You",
+        "image": "covers/7fzMoKUniZejudGjhevjAh.jpg"
+      }
+    },
+    {
+      "id": "09xL1bugxY0ATPTO0FY1No",
+      "name": "Iibigin",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2024-01-25",
+      "durationMs": 105079,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/09xL1bugxY0ATPTO0FY1No",
+      "album": {
+        "id": "6CxfuAaYRHWkKCuAfbYygQ",
+        "name": "One 4 You",
+        "image": "covers/09xL1bugxY0ATPTO0FY1No.jpg"
+      }
+    },
+    {
+      "id": "4C9uYcxX7mzr0r19qrIsjW",
+      "name": "Girl in BGC",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2023-11-03",
+      "durationMs": 87421,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/4C9uYcxX7mzr0r19qrIsjW",
+      "album": {
+        "id": "1fHEuSnq9yXq8exTEkXoFK",
+        "name": "Girl in BGC",
+        "image": "covers/4C9uYcxX7mzr0r19qrIsjW.jpg"
       }
     },
     {
@@ -108,29 +326,46 @@
         "MMONN",
         "Lanzeta"
       ],
-      "releaseDate": "2023-09-01T00:00:00Z",
+      "releaseDate": "2023-09-01",
       "durationMs": 178316,
       "explicit": false,
       "spotifyUrl": "https://open.spotify.com/track/5zwoGZDiCSCa0d0GcHMEC0",
       "album": {
-        "name": null,
+        "id": "68S42qO9HXqFA9c8kEvoG1",
+        "name": "Chillerong Busy",
         "image": "covers/5zwoGZDiCSCa0d0GcHMEC0.jpg"
       }
     },
     {
-      "id": "4lRspLX3zBJcjdR4lMlFwc",
-      "name": "Pagod na",
+      "id": "1qXYgPXyIhZpzVvUZDb1Bc",
+      "name": "Lumayo",
       "artists": [
-        "MMONN",
-        "RB Slatt"
+        "MMONN"
       ],
-      "releaseDate": "2022-11-26T00:00:00Z",
-      "durationMs": 169613,
-      "explicit": true,
-      "spotifyUrl": "https://open.spotify.com/track/4lRspLX3zBJcjdR4lMlFwc",
+      "releaseDate": "2023-08-03",
+      "durationMs": 151250,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/1qXYgPXyIhZpzVvUZDb1Bc",
       "album": {
-        "name": null,
-        "image": "covers/4lRspLX3zBJcjdR4lMlFwc.jpg"
+        "id": "6RErIL6KplZzUBGH7RXOxc",
+        "name": "Lumayo",
+        "image": "covers/1qXYgPXyIhZpzVvUZDb1Bc.jpg"
+      }
+    },
+    {
+      "id": "16qiO1gfdcLyBEzAkCSjGV",
+      "name": "Ply4",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2023-07-01",
+      "durationMs": 180019,
+      "explicit": true,
+      "spotifyUrl": "https://open.spotify.com/track/16qiO1gfdcLyBEzAkCSjGV",
+      "album": {
+        "id": "4jhcgwXgbrXW6APyJV0BWH",
+        "name": "Ply4",
+        "image": "covers/16qiO1gfdcLyBEzAkCSjGV.jpg"
       }
     },
     {
@@ -140,13 +375,160 @@
         "MMONN",
         "Calvin De Leon"
       ],
-      "releaseDate": "2023-05-06T00:00:00Z",
+      "releaseDate": "2023-05-06",
       "durationMs": 204694,
       "explicit": false,
       "spotifyUrl": "https://open.spotify.com/track/7pB8BnZyVdgiomsOnOzmp1",
       "album": {
-        "name": null,
+        "id": "3gvxmxAFCY9gypFJ0RUW3A",
+        "name": "Langit, Mundo",
         "image": "covers/7pB8BnZyVdgiomsOnOzmp1.jpg"
+      }
+    },
+    {
+      "id": "4655cmmanSuXuMszpFkRrf",
+      "name": "Dikoalam",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2023-04-27",
+      "durationMs": 106419,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/4655cmmanSuXuMszpFkRrf",
+      "album": {
+        "id": "1Alk6S6DpJxR00FBBYjOYe",
+        "name": "Dikoalam",
+        "image": "covers/4655cmmanSuXuMszpFkRrf.jpg"
+      }
+    },
+    {
+      "id": "4QnBI7WnatfRoisaq9AtFR",
+      "name": "Dina",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2023-03-04",
+      "durationMs": 181336,
+      "explicit": true,
+      "spotifyUrl": "https://open.spotify.com/track/4QnBI7WnatfRoisaq9AtFR",
+      "album": {
+        "id": "2tnctzCuBx06Y0XO3QOiuR",
+        "name": "Dina",
+        "image": "covers/4QnBI7WnatfRoisaq9AtFR.jpg"
+      }
+    },
+    {
+      "id": "2RIsW60RzeLCFrFSW0mexI",
+      "name": "Kasama",
+      "artists": [
+        "Jaime",
+        "MMONN"
+      ],
+      "releaseDate": "2023-02-06",
+      "durationMs": 178593,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/2RIsW60RzeLCFrFSW0mexI",
+      "album": {
+        "id": "3zFtFHLKoHWapgdmaAMdI2",
+        "name": "Kasama",
+        "image": "covers/2RIsW60RzeLCFrFSW0mexI.jpg"
+      }
+    },
+    {
+      "id": "0LLFMOskSR2cpcLLckb8rh",
+      "name": "Molina",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2023-02-04",
+      "durationMs": 119092,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/0LLFMOskSR2cpcLLckb8rh",
+      "album": {
+        "id": "5rcl7i80BE1pnP88xf1Ciq",
+        "name": "Molina",
+        "image": "covers/0LLFMOskSR2cpcLLckb8rh.jpg"
+      }
+    },
+    {
+      "id": "2pSqzwtn9l4qcgOe4pukey",
+      "name": "Maligayang Pagdaramdam",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2023-01-20",
+      "durationMs": 176727,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/2pSqzwtn9l4qcgOe4pukey",
+      "album": {
+        "id": "5nXX4FTrtyTwtVHCZXuv8g",
+        "name": "Maligayang Pagdaramdam",
+        "image": "covers/2pSqzwtn9l4qcgOe4pukey.jpg"
+      }
+    },
+    {
+      "id": "1jnpkUHaXVOypStsPeIkvi",
+      "name": "Aamin",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2022-12-10",
+      "durationMs": 123350,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/1jnpkUHaXVOypStsPeIkvi",
+      "album": {
+        "id": "3M7fsKaov3BlSP3Stortcp",
+        "name": "Aamin",
+        "image": "covers/1jnpkUHaXVOypStsPeIkvi.jpg"
+      }
+    },
+    {
+      "id": "4lRspLX3zBJcjdR4lMlFwc",
+      "name": "Pagod na",
+      "artists": [
+        "MMONN",
+        "RB Slatt"
+      ],
+      "releaseDate": "2022-11-26",
+      "durationMs": 169613,
+      "explicit": true,
+      "spotifyUrl": "https://open.spotify.com/track/4lRspLX3zBJcjdR4lMlFwc",
+      "album": {
+        "id": "3ehsWoVHfrpovrr0pnwbAM",
+        "name": "Pagod na",
+        "image": "covers/4lRspLX3zBJcjdR4lMlFwc.jpg"
+      }
+    },
+    {
+      "id": "2T4K7TlUudnRJglP7bxUSD",
+      "name": "Paraiso",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2022-10-03",
+      "durationMs": 160010,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/2T4K7TlUudnRJglP7bxUSD",
+      "album": {
+        "id": "58b8FjaYM7xTfgVzUeJSql",
+        "name": "Paraiso",
+        "image": "covers/2T4K7TlUudnRJglP7bxUSD.jpg"
+      }
+    },
+    {
+      "id": "58WWEjmGaVDZUZVXgEvrHg",
+      "name": "Manatili",
+      "artists": [
+        "MMONN"
+      ],
+      "releaseDate": "2022-08-06",
+      "durationMs": 175333,
+      "explicit": false,
+      "spotifyUrl": "https://open.spotify.com/track/58WWEjmGaVDZUZVXgEvrHg",
+      "album": {
+        "id": "6XaJoFHt2oby2wVf2aF9LY",
+        "name": "Manatili",
+        "image": "covers/58WWEjmGaVDZUZVXgEvrHg.jpg"
       }
     },
     {
@@ -155,12 +537,13 @@
       "artists": [
         "MMONN"
       ],
-      "releaseDate": "2022-07-08T00:00:00Z",
+      "releaseDate": "2022-07-08",
       "durationMs": 176015,
       "explicit": false,
       "spotifyUrl": "https://open.spotify.com/track/5IS2Eexq0gSttZj86HcVR7",
       "album": {
-        "name": null,
+        "id": "2viBgX45Fw5WskxO2lvl7U",
+        "name": "Alice",
         "image": "covers/5IS2Eexq0gSttZj86HcVR7.jpg"
       }
     }

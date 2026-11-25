@@ -40,12 +40,32 @@ export function normalizeContent(storedContent) {
 
   return {
     ...content,
+    contact: {
+      ...content.contact,
+      location: content.contact.location === "Naga City, Philippines"
+        ? bundledContent.contact.location
+        : content.contact.location,
+    },
     collaborations: content.collaborations.map((entry) => {
       const fallback = defaultsById.get(entry.id) || {};
+      // Older published content still carries the original demo release notes.
+      // Upgrade those only; preserve descriptions subsequently written by the owner.
+      const isSample = entry.description?.includes("Replace this sample note with");
+      const media = { ...mediaDefault, ...fallback.media, ...entry.media };
+      if (isSample && fallback.media) {
+        if (!media.youtubeEmbedUrl || (entry.id === "ply4-remix" && media.youtubeEmbedUrl.includes("i2igE_cixyw"))) {
+          media.youtubeEmbedUrl = fallback.media.youtubeEmbedUrl;
+          media.youtubeLabel = fallback.media.youtubeLabel;
+        }
+      }
       return {
         ...fallback,
         ...entry,
-        media: { ...mediaDefault, ...fallback.media, ...entry.media },
+        ...(isSample && fallback.description ? { description: fallback.description, artists: fallback.artists } : {}),
+        ...(entry.id === "kung-kakapit-ka" ? {
+          artists: (entry.artists || fallback.artists || []).filter((artist) => artist.trim().toUpperCase() !== "SXBER"),
+        } : {}),
+        media,
         frame: mergeContent(frameDefault, { ...fallback.frame, ...entry.frame }),
       };
     }),

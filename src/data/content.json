@@ -59,7 +59,7 @@
     "portraitAlt": "Close black-and-white portrait of MMONN in a dark suit and tie.",
     "paragraphs": [
       "MMONN is an independent multi-genre artist and producer from Naga City. Since 2019, he has been creating music inspired by real emotions and personal experiences, blending influences from R&B, hip-hop, melodic trap, and other contemporary genres.",
-      "His notable release, “PLY4,” helped establish his presence in the local music scene. Throughout his career, MMONN has collaborated with several respected artists, including Alison Shore and Because on “Lason,” DEMI on “PLY4 Remix,” LANZETA on “Chillerong Busy,” RB Slatt on “Pagod Na,” and SXBER and Ne7in on “Kung Kakapit Ka.”",
+      "His notable release, “PLY4,” helped establish his presence in the local music scene. Throughout his career, MMONN has collaborated with several respected artists, including Alison Shore and Because on “Lason,” DEMI on “PLY4 Remix,” LANZETA on “Chillerong Busy,” RB Slatt on “Pagod Na,” and Ne7in on “Kung Kakapit Ka.”",
       "MMONN further expanded his catalog with “AMARAD,” featuring Kyleaux—a collaboration that highlights his evolving sound, emotional storytelling, and ability to create music across different styles. Driven by authenticity and artistic growth, MMONN continues to push creative boundaries, crafting music that connects with listeners through honest storytelling and versatile soundscapes."
     ]
   },
@@ -78,16 +78,16 @@
       "id": "lason",
       "track": "Lason",
       "artists": [
-        "Alison Shore",
+        "Alisson Shore",
         "Because",
         "MMONN"
       ],
-      "description": "A late-night collaboration that brings three distinct voices into one shared melodic frame. Replace this sample note with the official release story, production credits, or an artist note.",
+      "description": "Lason brings MMONN together with Alisson Shore and Because on a three-artist hip-hop release. First released as a single on September 14, 2025, it also appears as the second track on Alisson Shore’s Memento Mori. The collaboration sits within an album that explores love, loss and transformation.",
       "photo": "",
       "media": {
         "spotifyEmbedUrl": "https://open.spotify.com/embed/track/1IZkg1yKs8wQOwXZveRkRN?utm_source=generator",
-        "youtubeEmbedUrl": "",
-        "youtubeLabel": ""
+        "youtubeEmbedUrl": "https://www.youtube.com/embed/s6W62wMUsVk",
+        "youtubeLabel": "Lason official music video"
       },
       "frame": {
         "src": "uploads/image-2026-09-03-192541971.png",
@@ -107,12 +107,12 @@
         "DEMI",
         "MMONN"
       ],
-      "description": "A reworked PLY4 moment, pairing DEMI and MMONN in a new version of the record. Replace this sample note with the official release story, production credits, or an artist note.",
+      "description": "MMONN revisits PLY4 with DEMI, turning his original 2023 solo release into a shared record. Released in June 2025, this version is written and performed by both artists, with production credited to CRMDRM. Plumberboi handles the arrangement, mixing and mastering, while DEMI’s official video presents the collaboration as PLY4 (Remix).",
       "photo": "",
       "media": {
         "spotifyEmbedUrl": "https://open.spotify.com/embed/track/3nRlbohAuTQDgKdB7RQWBk?utm_source=generator",
-        "youtubeEmbedUrl": "https://www.youtube.com/embed/i2igE_cixyw?start=61",
-        "youtubeLabel": "PLY4 music video"
+        "youtubeEmbedUrl": "https://www.youtube.com/embed/tfn6vTm8394",
+        "youtubeLabel": "PLY4 Remix official video"
       },
       "frame": {
         "src": "",
@@ -132,12 +132,12 @@
         "LANZETA",
         "MMONN"
       ],
-      "description": "A shared release that gives LANZETA and MMONN space to meet in the same restless, after-hours world. Replace this sample note with the official release story, production credits, or an artist note.",
+      "description": "Released in September 2023, Chillerong Busy brings MMONN and Lanzeta together around the push and pull of everyday work. Its lyrics balance ambition with rest, moving between the pressure to keep going and the need to slow down. The song makes room for family, personal goals and a calmer pace without giving up on the work ahead.",
       "photo": "",
       "media": {
         "spotifyEmbedUrl": "https://open.spotify.com/embed/track/5zwoGZDiCSCa0d0GcHMEC0?utm_source=generator",
-        "youtubeEmbedUrl": "",
-        "youtubeLabel": ""
+        "youtubeEmbedUrl": "https://www.youtube.com/embed/ITUJQ1b4R2U",
+        "youtubeLabel": "Chillerong Busy official visualizer"
       },
       "frame": {
         "src": "",
@@ -157,12 +157,12 @@
         "RB Slatt",
         "MMONN"
       ],
-      "description": "A direct two-artist collaboration, connecting RB Slatt and MMONN around a single release. Replace this sample note with the official release story, production credits, or an artist note.",
+      "description": "Pagod Na pairs MMONN with RB Slatt on a single released in November 2022. Across their verses, the two voices trace a relationship worn down by hurt and the exhaustion of holding on. The song moves toward separation and letting go, giving both performers a place in its account of heartbreak.",
       "photo": "",
       "media": {
         "spotifyEmbedUrl": "https://open.spotify.com/embed/track/4lRspLX3zBJcjdR4lMlFwc?utm_source=generator",
-        "youtubeEmbedUrl": "",
-        "youtubeLabel": ""
+        "youtubeEmbedUrl": "https://www.youtube.com/embed/NTSZx_4lFe0",
+        "youtubeLabel": "Pagod Na official audio"
       },
       "frame": {
         "src": "",
@@ -179,16 +179,15 @@
       "id": "kung-kakapit-ka",
       "track": "Kung Kakapit Ka",
       "artists": [
-        "SXBER",
         "Ne7in",
         "MMONN"
       ],
-      "description": "A three-way collaboration that puts SXBER, Ne7in, and MMONN in one shared track listing. Replace this sample note with the official release story, production credits, or an artist note.",
+      "description": "Released on December 27, 2024, Kung Kakapit Ka pairs MMONN with featured artist Ne7in. The R&B/Soul single unfolds over three minutes and 52 seconds. Its official lyric video accompanies the release with visuals credited to Orcaworldwide.",
       "photo": "",
       "media": {
         "spotifyEmbedUrl": "https://open.spotify.com/embed/track/5P0OmLtPsQlNpQBHYt8S6o?utm_source=generator",
-        "youtubeEmbedUrl": "",
-        "youtubeLabel": ""
+        "youtubeEmbedUrl": "https://www.youtube.com/embed/nRFoGtV7-Vc",
+        "youtubeLabel": "Kung Kakapit Ka official lyric video"
       },
       "frame": {
         "src": "",
@@ -208,7 +207,7 @@
         "Kyleaux",
         "MMONN"
       ],
-      "description": "A compact collaboration entry for Kyleaux and MMONN, held as a single piece in the archive. Replace this sample note with the official release story, production credits, or an artist note.",
+      "description": "Amarad brings MMONN and featured artist kyleaux together on an R&B single released in September 2026. Issued on the MMONN label, the track runs for three minutes and 24 seconds. Its release credits name Mmonen Moreno as both producer and composer.",
       "photo": "",
       "media": {
         "spotifyEmbedUrl": "https://open.spotify.com/embed/artist/57wPsYZkEErG0C2ntgqNTe?utm_source=generator",
@@ -417,6 +416,6 @@
   "contact": {
     "instagram": "mmonn.msc",
     "email": "mmonn.music.business@gmail.com",
-    "location": "Naga City, Philippines"
+    "location": "MNL PHILIPPINES"
   }
 }

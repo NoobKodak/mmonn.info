@@ -167,6 +167,15 @@ ul {
   }
 }
 
+/* Keep adjoining dark section backgrounds stationary and opaque. Moving or
+   fading their entire boxes exposed the white page as seams between them;
+   motion inside each section remains independent. */
+.app main > :is(.highlights, .music-catalog, .ct) {
+  animation: none;
+  opacity: 1;
+  translate: none;
+}
+
 @view-transition {
   navigation: auto;
 }

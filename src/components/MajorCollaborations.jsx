@@ -1,295 +1,108 @@
 import { useEffect, useRef, useState } from "react";
 
-import { contentAsset } from "../lib/content-asset.js";
-import { frameFor, useCollaborations, usePolaroid } from "../lib/content-store.jsx";
-import HyperText from "./HyperText.jsx";
+import { publicAsset } from "../assets.js";
+import catalog from "../data/spotify.json";
+import DiscArtwork from "./DiscArtwork.jsx";
+import { useCollaborations } from "../lib/content-store.jsx";
 import "./MajorCollaborations.css";
 
-const SPOTIFY_ARTIST_EMBED = "https://open.spotify.com/embed/artist/57wPsYZkEErG0C2ntgqNTe?utm_source=generator";
-const YOUTUBE_ALLOW = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-
-function CollaborationMedia({ collaboration }) {
-  const media = collaboration.media || {};
-  const spotifyEmbedUrl = media.spotifyEmbedUrl || SPOTIFY_ARTIST_EMBED;
-  const hasTrackEmbed = Boolean(media.spotifyEmbedUrl);
-
-  return (
-    <section className="mc-dialog-media" aria-label={`Listen to ${collaboration.track}`}>
-      <div className="mc-dialog-media-item">
-        <p className="mc-dialog-media-label">Spotify</p>
-        <iframe
-          className="mc-dialog-embed mc-dialog-embed--spotify"
-          src={spotifyEmbedUrl}
-          title={
-            hasTrackEmbed
-              ? `Listen to ${collaboration.track} on Spotify`
-              : "Listen to MMONN on Spotify"
-          }
-          loading="lazy"
-          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        />
-      </div>
-
-      {media.youtubeEmbedUrl ? (
-        <div className="mc-dialog-media-item">
-          <p className="mc-dialog-media-label">YouTube</p>
-          <iframe
-            className="mc-dialog-embed mc-dialog-embed--youtube"
-            src={media.youtubeEmbedUrl}
-            title={media.youtubeLabel || `${collaboration.track} music video`}
-            loading="lazy"
-            allow={YOUTUBE_ALLOW}
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
-          />
-        </div>
-      ) : (
-        <div className="mc-dialog-media-item mc-dialog-media-item--unavailable">
-          <p className="mc-dialog-media-label">YouTube</p>
-          <p>No official video embed is linked for this release yet.</p>
-        </div>
-      )}
-    </section>
-  );
-}
-
-function Polaroid({ collaboration, polaroid, className = "" }) {
-  // Each entry may carry its own frame; otherwise it takes the shared one.
-  const frame = frameFor(collaboration, polaroid);
-
-  return (
-    <span
-      className={`mc-frame ${className}`.trim()}
-      style={{
-        "--window-top": `${frame.window.top}%`,
-        "--window-side": `${frame.window.side}%`,
-        "--window-bottom": `${frame.window.bottom}%`,
-      }}
-    >
-      <img
-        className="mc-paper"
-        src={contentAsset(frame.src)}
-        alt=""
-        width={frame.width || undefined}
-        height={frame.height || undefined}
-      />
-      {collaboration.photo && (
-        <img
-          className="mc-photo"
-          src={contentAsset(collaboration.photo)}
-          alt=""
-          loading="lazy"
-        />
-      )}
-    </span>
-  );
+function releaseLinks(media = {}) {
+  const spotify = media.spotifyEmbedUrl?.match(/^https:\/\/open\.spotify\.com\/embed\/(track|artist)\/([a-zA-Z0-9]+)/);
+  const youtube = media.youtubeEmbedUrl?.match(/^https:\/\/www\.youtube\.com\/embed\/([a-zA-Z0-9_-]+)/);
+  return {
+    spotify: spotify ? `https://open.spotify.com/${spotify[1]}/${spotify[2]}` : null,
+    youtube: youtube ? `https://www.youtube.com/watch?v=${youtube[1]}` : null,
+  };
 }
 
 export default function MajorCollaborations({ number, label }) {
-  const COLLABORATIONS = useCollaborations();
-  const polaroid = usePolaroid();
-  const [openId, setOpenId] = useState(null);
-  const [displayedId, setDisplayedId] = useState(null);
-  const dialogRef = useRef(null);
-  const closeButtonRef = useRef(null);
-  const lastTriggerRef = useRef(null);
-  const contentRemovalTimerRef = useRef(null);
-  const open = COLLABORATIONS.find((item) => item.id === displayedId);
+  const collaborations = useCollaborations();
+  const listRef = useRef(null);
+  const [activeId, setActiveId] = useState(collaborations[0]?.id);
 
-  /**
-   * A native <dialog> opened with showModal(), rather than a hand-rolled
-   * overlay: the platform then supplies the focus trap, Escape to dismiss,
-   * inert background, top-layer stacking, and focus returning to whichever
-   * polaroid was clicked — none of which need to be written or maintained.
-   */
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-
-    if (openId && !dialog.open) {
-      // State has rendered the selected release before this effect runs, so
-      // the modal never opens with an empty panel.
-      dialog.showModal();
-
-      const focusFrame = requestAnimationFrame(() => {
-        closeButtonRef.current?.focus({ preventScroll: true });
-      });
-
-      return () => cancelAnimationFrame(focusFrame);
-    }
-
-    if (!openId && dialog.open) dialog.close();
-    return undefined;
-  }, [openId]);
-
-  /**
-   * Listened for natively rather than with React's `onClose`. The `close`
-   * event does not bubble, so it never reaches React's delegated root
-   * listener — leaving `openId` stale after Escape, which made clicking the
-   * same polaroid again a no-op state update that could never reopen it.
-   */
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return undefined;
-
-    const syncClosed = () => {
-      setOpenId(null);
-
-      // Leave the selected dossier mounted for the short native-dialog exit
-      // transition, avoiding an empty white sheet during the fade-out.
-      if (contentRemovalTimerRef.current) {
-        window.clearTimeout(contentRemovalTimerRef.current);
+    const list = listRef.current;
+    if (!list) return undefined;
+    let frame = null;
+    const update = () => {
+      frame = null;
+      const rows = [...list.children];
+      let active = rows[0];
+      for (const row of rows) {
+        const style = getComputedStyle(row);
+        const stacking = style.position === "sticky";
+        const pinnedTop = stacking ? parseFloat(style.top) : 0;
+        // Advance when the incoming heading reaches the reading area. Reading
+        // actual geometry also follows sticky offsets, resizing and reverse scroll.
+        const readingLine = Math.max(innerHeight * (stacking ? 0.55 : 0.28), pinnedTop + 100);
+        if (row.getBoundingClientRect().top <= readingLine) active = row;
       }
-      contentRemovalTimerRef.current = window.setTimeout(() => {
-        setDisplayedId(null);
-        contentRemovalTimerRef.current = null;
-      }, 300);
-
-      // Native dialogs restore focus in modern browsers. Doing this explicitly
-      // also keeps the clicked polaroid as the predictable return point.
-      requestAnimationFrame(() => {
-        lastTriggerRef.current?.focus({ preventScroll: true });
-      });
+      if (active) setActiveId(active.dataset.id);
     };
-    dialog.addEventListener("close", syncClosed);
-    return () => dialog.removeEventListener("close", syncClosed);
-  }, []);
-
-  useEffect(
-    () => () => {
-      if (contentRemovalTimerRef.current) {
-        window.clearTimeout(contentRemovalTimerRef.current);
-      }
-    },
-    [],
-  );
-
-  const handleOpen = (event, id) => {
-    if (contentRemovalTimerRef.current) {
-      window.clearTimeout(contentRemovalTimerRef.current);
-      contentRemovalTimerRef.current = null;
-    }
-
-    lastTriggerRef.current = event.currentTarget;
-    setDisplayedId(id);
-    setOpenId(id);
-  };
-
-  const handleClose = () => {
-    const dialog = dialogRef.current;
-    if (dialog?.open) {
-      dialog.close();
-      return;
-    }
-
-    setOpenId(null);
-  };
-
-  // Browsers retarget a native-dialog backdrop click to the dialog. Check the
-  // pointer coordinates instead of relying on event.target alone so clicks in
-  // the sheet's own padding never dismiss the selected collaboration.
-  const handleDialogClick = (event) => {
-    const dialog = dialogRef.current;
-    if (!dialog || event.target !== dialog) return;
-
-    const { top, right, bottom, left } = dialog.getBoundingClientRect();
-    const clickedBackdrop =
-      event.clientX < left ||
-      event.clientX > right ||
-      event.clientY < top ||
-      event.clientY > bottom;
-
-    if (clickedBackdrop) handleClose();
-  };
+    const schedule = () => {
+      if (frame === null) frame = requestAnimationFrame(update);
+    };
+    const observer = new ResizeObserver(schedule);
+    observer.observe(list);
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    update();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      if (frame !== null) cancelAnimationFrame(frame);
+    };
+  }, [collaborations]);
 
   return (
     <div className="mc">
-      <p className="mc-label">
-        <span className="mc-label-no">{number}.</span> {label}
-      </p>
-
-      <ul className="mc-grid">
-        {COLLABORATIONS.map((collaboration, index) => (
-          <li className="mc-item" key={collaboration.id} style={{ "--i": index }}>
-            <button
-              className="mc-card"
-              type="button"
-              data-id={collaboration.id}
-              aria-haspopup="dialog"
-              onClick={(event) => handleOpen(event, collaboration.id)}
-            >
-              <Polaroid collaboration={collaboration} polaroid={polaroid} />
-              <span className="visually-hidden">
-                {collaboration.track} with {collaboration.artists.join(", ")}
-              </span>
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      <dialog
-        className="mc-dialog"
-        ref={dialogRef}
-        aria-labelledby="mc-dialog-track"
-        aria-describedby="mc-dialog-description"
-        onClick={handleDialogClick}
-      >
-        {open && (
-          <div className="mc-dialog-shell" key={open.id}>
-            <header className="mc-dialog-topbar">
-              <p className="mc-dialog-kicker">
-                Collaboration file <span aria-hidden="true">/</span> {number}
-              </p>
-              <button
-                className="mc-close"
-                ref={closeButtonRef}
-                type="button"
-                onClick={handleClose}
-                aria-label="Close collaboration details"
-              >
-                <span>Close</span>
-                <span className="mc-close-mark" aria-hidden="true">
-                  ×
-                </span>
-              </button>
-            </header>
-
-            <div className="mc-dialog-panel">
-              <div className="mc-dialog-frame-wrap">
-                <Polaroid collaboration={open} polaroid={polaroid} className="mc-frame--detail" />
-              </div>
-
-              <div className="mc-credits">
-                <p className="mc-dialog-index">
-                  {String(COLLABORATIONS.indexOf(open) + 1).padStart(2, "0")} / {String(COLLABORATIONS.length).padStart(2, "0")}
-                </p>
-                <HyperText className="mc-artists" as="p" duration={720}>
-                  {open.artists.join(", ")}
-                </HyperText>
-                <HyperText
-                  className="mc-track"
-                  as="h4"
-                  id="mc-dialog-track"
-                  duration={620}
-                  delay={100}
-                >
-                  {open.track}
-                </HyperText>
-                <div className="mc-dialog-note">
-                  <p className="mc-dialog-note-label">Sample release note</p>
-                  <p className="mc-dialog-description" id="mc-dialog-description">
-                    {open.description}
-                  </p>
+      <p className="mc-label"><span className="mc-label-no">{number}.</span> {label}</p>
+      <div className="mc-intro">
+        <p>Different voices.<br />Shared records.</p>
+        <span>{String(collaborations.length).padStart(2, "0")} collaborations — scroll through the releases</span>
+      </div>
+      <ol className="mc-list" ref={listRef}>
+        {collaborations.map((collaboration, index) => {
+          const active = collaboration.id === activeId;
+          const links = releaseLinks(collaboration.media);
+          const trackId = links.spotify?.match(/\/track\/([a-zA-Z0-9]+)/)?.[1];
+          const release = catalog.tracks.find((track) => track.id === trackId)
+            || catalog.tracks.find((track) => track.name.toLowerCase() === collaboration.track.toLowerCase());
+          const image = release?.album?.image;
+          const cover = image ? (/^https?:\/\//.test(image) ? image : publicAsset(image)) : null;
+          return (
+            <li className={`mc-row${active ? " mc-row--active" : ""}`} key={collaboration.id}
+              data-id={collaboration.id} style={{ "--i": index }}>
+              <article className="mc-release" tabIndex={0}
+                aria-labelledby={`mc-title-${collaboration.id}`}
+                onFocus={() => setActiveId(collaboration.id)}>
+                <header className="mc-row-heading">
+                  <span className="mc-row-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                  <h4 className="mc-row-title" id={`mc-title-${collaboration.id}`}>{collaboration.track}</h4>
+                  <p className="mc-row-artists">{collaboration.artists.join(", ")}</p>
+                </header>
+                <div className="mc-row-details" aria-hidden={!active} inert={!active}>
+                  <div className="mc-row-copy">
+                    <p className="mc-row-description">{collaboration.description}</p>
+                    <div className="mc-row-links">
+                      {links.spotify && <a href={links.spotify} target="_blank" rel="noopener noreferrer">Listen on Spotify <span aria-hidden="true">↗</span></a>}
+                      {links.youtube && <a href={links.youtube} target="_blank" rel="noopener noreferrer">Watch on YouTube <span aria-hidden="true">↗</span></a>}
+                    </div>
+                  </div>
+                  {cover && (
+                    <a className="mc-disc-link" href={release.spotifyUrl || links.spotify}
+                      target="_blank" rel="noopener noreferrer"
+                      aria-label={`Listen to ${collaboration.track} on Spotify`}>
+                      <DiscArtwork image={cover} />
+                    </a>
+                  )}
                 </div>
-                <CollaborationMedia collaboration={open} />
-                <button className="mc-return" type="button" onClick={handleClose}>
-                  <span aria-hidden="true">←</span> Back to all collaborations
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </dialog>
+              </article>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }
