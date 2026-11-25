@@ -1,0 +1,74 @@
+/* A diagonal, perspective CD collection inspired by the supplied film gallery.
+   Native overflow keeps touch, links and keyboard access available without WebGL. */
+.music-disc-gallery { --disc-size: clamp(20rem, 39vw, 36rem); }
+.music-disc-gallery .music-disc-rail {
+  position: relative;
+  gap: 0;
+  width: calc(100% + var(--catalog-edge) * 2);
+  padding: clamp(5rem, 10vw, 10rem) max(1rem, calc((100vw - var(--disc-size)) / 2)) 9rem;
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+  cursor: grab;
+  touch-action: pan-x pan-y pinch-zoom;
+  overflow-anchor: none;
+}
+.music-disc-rail[data-dragging] { cursor: grabbing; user-select: none; }
+.music-disc-rail .music-catalog-item {
+  position: relative;
+  flex: 0 0 var(--disc-size);
+  margin-right: calc(var(--disc-size) * -0.16);
+  scroll-snap-align: none;
+}
+.music-disc-rail .music-catalog-item:last-child { margin-right: 0; }
+.music-disc-rail .music-catalog-card {
+  gap: 1.5rem;
+  padding: 0.5rem;
+  transform: translate3d(0, var(--disc-lift, 0px), 0) scale(var(--disc-scale, 1));
+  transform-origin: center center;
+  cursor: inherit;
+}
+.music-disc-rail .disc-artwork {
+  transform: perspective(1100px) rotateX(12deg) rotateY(var(--disc-yaw, -24deg)) rotateZ(var(--disc-turn, -17deg));
+  transition: transform 300ms ease-out;
+  box-shadow: 2px 3px 0 #96999a, 3px 5px 0 #d5d6d6;
+}
+.music-disc-rail[data-dragging] .disc-artwork { transition: none; }
+.music-disc-rail .music-catalog-card:hover .disc-artwork,
+.music-disc-rail .music-catalog-card:focus-visible .disc-artwork {
+  transform: perspective(1100px) rotateX(8deg) rotateY(var(--disc-yaw, -24deg)) rotateZ(calc(var(--disc-turn, -17deg) + 6deg));
+}
+.music-disc-rail .disc-artwork-cover {
+  mix-blend-mode: normal;
+  opacity: 0.97;
+  mask-image: radial-gradient(circle closest-side, transparent 0 17%, #000 18% 97%, transparent 99%);
+}
+.music-disc-rail .disc-artwork-reflection {
+  opacity: 0.2;
+  background: conic-gradient(from 25deg, transparent, #fff8 75deg, transparent 110deg 240deg, #fff5 285deg, transparent);
+  mask-image: radial-gradient(circle closest-side, transparent 0 17%, #000 18% 97%, transparent 99%);
+}
+.music-disc-rail .disc-artwork-hole {
+  width: 10%;
+  box-shadow: 0 0 0 3px #bfc3c5, 0 0 0 6px #8e9498, 0 0 0 9px #d8dcde;
+}
+.music-disc-rail .music-catalog-card-copy {
+  opacity: 0.7;
+  transition: opacity 350ms ease;
+}
+.music-disc-rail .music-catalog-track-credit { color: #333; }
+.music-disc-rail .is-active .music-catalog-card-copy,
+.music-disc-rail .music-catalog-card:focus-visible .music-catalog-card-copy { opacity: 1; }
+.music-disc-rail img { pointer-events: none; -webkit-user-drag: none; }
+@media (max-width: 700px) {
+  .music-disc-gallery { --disc-size: 76vw; }
+  .music-disc-rail { padding-top: 5rem; padding-bottom: 6rem; }
+  .music-disc-rail .music-catalog-item { flex-basis: var(--disc-size); }
+  .music-disc-rail .disc-artwork-hole { box-shadow: 0 0 0 2px #bfc3c5, 0 0 0 4px #8e9498, 0 0 0 6px #d8dcde; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-disc-rail .music-catalog-card { transform: none; }
+  .music-disc-rail .disc-artwork,
+  .music-disc-rail .music-catalog-card:hover .disc-artwork,
+  .music-disc-rail .music-catalog-card:focus-visible .disc-artwork { transform: none; transition: none; }
+  .music-disc-rail .music-catalog-card-copy { transition: none; opacity: 1; }
+}

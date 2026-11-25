@@ -1,9 +1,9 @@
 /* Horizontal CD shelf. The reference disc texture is blended with the
    existing Spotify covers; titles and credits remain outside the disc. */
 .music-catalog {
-  --catalog-paper: #191919;
-  --catalog-ink: #fff;
-  --catalog-muted: #aaa;
+  --catalog-paper: #f2f2f0;
+  --catalog-ink: #000;
+  --catalog-muted: #666;
   --catalog-edge: clamp(1.25rem, 3.6vw, 4rem);
   position: relative;
   overflow: clip;
@@ -38,9 +38,9 @@
 .music-catalog-card:hover .disc-artwork, .music-catalog-card:focus-visible .disc-artwork { transform: rotate(12deg); }
 .music-catalog-card-copy { display: grid; justify-items: center; gap: 0.5rem; min-width: 0; text-align: center; }
 .music-catalog-track-name { font-size: clamp(1.4rem, 2.1vw, 2.15rem); letter-spacing: -0.035em; line-height: 1.1; overflow-wrap: anywhere; }
-.music-catalog-track-credit { color: #b5b5b5; font-size: clamp(0.95rem, 1.1vw, 1.1rem); line-height: 1.4; overflow-wrap: anywhere; }
-.music-catalog :is(a, button):focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
-.music-catalog-grid:focus-visible { outline: 1px solid #aaa; outline-offset: -3px; }
+.music-catalog-track-credit { color: #666; font-size: clamp(0.95rem, 1.1vw, 1.1rem); line-height: 1.4; overflow-wrap: anywhere; }
+.music-catalog :is(a, button):focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+.music-catalog-grid:focus-visible { outline: 1px solid #777; outline-offset: -3px; }
 .music-catalog-status { margin-bottom: 4rem; color: var(--catalog-muted); }
 .music-catalog-grid--loading { pointer-events: none; }
 .music-catalog-loading-card { display: grid; justify-items: center; gap: 0.75rem; }

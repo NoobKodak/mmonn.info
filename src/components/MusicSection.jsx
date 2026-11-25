@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import DiscArtwork from "./DiscArtwork.jsx";
+import MusicDiscGallery from "./MusicDiscGallery.jsx";
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion.js";
 import { fetchSpotifyDiscography } from "../lib/spotify.js";
 import { useMusicVideos } from "../lib/content-store.jsx";
@@ -8,70 +8,6 @@ import "./MusicSection.css";
 
 const FALLBACK_ARTIST_URL = "https://open.spotify.com/artist/57wPsYZkEErG0C2ntgqNTe";
 const YOUTUBE_ALLOW = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-
-function TrackCard({ track, artistUrl }) {
-  const artistCredits = track.artists?.join(", ") || "MMONN";
-  return (
-    <li className="music-catalog-item">
-      <a className="music-catalog-card" href={track.spotifyUrl || artistUrl}
-        target="_blank" rel="noopener noreferrer"
-        aria-label={`Open ${track.name} by ${artistCredits} on Spotify`}>
-        <DiscArtwork image={track.album?.image} />
-        <span className="music-catalog-card-copy">
-          <span className="music-catalog-track-name">{track.name}</span>
-          <span className="music-catalog-track-credit">{artistCredits}</span>
-        </span>
-      </a>
-    </li>
-  );
-}
-
-function TrackShelf({ tracks, artistUrl }) {
-  const railRef = useRef(null);
-  const reducedMotion = usePrefersReducedMotion();
-  useEffect(() => {
-    const rail = railRef.current;
-    const wheel = (event) => {
-      // Horizontal gestures stay native. Vertical wheels move the shelf only
-      // while it has space in that direction, then return to page scrolling.
-      if (event.ctrlKey || event.shiftKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
-      const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? rail.clientWidth : 1);
-      const room = delta > 0
-        ? rail.scrollLeft < rail.scrollWidth - rail.clientWidth - 2
-        : rail.scrollLeft > 2;
-      if (!room || !delta) return;
-      event.preventDefault();
-      rail.scrollLeft += delta;
-    };
-    rail.addEventListener("wheel", wheel, { passive: false });
-    return () => rail.removeEventListener("wheel", wheel);
-  }, [tracks]);
-
-  const move = (direction) => {
-    const rail = railRef.current;
-    const card = rail.firstElementChild;
-    const step = card.getBoundingClientRect().width + parseFloat(getComputedStyle(rail).columnGap);
-    rail.scrollBy({ left: direction * step, behavior: reducedMotion ? "instant" : "smooth" });
-  };
-  const onKeyDown = (event) => {
-    if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
-      event.preventDefault();
-      move(event.key === "ArrowRight" ? 1 : -1);
-    } else if (event.key === "Home" || event.key === "End") {
-      event.preventDefault();
-      railRef.current.scrollTo({ left: event.key === "Home" ? 0 : railRef.current.scrollWidth, behavior: reducedMotion ? "instant" : "smooth" });
-    }
-  };
-
-  return (
-    <div className="music-catalog-shelf">
-      <ul className="music-catalog-grid" aria-label="MMONN songs on Spotify. Scroll horizontally or use left and right arrow keys."
-        ref={railRef} tabIndex={0} onKeyDown={onKeyDown}>
-        {tracks.map((track) => <TrackCard artistUrl={artistUrl} key={track.id} track={track} />)}
-      </ul>
-    </div>
-  );
-}
 
 function LoadingGrid() {
   return (
@@ -197,7 +133,7 @@ export default function MusicSection({ id, number }) {
 
       {isReady && (
         <>
-          {trackCount > 0 && <TrackShelf tracks={catalog.tracks} artistUrl={artistUrl} />}
+          {trackCount > 0 && <MusicDiscGallery tracks={catalog.tracks} artistUrl={artistUrl} />}
 
           {trackCount === 0 && (
             <p className="music-catalog-empty">No Spotify songs are available in this market.</p>
