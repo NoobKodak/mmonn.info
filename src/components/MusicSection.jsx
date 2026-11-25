@@ -4,7 +4,6 @@ import DiscArtwork from "./DiscArtwork.jsx";
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion.js";
 import { fetchSpotifyDiscography } from "../lib/spotify.js";
 import { useMusicVideos } from "../lib/content-store.jsx";
-import MusicMetrics from "./MusicMetrics.jsx";
 import "./MusicSection.css";
 
 const FALLBACK_ARTIST_URL = "https://open.spotify.com/artist/57wPsYZkEErG0C2ntgqNTe";
@@ -30,13 +29,8 @@ function TrackCard({ track, artistUrl }) {
 function TrackShelf({ tracks, artistUrl }) {
   const railRef = useRef(null);
   const reducedMotion = usePrefersReducedMotion();
-  const [edges, setEdges] = useState({ start: true, end: false });
   useEffect(() => {
     const rail = railRef.current;
-    const update = () => setEdges({
-      start: rail.scrollLeft <= 2,
-      end: rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 2,
-    });
     const wheel = (event) => {
       // Horizontal gestures stay native. Vertical wheels move the shelf only
       // while it has space in that direction, then return to page scrolling.
@@ -49,16 +43,8 @@ function TrackShelf({ tracks, artistUrl }) {
       event.preventDefault();
       rail.scrollLeft += delta;
     };
-    const observer = new ResizeObserver(update);
-    observer.observe(rail);
-    rail.addEventListener("scroll", update, { passive: true });
     rail.addEventListener("wheel", wheel, { passive: false });
-    update();
-    return () => {
-      observer.disconnect();
-      rail.removeEventListener("scroll", update);
-      rail.removeEventListener("wheel", wheel);
-    };
+    return () => rail.removeEventListener("wheel", wheel);
   }, [tracks]);
 
   const move = (direction) => {
@@ -79,10 +65,6 @@ function TrackShelf({ tracks, artistUrl }) {
 
   return (
     <div className="music-catalog-shelf">
-      <div className="music-catalog-shelf-controls" aria-label="Browse tracks">
-        <button type="button" onClick={() => move(-1)} disabled={edges.start} aria-label="Previous tracks">←</button>
-        <button type="button" onClick={() => move(1)} disabled={edges.end} aria-label="Next tracks">→</button>
-      </div>
       <ul className="music-catalog-grid" aria-label="MMONN songs on Spotify. Scroll horizontally or use left and right arrow keys."
         ref={railRef} tabIndex={0} onKeyDown={onKeyDown}>
         {tracks.map((track) => <TrackCard artistUrl={artistUrl} key={track.id} track={track} />)}
@@ -194,11 +176,6 @@ export default function MusicSection({ id, number }) {
           <h2 className="music-catalog-title" id="music-title">
             MUSIC
           </h2>
-        </div>
-
-        <div className="music-catalog-header-side">
-          <MusicMetrics />
-
         </div>
       </header>
 

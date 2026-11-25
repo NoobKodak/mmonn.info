@@ -15,20 +15,9 @@
 }
 .music-catalog-header { display: flex; align-items: end; justify-content: space-between; gap: 2rem; margin-bottom: clamp(2.5rem, 6vw, 6rem); }
 .music-catalog-index { margin: 0 0 0.75rem; font-size: 0.85rem; }
-.music-catalog-title { margin: 0; font-size: clamp(4rem, 14vw, 13rem); font-weight: 400; letter-spacing: -0.085em; line-height: 0.76; }
-.music-catalog-header-side { display: grid; justify-items: end; gap: 2rem; }
+.music-catalog-title { margin: 0; font-size: clamp(1.75rem, 5vw, 3.5rem); font-weight: 400; letter-spacing: -0.04em; line-height: 0.9; }
 .music-catalog a { color: inherit; }
-.music-catalog-metrics { margin: 0; text-align: right; }
-.music-catalog-metrics-list { display: flex; gap: 2rem; margin: 0; }
-.music-catalog-metrics-item { display: grid; gap: 0.4rem; }
-.music-catalog-metrics-item dt, .music-catalog-metrics-item dd { margin: 0; }
-.music-catalog-metrics-item dt { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--catalog-muted); }
-.music-catalog-metrics-item dd { font-size: clamp(1.5rem, 3vw, 2.5rem); letter-spacing: -0.05em; }
 .music-catalog-shelf { margin-bottom: clamp(4rem, 8vw, 8rem); }
-.music-catalog-shelf-controls { display: flex; justify-content: end; gap: 0.5rem; margin-bottom: 1rem; }
-.music-catalog-shelf-controls button { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid #555; border-radius: 50%; background: transparent; color: inherit; font: inherit; font-size: 1.5rem; cursor: pointer; transition: background 180ms; }
-.music-catalog-shelf-controls button:hover:enabled { background: #333; }
-.music-catalog-shelf-controls button:disabled { opacity: 0.3; cursor: default; }
 .music-catalog-grid {
   display: flex;
   flex-wrap: nowrap;
@@ -115,14 +104,12 @@
 
 @media (max-width: 700px) {
   .music-catalog-header { display: block; }
-  .music-catalog-header-side { margin-top: 2rem; justify-items: start; gap: 1rem; }
-  .music-catalog-metrics { text-align: left; justify-items: start; }
   .music-catalog-item, .music-catalog-loading-card { flex-basis: 76vw; }
   .music-catalog-track-name { font-size: 1.65rem; }
   .music-video-showcase-grid { grid-template-columns: minmax(0, 1fr); }
   .music-catalog-footer { align-items: start; flex-direction: column; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .disc-artwork, .music-catalog-shelf-controls button { transition: none; }
+  .disc-artwork { transition: none; }
   .music-catalog-card:hover .disc-artwork, .music-catalog-card:focus-visible .disc-artwork { transform: none; }
 }
