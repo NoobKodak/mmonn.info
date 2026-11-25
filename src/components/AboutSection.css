@@ -18,6 +18,11 @@
   background: var(--paper);
   color: var(--ink);
   font-family: var(--face);
+  font-weight: 400;
+  font-stretch: normal;
+  font-synthesis: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   scroll-margin-top: 0;
 }
 
@@ -120,7 +125,9 @@
   }
 
   .ab-paragraph {
-    font-size: max(0.8125rem, 2.9cqw);
+    font-size: clamp(1rem, 3.5vw, 1.125rem);
+    font-weight: 400;
+    line-height: 1.5;
     text-align: left;
   }
 }

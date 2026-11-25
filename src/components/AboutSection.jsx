@@ -1,6 +1,5 @@
 import { asset } from "../assets.js";
 import { useAbout } from "../lib/content-store.jsx";
-import HyperText from "./HyperText.jsx";
 import "./AboutSection.css";
 
 export default function AboutSection({ id }) {
@@ -31,16 +30,10 @@ export default function AboutSection({ id }) {
         </h2>
 
         <div className="ab-text">
-          {ABOUT_PARAGRAPHS.map((paragraph, index) => (
-            <HyperText
-              className="ab-paragraph"
-              key={paragraph.slice(0, 32)}
-              as="p"
-              duration={1100}
-              delay={index * 140}
-            >
+          {ABOUT_PARAGRAPHS.map((paragraph) => (
+            <p className="ab-paragraph" key={paragraph}>
               {paragraph}
-            </HyperText>
+            </p>
           ))}
         </div>
       </div>
