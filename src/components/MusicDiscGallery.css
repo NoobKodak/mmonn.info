@@ -1,11 +1,15 @@
 /* A diagonal, perspective CD collection inspired by the supplied film gallery.
    Native overflow keeps touch, links and keyboard access available without WebGL. */
-.music-disc-gallery { --disc-size: clamp(20rem, 39vw, 36rem); }
+.music-catalog:has(.music-disc-gallery) { padding-top: clamp(2rem, 4dvh, 3rem); }
+.music-catalog:has(.music-disc-gallery) .music-catalog-header { margin-bottom: clamp(1.25rem, 3dvh, 2rem); }
+.music-disc-gallery { --disc-size: clamp(16rem, min(36vw, 52dvh), 34rem); }
 .music-disc-gallery .music-disc-rail {
   position: relative;
   gap: 0;
   width: calc(100% + var(--catalog-edge) * 2);
-  padding: clamp(5rem, 10vw, 10rem) max(1rem, calc((100vw - var(--disc-size)) / 2)) 9rem;
+  height: max(25rem, calc(100dvh - 11.5rem));
+  align-items: center;
+  padding: clamp(3rem, 7dvh, 5rem) max(1rem, calc((var(--rail-width, 100vw) - var(--disc-size)) / 2));
   scroll-snap-type: none;
   scroll-behavior: auto;
   cursor: grab;
@@ -60,8 +64,7 @@
 .music-disc-rail .music-catalog-card:focus-visible .music-catalog-card-copy { opacity: 1; }
 .music-disc-rail img { pointer-events: none; -webkit-user-drag: none; }
 @media (max-width: 700px) {
-  .music-disc-gallery { --disc-size: 76vw; }
-  .music-disc-rail { padding-top: 5rem; padding-bottom: 6rem; }
+  .music-disc-gallery { --disc-size: min(76vw, 48dvh); }
   .music-disc-rail .music-catalog-item { flex-basis: var(--disc-size); }
   .music-disc-rail .disc-artwork-hole { box-shadow: 0 0 0 2px #bfc3c5, 0 0 0 4px #8e9498, 0 0 0 6px #d8dcde; }
 }

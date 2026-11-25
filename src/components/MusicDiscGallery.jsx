@@ -135,9 +135,22 @@ export default function MusicDiscGallery({ tracks, artistUrl }) {
       const index = cards.findIndex((card) => card.contains(event.target));
       if (index >= 0) align(index);
     };
-    const resize = () => { stop(); lostCapture(); schedulePaint(); };
+    const resize = () => {
+      // Fullscreen changes both card geometry and rail width. Keep the current
+      // release centered rather than retaining a stale pixel scroll offset.
+      stop();
+      lostCapture();
+      rail.style.setProperty("--rail-width", `${rail.clientWidth}px`);
+      const card = cards[active];
+      rail.scrollLeft = clamp(card.offsetLeft + card.offsetWidth / 2 - rail.clientWidth / 2, 0, maxScroll());
+      target = lastScroll = rail.scrollLeft;
+      speed = 0;
+      schedulePaint();
+    };
     const observer = new ResizeObserver(resize);
     observer.observe(rail);
+    window.addEventListener("resize", resize);
+    document.addEventListener("fullscreenchange", resize);
     rail.addEventListener("scroll", schedulePaint, { passive: true });
     rail.addEventListener("wheel", wheel, { passive: false });
     rail.addEventListener("pointerdown", pointerDown);
@@ -153,6 +166,8 @@ export default function MusicDiscGallery({ tracks, artistUrl }) {
       stop();
       if (paintFrame !== null) cancelAnimationFrame(paintFrame);
       observer.disconnect();
+      window.removeEventListener("resize", resize);
+      document.removeEventListener("fullscreenchange", resize);
       rail.removeEventListener("scroll", schedulePaint);
       rail.removeEventListener("wheel", wheel);
       rail.removeEventListener("pointerdown", pointerDown);
