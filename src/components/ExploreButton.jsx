@@ -1,8 +1,10 @@
 import { asset } from "../assets.js";
 
-export default function ExploreButton({ controls, expanded, onActivate }) {
+export default function ExploreButton({ controls, expanded, onActivate, label = "EXPLORE MORE", buttonRef, id }) {
   return (
     <button
+      ref={buttonRef}
+      id={id}
       className="explore"
       type="button"
       aria-controls={controls}
@@ -17,7 +19,7 @@ export default function ExploreButton({ controls, expanded, onActivate }) {
           width="24"
           height="24"
         />
-        <span className="explore-label">EXPLORE MORE</span>
+        <span className="explore-label">{label}</span>
       </span>
     </button>
   );

@@ -4,6 +4,7 @@ import Hero from "./components/Hero.jsx";
 import HighlightsSection from "./components/HighlightsSection.jsx";
 import MusicSection from "./components/MusicSection.jsx";
 import NotableProjectsSection from "./components/NotableProjectsSection.jsx";
+import SocialFooter from "./components/SocialFooter.jsx";
 import ProfileSection from "./components/ProfileSection.jsx";
 import { useSections } from "./lib/content-store.jsx";
 
@@ -33,6 +34,7 @@ export default function App() {
           return <Section key={section.id} {...section} />;
         })}
       </main>
+      <SocialFooter />
     </div>
   );
 }

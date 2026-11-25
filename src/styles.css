@@ -433,6 +433,77 @@ ul {
   transform: translate(0.08rem, -0.06rem);
 }
 
+/* Matching hero actions share the existing Explore treatment. */
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 0.25rem 1rem;
+  margin-top: clamp(1.75rem, 7vw, 2.75rem);
+}
+.hero-actions .explore { margin: 0; }
+
+/* Google Material Symbols: loaded via index.html, rendered through the
+   ligature name set as the element's text content. */
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+/* The Amarad nav is AmaradNav.jsx's own "hero-nav" + "nav-list" + "nav-item"
+   markup (see SectionNav.jsx) — it inherits the numbered /01 treatment and
+   scattered desktop placement for free. Only the extra Material Symbols
+   arrow (marking these as external links) needs its own rule. */
+.amarad-arrow {
+  align-self: center;
+  margin-left: 0.2rem;
+  font-size: clamp(1rem, 3.5vw, 1.25rem);
+  transition: transform 180ms ease;
+}
+.amarad-link:hover .amarad-arrow,
+.amarad-link:focus-visible .amarad-arrow {
+  transform: translate(0.08em, -0.08em);
+}
+
+/* The leading "Back" entry closes the overlay; it's a <button>, not an <a>,
+   so it needs its own reset before the shared .nav-link treatment applies. */
+.amarad-back-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.amarad-back-icon {
+  font-size: clamp(1.1rem, 4vw, 1.375rem);
+  transition: transform 180ms ease;
+}
+.amarad-back-link:hover .amarad-back-icon,
+.amarad-back-link:focus-visible .amarad-back-icon {
+  transform: translateX(-0.15em);
+}
+@media (prefers-reduced-motion: reduce) {
+  .amarad-arrow,
+  .amarad-back-icon { transition: none; }
+}
+@media (max-width: 39.999rem) {
+  .hero-title { font-size: clamp(1.0625rem, 4.5vw, 1.25rem); }
+  .hero-actions { column-gap: 0.25rem; }
+}
+
 /* --- Revealed navigation ---------------------------------------------- */
 
 .hero-nav {
@@ -677,6 +748,11 @@ ul {
     font-size: calc(28 * var(--px));
   }
 
+  .hero-actions {
+    margin: calc(109 * var(--px)) 0 0 calc(263 * var(--px));
+    gap: calc(24 * var(--px));
+  }
+
   /* --- Navigation: scattered editorial placement --- */
   .hero-nav {
     position: absolute;
@@ -720,6 +796,19 @@ ul {
 
   .nav-label {
     font-size: calc(34 * var(--px));
+  }
+
+  /* Amarad reuses the --about/--music/--contact scatter slots above for a
+     pixel-identical match to the reference composition; only its own "Back"
+     entry (shown above the portrait, clear of that cluster) needs a slot. */
+  .amarad-back { --x: 199; --base: 437; }
+
+  .amarad-arrow {
+    font-size: calc(40 * var(--px));
+  }
+
+  .amarad-back-icon {
+    font-size: calc(30 * var(--px));
   }
 }
 

@@ -2,11 +2,14 @@ import { useEffect, useRef, useState } from "react";
 
 import { asset } from "../assets.js";
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion.js";
+import AmaradNav from "./AmaradNav.jsx";
 import ExploreButton from "./ExploreButton.jsx";
 import RoleList from "./RoleList.jsx";
 import SectionNav from "./SectionNav.jsx";
 
 const NAV_ID = "site-nav";
+const AMARAD_NAV_ID = "amarad-links";
+const AMARAD_TOGGLE_ID = "amarad-toggle";
 
 /** Fallback in case `transitionend` never arrives (interrupted paint, etc.). */
 const LEAVE_TIMEOUT_MS = 700;
@@ -23,6 +26,7 @@ const LEAVE_TIMEOUT_MS = 700;
 export default function Hero() {
   const [phase, setPhase] = useState("intro");
   const [focusNavigation, setFocusNavigation] = useState(false);
+  const [amaradOpen, setAmaradOpen] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
   const timerRef = useRef(null);
 
@@ -74,7 +78,7 @@ export default function Hero() {
           </figcaption>
         </figure>
 
-        {!revealed && (
+        {!revealed && !amaradOpen && (
           <div
             className="hero-intro"
             data-state={phase === "leaving" ? "leaving" : undefined}
@@ -88,11 +92,20 @@ export default function Hero() {
               height="47"
             />
 
-            <ExploreButton
-              controls={NAV_ID}
-              expanded={revealed}
-              onActivate={handleExplore}
-            />
+            <div className="hero-actions">
+              <ExploreButton
+                controls={NAV_ID}
+                expanded={revealed}
+                onActivate={handleExplore}
+              />
+              <ExploreButton
+                id={AMARAD_TOGGLE_ID}
+                label="AMARAD"
+                controls={AMARAD_NAV_ID}
+                expanded={amaradOpen}
+                onActivate={() => setAmaradOpen((value) => !value)}
+              />
+            </div>
           </div>
         )}
 
@@ -100,6 +113,13 @@ export default function Hero() {
           id={NAV_ID}
           revealed={revealed}
           shouldFocusFirstLink={focusNavigation}
+        />
+
+        <AmaradNav
+          id={AMARAD_NAV_ID}
+          open={amaradOpen}
+          onClose={() => setAmaradOpen(false)}
+          toggleId={AMARAD_TOGGLE_ID}
         />
       </div>
     </section>
