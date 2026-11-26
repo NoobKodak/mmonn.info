@@ -142,7 +142,13 @@ export default function MusicDiscGallery({ tracks, artistUrl }) {
       const index = cards.findIndex((card) => card.contains(event.target));
       if (index >= 0) align(index);
     };
+    let measuredWidth = 0;
     const resize = () => {
+      // Mobile browser chrome changes viewport height during scrolling. Never
+      // cancel native momentum or snap the release for a height-only resize.
+      const nextWidth = rail.clientWidth;
+      if ((nextWidth < 700 || coarsePointer.matches) && Math.abs(nextWidth - measuredWidth) < 1) return;
+      measuredWidth = nextWidth;
       // Fullscreen changes both card geometry and rail width. Keep the current
       // release centered rather than retaining a stale pixel scroll offset.
       stop();

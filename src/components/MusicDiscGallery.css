@@ -64,7 +64,7 @@
 .music-disc-rail .music-catalog-card:focus-visible .music-catalog-card-copy { opacity: 1; }
 .music-disc-rail img { pointer-events: none; -webkit-user-drag: none; }
 @media (max-width: 700px) {
-  .music-disc-gallery { --disc-size: min(76vw, 48dvh); }
+  .music-disc-gallery { --disc-size: min(76vw, 48svh); }
   .music-disc-rail .music-catalog-item { flex-basis: var(--disc-size); }
   .music-disc-rail .disc-artwork-hole { box-shadow: 0 0 0 2px #bfc3c5, 0 0 0 4px #8e9498, 0 0 0 6px #d8dcde; }
 }
@@ -79,7 +79,19 @@
 /* Keep touch momentum on the compositor: static perspective artwork avoids
    retargeting 31 masked, blended discs on every native scroll frame. */
 @media (max-width: 700px), (pointer: coarse) {
-  .music-disc-rail { -webkit-overflow-scrolling: touch; }
+  .music-catalog:has(.music-disc-gallery) { padding-top: clamp(2rem, 4svh, 3rem); }
+  .music-catalog:has(.music-disc-gallery) .music-catalog-header { margin-bottom: clamp(1.25rem, 3svh, 2rem); }
+  .music-disc-gallery .music-disc-rail {
+    -webkit-overflow-scrolling: touch;
+    height: max(25rem, calc(100svh - 11.5rem));
+    padding-block: clamp(3rem, 7svh, 5rem);
+  }
+  .music-disc-rail .music-catalog-item {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto calc(var(--disc-size) + 7rem);
+    /* Room for tilted artwork; keep paint containment away from the CD edge. */
+    padding-block: 2rem;
+  }
   .music-disc-rail .music-catalog-card {
     transform: translate3d(0, 0, 0);
   }
@@ -100,4 +112,24 @@
 @media (prefers-reduced-motion: reduce) {
   .music-disc-rail .music-catalog-item .music-catalog-card,
   .music-disc-rail .music-catalog-item .disc-artwork { transform: none; }
+}
+
+/* Where supported, let the browser sample the swipe animation directly rather
+   than waiting for main-thread scroll events (including during iOS momentum). */
+@supports (animation-timeline: view(inline)) {
+  @media (max-width: 700px), (pointer: coarse) {
+    .music-disc-rail .music-catalog-item .music-catalog-card {
+      animation: mobile-disc-pass linear both;
+      animation-timeline: view(inline);
+      animation-range: entry 0% exit 100%;
+    }
+  }
+}
+@keyframes mobile-disc-pass {
+  from { transform: translate3d(0, 26px, 0) scale(.94); }
+  50% { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(0, -26px, 0) scale(1.06); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-disc-rail .music-catalog-item .music-catalog-card { animation: none; }
 }
